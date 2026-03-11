@@ -20,6 +20,18 @@ padding:20px;
 margin:0;
 }
 
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#1e4ea1;
+color:white;
+font-size:16px;
+cursor:pointer;
+margin-bottom:15px;
+}
+
 .card{
 background:white;
 padding:20px;
@@ -37,27 +49,16 @@ line-height:1.6;
 .item:last-child{
 border-bottom:none;
 }
-
-button{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-background:#1e4ea1;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
 </style>
 </head>
 <body>
+
+<button onclick="voltar()">Voltar</button>
 
 <div class="card">
 <h2>Notificações</h2>
 <div id="lista">Carregando...</div>
 </div>
-
-<button onclick="voltar()">Voltar</button>
 
 <script>
 let usuario = null
@@ -65,13 +66,6 @@ let usuario = null
 function horarioBrasil(data){
 return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo"
-})
-}
-
-function formatarReal(v){
-return Number(v || 0).toLocaleString("pt-BR",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
 })
 }
 

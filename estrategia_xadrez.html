@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -53,9 +53,9 @@
     <div class="card-title xadrez-title">Estratégia Xadrez</div>
     <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
 
-    <div class="quadro-scroll-label">Deslize para o lado quando tiver muitos quadrados</div>
+    <div id="quadroScrollLabel" class="quadro-scroll-label oculto">Deslize para o lado quando tiver muitos quadrados</div>
 
-    <div class="quadro-scroll">
+    <div id="quadroScroll" class="quadro-scroll">
       <div id="quadro" class="quadro-xadrez"></div>
     </div>
 
@@ -117,14 +117,16 @@ function chaveResumoXadrez(){
 
 function obterColunas(qtd){
   if(qtd === 100) return 10
-  if(qtd === 200) return 20
-  if(qtd === 300) return 20
   return 20
 }
 
 function obterLarguraMinima(colunas){
   const larguraCasa = 58
   return colunas * larguraCasa
+}
+
+function precisaRolagem(qtd){
+  return qtd > 100
 }
 
 function gerarValoresInteiros(metaEscolhida, quantidade){
@@ -229,13 +231,30 @@ function atualizarResumo(){
   document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
 }
 
+function configurarAreaDoQuadro(colunas){
+  const quadro = document.getElementById("quadro")
+  const scroll = document.getElementById("quadroScroll")
+  const label = document.getElementById("quadroScrollLabel")
+
+  if(precisaRolagem(qtdQuadrados)){
+    const larguraMinima = obterLarguraMinima(colunas)
+    quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(58px, 58px))`
+    quadro.style.minWidth = `${larguraMinima}px`
+    scroll.classList.add("quadro-scroll-ativo")
+    label.classList.remove("oculto")
+  }else{
+    quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+    quadro.style.minWidth = `100%`
+    scroll.classList.remove("quadro-scroll-ativo")
+    label.classList.add("oculto")
+  }
+}
+
 function montarQuadro(){
   const quadro = document.getElementById("quadro")
   const colunas = obterColunas(qtdQuadrados)
-  const larguraMinima = obterLarguraMinima(colunas)
 
-  quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(58px, 58px))`
-  quadro.style.minWidth = `${larguraMinima}px`
+  configurarAreaDoQuadro(colunas)
 
   let html = ""
 
@@ -248,7 +267,7 @@ function montarQuadro(){
     html += `
       <div class="casa-xadrez ${classeCor} ${classeMarcada}" onclick="alternarMarcado(${index})">
         <div class="numero-xadrez">${index + 1}</div>
-        <div class="valor-xadrez">${valor}</div>
+        <div class="valor-xadrez">$${valor}</div>
       </div>
     `
   })

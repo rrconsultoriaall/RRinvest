@@ -39,6 +39,7 @@ color:white;
 border:none;
 border-radius:6px;
 cursor:pointer;
+margin-top:10px;
 }
 
 .usuario{
@@ -81,6 +82,14 @@ padding:10px 0;
 
 </div>
 
+<div class="card">
+
+<h3>Movimentações</h3>
+
+<div id="movimentacoes"></div>
+
+</div>
+
 <script>
 
 let usuario
@@ -89,6 +98,16 @@ function formatarReal(valor){
 
 return Number(valor).toLocaleString("pt-BR",{
 minimumFractionDigits:2
+})
+
+}
+
+function formatarData(data){
+
+const d = new Date(data)
+
+return d.toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo"
 })
 
 }
@@ -105,6 +124,7 @@ return
 usuario = data.user
 
 carregarUsuarios()
+carregarMovimentacoes()
 
 }
 
@@ -132,6 +152,39 @@ ${u.email}<br>
 Telefone: ${u.telefone}<br>
 
 Saldo: R$ ${formatarReal(u.saldo)}
+
+</div>
+
+`
+
+})
+
+}
+
+async function carregarMovimentacoes(){
+
+const { data } = await sb
+.from("transacoes")
+.select("*")
+.order("id",{ascending:false})
+
+const div = document.getElementById("movimentacoes")
+
+div.innerHTML=""
+
+data.forEach(t=>{
+
+div.innerHTML+=`
+
+<div style="border-bottom:1px solid #eee;padding:10px 0">
+
+<strong>${t.tipo}</strong><br>
+
+Valor: R$ ${formatarReal(t.valor)}<br>
+
+${t.descricao}<br>
+
+${formatarData(t.created_at)}
 
 </div>
 
@@ -180,6 +233,7 @@ descricao:"Depósito admin"
 document.getElementById("msg").innerText="Saldo adicionado"
 
 carregarUsuarios()
+carregarMovimentacoes()
 
 }
 

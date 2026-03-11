@@ -3,9 +3,6 @@
 <head>
 
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RRinvest</title>
@@ -24,10 +21,10 @@ padding:20px;
 
 .card{
 background:white;
-padding:24px;
+padding:22px;
 border-radius:16px;
 margin-bottom:20px;
-box-shadow:0 4px 18px rgba(0,0,0,0.08);
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
 text-align:center;
 }
 
@@ -40,80 +37,75 @@ font-weight:bold;
 font-size:46px;
 font-weight:bold;
 color:#0b3d91;
-margin-top:8px;
+margin-top:10px;
 }
 
-.tituloMineracao{
-font-weight:bold;
-margin-bottom:10px;
-font-size:18px;
-}
-
-.caverna{
-border-radius:16px;
-overflow:hidden;
+.mineracao{
 background:#111;
+border-radius:14px;
+padding:20px;
+color:white;
 }
 
-svg{
-width:100%;
-max-width:400px;
+.mineracaoTitulo{
+font-weight:bold;
+margin-bottom:12px;
+}
+
+.cena{
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.mineiro{
+width:120px;
+animation:mineiro 0.8s infinite alternate;
+}
+
+@keyframes mineiro{
+0%{transform:rotate(-2deg)}
+100%{transform:rotate(2deg)}
 }
 
 .picareta{
-transform-origin:210px 100px;
-animation:bate 0.7s infinite alternate ease-in-out;
+animation:picareta 0.6s infinite alternate;
 }
 
-@keyframes bate{
-0%{transform:rotate(-18deg)}
+@keyframes picareta{
+0%{transform:rotate(-10deg)}
 100%{transform:rotate(12deg)}
 }
 
 .pedra{
-animation:pedra 0.7s infinite alternate ease-in-out;
+width:90px;
+animation:pedra 0.6s infinite alternate;
 }
 
 @keyframes pedra{
-0%{transform:translateX(0px)}
-100%{transform:translateX(3px)}
-}
-
-.racha{
-opacity:0.3;
-animation:racha 1s infinite alternate;
-}
-
-@keyframes racha{
-0%{opacity:0.2}
-100%{opacity:0.6}
-}
-
-.particula{
-opacity:0;
-animation:particula 1s infinite;
-}
-
-@keyframes particula{
-0%{opacity:0; transform:translateY(0)}
-40%{opacity:1}
-100%{opacity:0; transform:translateY(-15px)}
+0%{transform:translateX(0)}
+100%{transform:translateX(4px)}
 }
 
 .moeda{
-opacity:0;
+position:absolute;
+font-size:22px;
 animation:moeda 2s infinite;
 }
 
 @keyframes moeda{
-0%{opacity:0; transform:translateY(0)}
-40%{opacity:1}
-100%{opacity:0; transform:translateY(-40px)}
+0%{
+opacity:0;
+transform:translateY(0);
 }
-
-.m1{animation-delay:0s}
-.m2{animation-delay:0.4s}
-.m3{animation-delay:0.8s}
+40%{
+opacity:1;
+}
+100%{
+opacity:0;
+transform:translateY(-40px);
+}
+}
 
 .botoes{
 display:flex;
@@ -173,94 +165,41 @@ justify-content:center;
 display:none;
 }
 
-.pendente{
-color:orange;
-font-weight:bold;
-}
-
 </style>
 
 </head>
+
 <body>
 
 <!-- CARD 1 -->
 <div class="card">
 
-<div class="nome" id="nome">Carregando...</div>
+<div id="nome" class="nome">Carregando...</div>
 
-<div class="saldo" id="saldo">R$ 0,00</div>
+<div id="saldo" class="saldo">R$ 0,00</div>
 
 </div>
 
 <!-- CARD 2 ANIMAÇÃO -->
-<div class="card">
+<div class="card mineracao">
 
-<div class="tituloMineracao">
+<div class="mineracaoTitulo">
 ⛏️ Minerando lucros...
 </div>
 
-<div class="caverna">
+<div class="cena">
 
-<svg viewBox="0 0 400 220">
+<img src="minerador.png" class="mineiro">
 
-<radialGradient id="luz" cx="50%" cy="50%" r="70%">
-<stop offset="0%" stop-color="#2a2a2a"/>
-<stop offset="100%" stop-color="#111"/>
-</radialGradient>
+<div style="position:relative">
 
-<rect x="0" y="0" width="400" height="220" fill="url(#luz)" rx="20"/>
+<div class="moeda" style="left:10px">💰</div>
+<div class="moeda" style="left:30px;animation-delay:.7s">💰</div>
 
-<!-- chão -->
-<rect x="0" y="170" width="400" height="60" fill="#2a2a2a"/>
+<img src="https://cdn-icons-png.flaticon.com/512/809/809957.png"
+class="pedra">
 
-<!-- pedra -->
-<polygon class="pedra"
-points="270,165 300,110 350,130 330,175"
-fill="#777"/>
-
-<!-- rachadura -->
-<polyline class="racha"
-points="300,120 305,135 295,150"
-stroke="#444"
-stroke-width="2"
-fill="none"/>
-
-<!-- mineiro cabeça -->
-<circle cx="160" cy="110" r="14" fill="#ffd7b0"/>
-
-<!-- capacete -->
-<rect x="145" y="95" width="30" height="10" fill="#f3c642"/>
-
-<!-- corpo -->
-<rect x="153" y="120" width="14" height="28" fill="#2f6cd1"/>
-
-<!-- braço -->
-<line x1="160" y1="130" x2="210" y2="100"
-stroke="#ffd7b0"
-stroke-width="6"/>
-
-<!-- picareta -->
-<g class="picareta">
-<line x1="210" y1="100" x2="240" y2="85"
-stroke="#8b5a2b"
-stroke-width="5"/>
-
-<line x1="238" y1="80" x2="255" y2="95"
-stroke="#ccc"
-stroke-width="5"/>
-</g>
-
-<!-- partículas -->
-<circle class="particula" cx="300" cy="120" r="3" fill="#ffd700"/>
-<circle class="particula" cx="310" cy="130" r="3" fill="#ffd700"/>
-<circle class="particula" cx="295" cy="135" r="3" fill="#ffd700"/>
-
-<!-- moedas -->
-<circle class="moeda m1" cx="310" cy="105" r="6" fill="#ffd700"/>
-<circle class="moeda m2" cx="320" cy="110" r="6" fill="#ffd700"/>
-<circle class="moeda m3" cx="300" cy="100" r="6" fill="#ffd700"/>
-
-</svg>
+</div>
 
 </div>
 
@@ -279,7 +218,7 @@ Depositar
 Sacar
 </button>
 
-<button class="notif" onclick="toggleNotificacoes()">
+<button class="notif" onclick="abrirNotificacoes()">
 Notificações
 <span id="badge" class="badge oculto">!</span>
 </button>
@@ -311,15 +250,11 @@ function formatarReal(v){
 return Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2})
 }
 
-function horarioBrasil(data){
-return new Date(data).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})
-}
-
 async function verificarLogin(){
 
-const {data,error}=await sb.auth.getSession()
+const {data}=await sb.auth.getSession()
 
-if(error || !data.session){
+if(!data.session){
 
 location.href="login.html"
 return false
@@ -351,11 +286,12 @@ const {data}=await sb
 .select("*")
 .eq("usuario_id",usuario.id)
 .eq("status","pendente")
-.order("created_at",{ascending:false})
 
 if(!data || data.length==0){
 
-document.getElementById("extrato").innerHTML="Nenhuma solicitação pendente."
+document.getElementById("extrato").innerHTML=
+"Nenhuma solicitação pendente."
+
 return
 
 }
@@ -372,9 +308,7 @@ html+=`
 
 Valor: R$ ${formatarReal(t.valor)}<br>
 
-Status: <span class="pendente">${t.status}</span><br>
-
-${horarioBrasil(t.created_at)}
+Status: pendente
 
 </p>
 
@@ -385,6 +319,29 @@ ${horarioBrasil(t.created_at)}
 })
 
 document.getElementById("extrato").innerHTML=html
+
+}
+
+async function verificarNotificacoes(){
+
+const {data}=await sb
+.from("transacoes")
+.select("*")
+.eq("usuario_id",usuario.id)
+.eq("status","aprovado")
+.eq("lido",false)
+
+if(data && data.length>0){
+
+document.getElementById("badge").classList.remove("oculto")
+
+}
+
+}
+
+function abrirNotificacoes(){
+
+location.href="notificacoes.html"
 
 }
 
@@ -412,6 +369,8 @@ if(!ok) return
 await carregarPerfil()
 
 await carregarExtrato()
+
+await verificarNotificacoes()
 
 }
 

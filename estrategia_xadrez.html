@@ -3,359 +3,276 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estratégia Xadrez</title>
+<title>Estratégia Xadrez - RRinvest</title>
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=120">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
+<style>
+.grid-xadrez{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:6px;
+}
+
+.quadrado{
+background:#f2f2f2;
+border-radius:8px;
+padding:6px;
+text-align:center;
+cursor:pointer;
+border:1px solid #ddd;
+}
+
+.quadrado.marcado{
+background:#27ae60;
+color:#fff;
+border:none;
+}
+
+.numero{
+font-size:12px;
+opacity:.6;
+}
+
+.valor{
+font-weight:700;
+}
+</style>
+
 </head>
 <body>
 
 <div class="app">
 
-  <div class="topbar">
-    <div>
-      <div class="brand">RRinvest</div>
-      <div class="brand-sub">Estratégia Xadrez</div>
-    </div>
-    <div class="premium-badge">Premium</div>
-  </div>
+<div class="topbar">
+<div>
+<div class="brand">RRinvest</div>
+<div class="brand-sub">Estratégia Xadrez</div>
+</div>
+<div class="premium-badge">Premium</div>
+</div>
 
-  <div class="top-actions-grid">
-    <button class="btn btn-deposito" onclick="location.href='index.html'">
-      <span class="material-symbols-rounded icon">arrow_back</span>
-      Voltar
-    </button>
+<button class="btn btn-deposito" onclick="voltar()">
+<span class="material-symbols-rounded icon">arrow_back</span>
+Voltar
+</button>
 
-    <button class="btn btn-xadrez" onclick="gerarNovaEstrategia()">
-      <span class="material-symbols-rounded icon">refresh</span>
-      Atualizar
-    </button>
+<button class="btn btn-xadrez" onclick="gerarNovo()">
+<span class="material-symbols-rounded icon">refresh</span>
+Atualizar
+</button>
 
-    <button class="btn btn-saque" onclick="salvarEstrategia()">
-      <span class="material-symbols-rounded icon">save</span>
-      Salvar
-    </button>
-  </div>
+<button class="btn btn-saque" onclick="salvar()">
+<span class="material-symbols-rounded icon">save</span>
+Salvar
+</button>
 
-  <div class="card card-saldo-topo-xadrez">
-    <div class="card-subtitle-top">Saldo atual</div>
-    <div id="saldoAtualTopo" class="saldo-topo-xadrez">R$ 0,00</div>
-  </div>
+<div class="card">
 
-  <div class="card card-xadrez-ajustado">
-    <div class="card-title xadrez-title">Estratégia Xadrez</div>
-    <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
+<div class="card-subtitle">Saldo atual</div>
+<div id="saldoAtual" class="saldo-valor">R$ 0,00</div>
 
-    <div id="quadroScrollLabel" class="quadro-scroll-label oculto">Deslize para o lado quando tiver muitos quadrados</div>
+</div>
 
-    <div id="quadroScroll" class="quadro-scroll">
-      <div id="quadro" class="quadro-xadrez"></div>
-    </div>
+<div class="card">
 
-    <div class="xadrez-resumo-box">
-      <div>Saldo marcado: <strong id="saldoMarcado">R$ 0,00</strong></div>
-      <div>Falta marcar: <strong id="saldoFaltando">R$ 0,00</strong></div>
-      <div>Quadrados marcados: <strong id="qtdMarcados">0</strong></div>
-    </div>
+<div class="card-title">Estratégia Xadrez</div>
 
-    <div id="mensagemSalvar" class="mensagem-salvar oculto">
-      Estratégia salva com sucesso.
-    </div>
-  </div>
+<div id="metaValor" class="saldo-valor" style="color:#27ae60;font-size:28px;">
+R$ 0,00
+</div>
+
+<div id="grid" class="grid-xadrez"></div>
+
+</div>
+
+<div class="card">
+
+<div>Saldo marcado: <strong id="marcado">R$ 0,00</strong></div>
+<div>Falta marcar: <strong id="falta">R$ 0,00</strong></div>
+<div>Quadrados marcados: <strong id="qtd">0</strong></div>
+
+</div>
 
 </div>
 
 <script>
-let usuario = null
-let meta = 0
-let qtdQuadrados = 500
-let valores = []
-let marcados = []
-let saldoBasePerfil = 0
 
-async function verificarLogin(){
-  const {data,error} = await sb.auth.getSession()
+let meta = Number(localStorage.getItem("rrinvest_meta_xadrez") || 0)
+let qtd = Number(localStorage.getItem("rrinvest_qtd_xadrez") || 100)
 
-  if(error || !data.session){
-    location.href = "login.html"
-    return false
-  }
+let valores=[]
+let marcados=new Set()
 
-  usuario = data.session.user
-  return true
+function formatar(v){
+return Number(v).toLocaleString("pt-BR",{minimumFractionDigits:2})
 }
 
-function formatarReal(v){
-  return Number(v || 0).toLocaleString("pt-BR",{
-    minimumFractionDigits:2,
-    maximumFractionDigits:2
-  })
+function chaveBase(){
+return "rrinvest_rendimento_base_"+usuario.id
 }
 
-function chaveValores(){
-  return "rrinvest_xadrez_valores_" + meta + "_" + qtdQuadrados
+function chaveInicio(){
+return "rrinvest_rendimento_inicio_"+usuario.id
 }
 
-function chaveMarcados(){
-  return "rrinvest_xadrez_marcados_" + meta + "_" + qtdQuadrados
+function chaveDesconto(){
+return "rrinvest_xadrez_desconto_"+usuario.id
 }
 
-function chaveDescontoXadrez(){
-  return "rrinvest_xadrez_desconto_" + usuario.id
+function lerEstado(){
+return{
+base:Number(localStorage.getItem(chaveBase())||0),
+inicio:Number(localStorage.getItem(chaveInicio())||0)
+}
 }
 
-function chaveResumoXadrez(){
-  return "rrinvest_xadrez_resumo_" + usuario.id
+function rendimentoPorSegundo(base){
+return base*0.20/30/24/60/60
 }
 
-function obterColunas(qtd){
-  if(qtd === 100) return 10
-  return 20
+function calcularSaldo(){
+const e=lerEstado()
+
+if(!e.inicio) return e.base
+
+const segundos=(Date.now()-e.inicio)/1000
+return e.base+(segundos*rendimentoPorSegundo(e.base))
 }
 
-function obterLarguraMinima(colunas){
-  const larguraCasa = 58
-  return colunas * larguraCasa
+function atualizarSaldoTela(){
+
+const desconto=Number(localStorage.getItem(chaveDesconto())||0)
+
+const saldo=calcularSaldo()-desconto
+
+document.getElementById("saldoAtual").innerText="R$ "+formatar(saldo)
+
 }
 
-function precisaRolagem(qtd){
-  return qtd > 100
+function gerarValores(){
+
+valores=[]
+
+for(let i=0;i<qtd;i++){
+valores.push(Math.floor(Math.random()*190)+10)
 }
 
-function gerarValoresInteiros(metaEscolhida, quantidade){
-  const pesos = []
-  const grupos = [1,2,3,4,5,6,7,8,9,10]
+render()
 
-  for(let i=0;i<quantidade;i++){
-    const aleatorio = grupos[Math.floor(Math.random() * grupos.length)]
-    pesos.push(aleatorio)
-  }
-
-  const somaPesos = pesos.reduce((a,b)=>a+b,0)
-  let inteiros = pesos.map(p => Math.max(1, Math.floor((metaEscolhida * p) / somaPesos)))
-
-  let totalAtual = inteiros.reduce((a,b)=>a+b,0)
-
-  while(totalAtual < metaEscolhida){
-    const idx = Math.floor(Math.random() * quantidade)
-    inteiros[idx] += 1
-    totalAtual += 1
-  }
-
-  while(totalAtual > metaEscolhida + quantidade){
-    const idx = Math.floor(Math.random() * quantidade)
-    if(inteiros[idx] > 1){
-      inteiros[idx] -= 1
-      totalAtual -= 1
-    }
-  }
-
-  return {
-    valores: inteiros
-  }
 }
 
-function embaralhar(lista){
-  const copia = [...lista]
-  for(let i=copia.length-1;i>0;i--){
-    const j = Math.floor(Math.random() * (i+1))
-    const temp = copia[i]
-    copia[i] = copia[j]
-    copia[j] = temp
-  }
-  return copia
+function render(){
+
+const grid=document.getElementById("grid")
+grid.innerHTML=""
+
+valores.forEach((v,i)=>{
+
+const d=document.createElement("div")
+d.className="quadrado"
+
+if(marcados.has(i)){
+d.classList.add("marcado")
 }
 
-function salvarValores(){
-  localStorage.setItem(chaveValores(), JSON.stringify(valores))
+d.innerHTML=`
+<div class="numero">${i+1}</div>
+<div class="valor">$${v}</div>
+`
+
+d.onclick=()=>toggle(i)
+
+grid.appendChild(d)
+
+})
+
+calcularResumo()
+
 }
 
-function salvarMarcadosLocais(){
-  localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
+function toggle(i){
+
+if(marcados.has(i)){
+marcados.delete(i)
+}else{
+marcados.add(i)
 }
 
-function limparSalvamentoIndex(){
-  localStorage.setItem(chaveDescontoXadrez(), "0")
-  localStorage.removeItem(chaveResumoXadrez())
+render()
+
 }
 
-function salvarResumoNoIndex(totalMarcado, quantidadeMarcados){
-  localStorage.setItem(chaveDescontoXadrez(), String(totalMarcado))
+function calcularResumo(){
 
-  localStorage.setItem(chaveResumoXadrez(), JSON.stringify({
-    salvo: true,
-    meta: meta,
-    reservado: totalMarcado,
-    marcados: quantidadeMarcados
-  }))
+let total=0
+
+marcados.forEach(i=>{
+total+=valores[i]
+})
+
+document.getElementById("marcado").innerText="R$ "+formatar(total)
+document.getElementById("falta").innerText="R$ "+formatar(meta-total)
+document.getElementById("qtd").innerText=marcados.size
+
 }
 
-function carregarMarcados(){
-  const salvo = JSON.parse(localStorage.getItem(chaveMarcados()) || "[]")
-  if(Array.isArray(salvo) && salvo.length === valores.length){
-    marcados = salvo
-  }else{
-    marcados = new Array(valores.length).fill(false)
-  }
+function salvar(){
+
+let total=0
+
+marcados.forEach(i=>{
+total+=valores[i]
+})
+
+localStorage.setItem("rrinvest_xadrez_desconto_"+usuario.id,total)
+
+localStorage.setItem("rrinvest_xadrez_resumo_"+usuario.id,JSON.stringify({
+meta:meta,
+reservado:total,
+marcados:marcados.size,
+salvo:true
+}))
+
+alert("Estratégia salva")
+
 }
 
-function calcularTotalMarcado(){
-  let totalMarcado = 0
-  let quantidadeMarcados = 0
+function gerarNovo(){
 
-  for(let i=0;i<valores.length;i++){
-    if(marcados[i]){
-      totalMarcado += Number(valores[i])
-      quantidadeMarcados++
-    }
-  }
+marcados.clear()
+gerarValores()
 
-  return { totalMarcado, quantidadeMarcados }
 }
 
-function atualizarResumo(){
-  const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
-  const falta = Math.max(0, meta - totalMarcado)
-  const saldoRestante = Math.max(0, saldoBasePerfil - totalMarcado)
-
-  document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
-  document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
-  document.getElementById("qtdMarcados").innerText = quantidadeMarcados
-  document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
+function voltar(){
+history.back()
 }
 
-function configurarAreaDoQuadro(colunas){
-  const quadro = document.getElementById("quadro")
-  const scroll = document.getElementById("quadroScroll")
-  const label = document.getElementById("quadroScrollLabel")
-
-  if(precisaRolagem(qtdQuadrados)){
-    const larguraMinima = obterLarguraMinima(colunas)
-    quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(58px, 58px))`
-    quadro.style.minWidth = `${larguraMinima}px`
-    scroll.classList.add("quadro-scroll-ativo")
-    label.classList.remove("oculto")
-  }else{
-    quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
-    quadro.style.minWidth = `100%`
-    scroll.classList.remove("quadro-scroll-ativo")
-    label.classList.add("oculto")
-  }
-}
-
-function montarQuadro(){
-  const quadro = document.getElementById("quadro")
-  const colunas = obterColunas(qtdQuadrados)
-
-  configurarAreaDoQuadro(colunas)
-
-  let html = ""
-
-  valores.forEach((valor,index)=>{
-    const linha = Math.floor(index / colunas)
-    const coluna = index % colunas
-    const classeCor = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
-    const classeMarcada = marcados[index] ? "marcada" : ""
-
-    html += `
-      <div class="casa-xadrez ${classeCor} ${classeMarcada}" onclick="alternarMarcado(${index})">
-        <div class="numero-xadrez">${index + 1}</div>
-        <div class="valor-xadrez">$${valor}</div>
-      </div>
-    `
-  })
-
-  quadro.innerHTML = html
-  atualizarResumo()
-}
-
-function alternarMarcado(index){
-  marcados[index] = !marcados[index]
-  salvarMarcadosLocais()
-  montarQuadro()
-  esconderMensagemSalvar()
-}
-
-function gerarNovaEstrategia(){
-  const resultado = gerarValoresInteiros(meta, qtdQuadrados)
-  valores = embaralhar(resultado.valores)
-  marcados = new Array(valores.length).fill(false)
-
-  salvarValores()
-  salvarMarcadosLocais()
-  limparSalvamentoIndex()
-  esconderMensagemSalvar()
-  montarQuadro()
-}
-
-function mostrarMensagemSalvar(){
-  document.getElementById("mensagemSalvar").classList.remove("oculto")
-}
-
-function esconderMensagemSalvar(){
-  document.getElementById("mensagemSalvar").classList.add("oculto")
-}
-
-function salvarEstrategia(){
-  const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
-  salvarResumoNoIndex(totalMarcado, quantidadeMarcados)
-  mostrarMensagemSalvar()
-}
-
-async function carregarSaldoPerfil(){
-  const {data,error} = await sb
-    .from("profiles")
-    .select("saldo")
-    .eq("id",usuario.id)
-    .single()
-
-  if(error || !data){
-    saldoBasePerfil = 0
-  }else{
-    saldoBasePerfil = Number(data.saldo || 0)
-  }
-
-  document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoBasePerfil)
-}
+let usuario=null
 
 async function iniciar(){
-  const ok = await verificarLogin()
-  if(!ok) return
 
-  meta = Math.floor(Number(localStorage.getItem("rrinvest_meta_xadrez") || 0))
-  qtdQuadrados = Number(localStorage.getItem("rrinvest_qtd_xadrez") || 500)
+const {data}=await sb.auth.getSession()
 
-  if(!meta || meta <= 0){
-    location.href = "index.html"
-    return
-  }
+usuario=data.session.user
 
-  document.getElementById("valorMetaTitulo").innerText = "R$ " + formatarReal(meta)
+document.getElementById("metaValor").innerText="R$ "+formatar(meta)
 
-  await carregarSaldoPerfil()
+atualizarSaldoTela()
 
-  const valoresSalvos = JSON.parse(localStorage.getItem(chaveValores()) || "[]")
+setInterval(atualizarSaldoTela,100)
 
-  if(Array.isArray(valoresSalvos) && valoresSalvos.length === qtdQuadrados){
-    valores = valoresSalvos
-  }else{
-    const resultado = gerarValoresInteiros(meta, qtdQuadrados)
-    valores = embaralhar(resultado.valores)
-    salvarValores()
-  }
+gerarValores()
 
-  carregarMarcados()
-  montarQuadro()
 }
 
 iniciar()
+
 </script>
 
 </body>

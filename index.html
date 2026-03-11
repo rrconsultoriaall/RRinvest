@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
@@ -7,7 +8,11 @@
 
 <title>RRinvest</title>
 
-<link rel="stylesheet" href="style.css?v=20">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<link rel="stylesheet" href="style.css?v=30">
 
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
@@ -23,142 +28,117 @@
 <div class="topbar">
 
 <div>
-
 <div class="brand">RRinvest</div>
 <div class="brand-sub">Painel financeiro</div>
-
 </div>
 
 <div class="premium-badge">Premium</div>
 
 </div>
 
+
+
+<!-- CARD SALDO -->
+
 <div class="card saldo-card">
 
 <div class="saldo-topo">
 
-<div class="cliente-nome" id="nomeCliente">...</div>
+<div id="nomeCliente" class="cliente-nome">...</div>
 <div class="cliente-label">Saldo disponível</div>
 
 </div>
 
-<div class="saldo-valor" id="saldo">R$ 0,00</div>
+<div id="saldo" class="saldo-valor">R$ 0,00</div>
 
-<div class="reserva-info" id="reservaXadrez">
-
-Reservado na Estratégia Xadrez: <strong>R$ 0,00</strong>
-
+<div id="reservaXadrez" class="reserva-info oculto">
+Reservado na Estratégia Xadrez: <strong id="valorReservado">R$ 0,00</strong>
 </div>
 
 </div>
 
+
+
+<!-- BOTÕES -->
 
 <div class="card">
 
 <div class="acoes-grid">
 
-<button class="btn btn-deposito" onclick="location.href='depositar.html'">
-
+<button class="btn btn-deposito" onclick="location.href='deposito.html'">
 <span class="material-symbols-rounded icon">add</span>
 Depositar
-
 </button>
 
-
-<button class="btn btn-saque" onclick="location.href='sacar.html'">
-
-<span class="material-symbols-rounded icon">arrow_downward</span>
+<button class="btn btn-saque" onclick="location.href='saque.html'">
+<span class="material-symbols-rounded icon">south</span>
 Sacar
-
 </button>
-
 
 <button class="btn btn-notificacoes" onclick="location.href='notificacoes.html'">
-
 <span class="material-symbols-rounded icon">notifications</span>
 Notificações
-
 </button>
 
 </div>
 
-<button class="btn btn-sair" onclick="sair()">
-
+<button class="btn btn-sair" onclick="logout()">
 <span class="material-symbols-rounded icon">logout</span>
 Sair
-
 </button>
 
 </div>
 
 
+
+<!-- ESTRATÉGIA -->
 
 <div class="card">
 
 <div class="card-title">Estratégia Xadrez</div>
 
 <div class="card-subtitle">
-
-Monte sua estratégia de depósitos do jeito que preferir.
-
+Monte sua estratégia de depósitos.
 </div>
 
-
-<div id="estrategiaSalva" class="xadrez-salva-box oculto">
+<div id="xadrezSalvaBox" class="xadrez-salva-box oculto">
 
 <div class="xadrez-salva-topo">
 
 <div class="xadrez-salva-titulo">Estratégia salva</div>
-
 <div class="xadrez-salva-status">Ativa</div>
 
 </div>
 
-
 <div class="xadrez-salva-grid">
 
 <div class="xadrez-info-item">
-
-<div class="xadrez-info-label">Meta</div>
-<strong id="metaSalva">R$ 0,00</strong>
-
+<span class="xadrez-info-label">Meta</span>
+<strong id="xadrezMetaSalva">R$ 0,00</strong>
 </div>
-
 
 <div class="xadrez-info-item">
-
-<div class="xadrez-info-label">Reservado</div>
-<strong id="reservadoSalvo">R$ 0,00</strong>
-
+<span class="xadrez-info-label">Reservado</span>
+<strong id="xadrezReservadoSalvo">R$ 0,00</strong>
 </div>
-
 
 <div class="xadrez-info-item">
-
-<div class="xadrez-info-label">Marcados</div>
-<strong id="marcadosSalvo">0</strong>
-
+<span class="xadrez-info-label">Marcados</span>
+<strong id="xadrezMarcadosSalvos">0</strong>
 </div>
 
 </div>
 
-
-<button class="btn btn-abrir-salva" onclick="abrirEstrategia()">
-
+<button class="btn btn-abrir-salva" onclick="location.href='estrategia_xadrez.html'">
 <span class="material-symbols-rounded icon">open_in_new</span>
-Abrir estratégia salva
-
+Abrir estratégia
 </button>
 
 </div>
 
-
 <div class="form-group">
-
-<input id="valorMeta" placeholder="Digite o valor que quer juntar">
-
+<input type="number" id="metaXadrez" placeholder="Digite o valor que quer juntar">
 </div>
-
 
 <div class="form-group">
 
@@ -173,8 +153,7 @@ Abrir estratégia salva
 
 </div>
 
-
-<button class="btn btn-xadrez" onclick="criarEstrategia()">
+<button class="btn btn-xadrez" onclick="abrirEstrategiaXadrez()">
 
 <span class="material-symbols-rounded icon">grid_view</span>
 Criar estratégia
@@ -185,21 +164,15 @@ Criar estratégia
 
 
 
-<div class="card">
+<!-- EXTRATO -->
 
-<div class="extrato-header">
+<div class="card">
 
 <div class="card-title">Extrato</div>
 
-<div class="card-subtitle">
-
-Últimas movimentações pendentes
-
+<div id="extrato" class="extrato-lista">
+<div class="vazio">Carregando...</div>
 </div>
-
-</div>
-
-<div id="extratoLista" class="extrato-lista"></div>
 
 </div>
 
@@ -220,7 +193,10 @@ let inicioRendimento = 0
 
 function formatarReal(v){
 
-return Number(v).toLocaleString("pt-BR",{minimumFractionDigits:2})
+return Number(v).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
 
 }
 
@@ -236,7 +212,7 @@ inicioRendimento = Date.now()
 
 atualizarSaldo()
 
-setInterval(atualizarSaldo,1000)
+setInterval(atualizarSaldo,100)
 
 }
 
@@ -267,11 +243,13 @@ if(error || !data.session){
 
 location.href = "login.html"
 
-return
+return false
 
 }
 
 usuario = data.session.user
+
+return true
 
 }
 
@@ -285,7 +263,13 @@ const {data,error} = await sb
 .eq("id",usuario.id)
 .single()
 
-if(data){
+if(error || !data){
+
+document.getElementById("nomeCliente").innerText = "Erro"
+
+return
+
+}
 
 document.getElementById("nomeCliente").innerText =
 data.nome || "Cliente"
@@ -294,13 +278,11 @@ iniciarRendimento(data.saldo || 0)
 
 }
 
-}
 
 
+function abrirEstrategiaXadrez(){
 
-function criarEstrategia(){
-
-const valor = document.getElementById("valorMeta").value
+const valor = document.getElementById("metaXadrez").value
 const qtd = document.getElementById("qtdQuadrados").value
 
 if(!valor){
@@ -320,17 +302,10 @@ location.href="estrategia_xadrez.html"
 
 
 
-function abrirEstrategia(){
+async function logout(){
 
-location.href="estrategia_xadrez.html"
+await sb.auth.signOut()
 
-}
-
-
-
-function sair(){
-
-sb.auth.signOut()
 location.href="login.html"
 
 }
@@ -339,7 +314,9 @@ location.href="login.html"
 
 async function iniciar(){
 
-await verificarLogin()
+const ok = await verificarLogin()
+
+if(!ok) return
 
 await carregarPerfil()
 
@@ -348,7 +325,6 @@ await carregarPerfil()
 iniciar()
 
 </script>
-
 
 </body>
 </html>

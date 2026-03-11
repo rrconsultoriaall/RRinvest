@@ -98,17 +98,23 @@ color:#1f8f4e;
 <div id="clientes">Carregando...</div>
 </div>
 
-<div class="card">
-<h2>Movimentações aprovadas</h2>
-<div id="movimentos">Carregando...</div>
-</div>
-
 <script>
 let usuarioAtual = null
 
 function horarioBrasil(data){
-return new Date(data).toLocaleString("pt-BR",{
-timeZone:"America/Sao_Paulo"
+if(!data) return "-"
+let texto = String(data)
+if(!texto.endsWith("Z") && !texto.includes("+") && !texto.match(/-\d{2}:\d{2}$/)){
+texto = texto + "Z"
+}
+return new Date(texto).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo",
+year:"numeric",
+month:"2-digit",
+day:"2-digit",
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit"
 })
 }
 
@@ -123,6 +129,15 @@ function setMsg(texto, tipo=""){
 const el = document.getElementById("msgGeral")
 el.className = "msg " + tipo
 el.innerText = texto
+}
+
+async function criarNotificacao(usuarioId, titulo, mensagem){
+await sb.from("notificacoes").insert({
+usuario_id: usuarioId,
+titulo: titulo,
+mensagem: mensagem,
+created_at: new Date().toISOString()
+})
 }
 
 async function verificarLogin(){
@@ -248,44 +263,7 @@ Valor: R$ ${formatarReal(s.valor)}<br>
 Detalhe: ${s.descricao || "-"}<br>
 Status: ${s.status || "-"}<br>
 Data: ${horarioBrasil(s.created_at)}<br>
-</div>
-`
-})
-
-div.innerHTML = html
-}
-
-async function carregarMovimentos(){
-const div = document.getElementById("movimentos")
-div.innerHTML = "Carregando..."
-
-const { data, error } = await sb
-.from("transacoes")
-.select("*")
-.eq("status","aprovado")
-.order("created_at",{ascending:false})
-
-if(error){
-div.innerHTML = `<div class="erro">${error.message}</div>`
-return
-}
-
-if(!data || data.length===0){
-div.innerHTML = "Nenhuma movimentação aprovada."
-return
-}
-
-let html = ""
-
-data.forEach(m=>{
-html += `
-<div class="item">
-<b>${m.tipo || "-"}</b><br>
-Usuário: ${m.usuario_email || "-"}<br>
-Valor: R$ ${formatarReal(m.valor)}<br>
-Descrição: ${m.descricao || "-"}<br>
-Status: ${m.status || "-"}<br>
-Data: ${horarioBrasil(m.created_at)}
+<button class="btn-aprovar" onclick="aprovarSaque(${s.id},'${s.usuario_id}',${Number(s.valor)})">Aprovar saque</button>
 </div>
 `
 })
@@ -329,11 +307,72 @@ setMsg(erroTransacao.message,"erro")
 return
 }
 
+await criarNotificacao(
+usuarioId,
+"Depósito aprovado",
+"Seu depósito de R$ " + formatarReal(valor) + " foi aprovado."
+)
+
 setMsg("Depósito aprovado com sucesso.","ok")
 
 await carregarDepositos()
 await carregarClientes()
-await carregarMovimentos()
+}
+
+async function aprovarSaque(id, usuarioId, valor){
+setMsg("Aprovando saque...")
+
+const { data: perfil, error: erroPerfil } = await sb
+.from("profiles")
+.select("saldo")
+.eq("id", usuarioId)
+.single()
+
+if(erroPerfil){
+setMsg(erroPerfil.message,"erro")
+return
+}
+
+const saldoAtual = Number(perfil.saldo || 0)
+const valorSaque = Number(valor || 0)
+
+if(saldoAtual < valorSaque){
+setMsg("Saldo insuficiente para aprovar esse saque.","erro")
+return
+}
+
+const novoSaldo = saldoAtual - valorSaque
+
+const { error: erroSaldo } = await sb
+.from("profiles")
+.update({ saldo: novoSaldo })
+.eq("id", usuarioId)
+
+if(erroSaldo){
+setMsg(erroSaldo.message,"erro")
+return
+}
+
+const { error: erroTransacao } = await sb
+.from("transacoes")
+.update({ status: "aprovado" })
+.eq("id", id)
+
+if(erroTransacao){
+setMsg(erroTransacao.message,"erro")
+return
+}
+
+await criarNotificacao(
+usuarioId,
+"Saque aprovado",
+"Seu saque de R$ " + formatarReal(valor) + " foi aprovado."
+)
+
+setMsg("Saque aprovado com sucesso.","ok")
+
+await carregarSaques()
+await carregarClientes()
 }
 
 async function logout(){
@@ -348,7 +387,6 @@ if(!ok) return
 await carregarDepositos()
 await carregarSaques()
 await carregarClientes()
-await carregarMovimentos()
 }
 
 iniciar()

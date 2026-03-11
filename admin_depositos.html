@@ -2,213 +2,201 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Depósitos</title>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Depósitos pendentes</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial;
-background:#f3f3f3;
-padding:20px;
+font-family:Arial,sans-serif;
+background:#f4f6f8;
 margin:0;
+padding:20px;
 }
 
-.card{
-background:white;
-padding:20px;
-border-radius:12px;
+.topo{
+display:flex;
+gap:10px;
 margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
 button{
-padding:12px;
+padding:14px;
 border:none;
-border-radius:8px;
+border-radius:12px;
+font-size:16px;
 cursor:pointer;
-font-size:15px;
-margin-top:10px;
-}
-
-.aprovar{
-background:#28a745;
-color:white;
 }
 
 .voltar{
 background:#1e4ea1;
 color:white;
+flex:1;
 }
 
-.item{
-border-bottom:1px solid #eee;
-padding:12px 0;
-line-height:1.6;
+.sair{
+background:#c0392b;
+color:white;
+flex:1;
 }
 
-.item:last-child{
-border-bottom:none;
+.card{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
+margin-bottom:15px;
+line-height:1.8;
+}
+
+.aprovar{
+background:#1faa59;
+color:white;
+width:100%;
+margin-top:12px;
 }
 
 .msg{
-margin-top:10px;
+background:#e8f7ea;
+color:#1e7e34;
+padding:12px;
+border-radius:12px;
+margin-bottom:15px;
 font-weight:bold;
 }
-
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<h2>Depósitos pendentes</h2>
-
-<button class="voltar" onclick="voltar()">Voltar</button>
-
-<div id="lista">Carregando...</div>
-
-<div class="msg" id="msg"></div>
-
+<div class="topo">
+<button class="voltar" onclick="location.href='admin.html'">Voltar</button>
+<button class="sair" onclick="logout()">Sair</button>
 </div>
 
-<script>
+<div id="mensagem"></div>
+<div id="depositos">Carregando...</div>
 
-let usuario
+<script>
+function formatarReal(v){
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+}
 
 function horarioBrasil(data){
-
 return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo"
 })
-
-}
-
-function formatarReal(valor){
-
-return Number(valor).toLocaleString("pt-BR",{
-minimumFractionDigits:2
-})
-
-}
-
-async function verificarLogin(){
-
-const { data } = await sb.auth.getSession()
-
-if(!data.session){
-
-location.href="login.html"
-return
-
-}
-
-usuario=data.session.user
-
 }
 
 async function carregarDepositos(){
-
-let { data } = await sb
+const {data,error} = await sb
 .from("transacoes")
 .select("*")
 .eq("tipo","deposito")
 .eq("status","pendente")
 .order("created_at",{ascending:false})
 
-if(!data || data.length==0){
-
-document.getElementById("lista").innerHTML="Nenhum depósito pendente"
+if(error){
+document.getElementById("depositos").innerHTML = "Erro ao carregar depósitos."
 return
-
 }
 
-let html=""
-
-data.forEach(d=>{
-
-html+=`
-
-<div class="item">
-
-<b>Depósito</b><br>
-Usuário: ${d.usuario_email}<br>
-Valor: R$ ${formatarReal(d.valor)}<br>
-Data: ${horarioBrasil(d.created_at)}<br>
-
-<button class="aprovar" onclick="aprovar(${d.id},'${d.usuario_id}',${d.valor})">
-Aprovar depósito
-</button>
-
-</div>
-
-`
-
-})
-
-document.getElementById("lista").innerHTML=html
-
+if(!data || data.length === 0){
+document.getElementById("depositos").innerHTML = "Nenhum depósito pendente."
+return
 }
 
-async function aprovar(id,usuarioId,valor){
+let html = ""
 
-document.getElementById("msg").innerText="Aprovando..."
-
-let { data:perfil } = await sb
+for(const d of data){
+let email = "-"
+const {data:perfil} = await sb
 .from("profiles")
-.select("saldo")
+.select("email")
+.eq("id",d.usuario_id)
+.single()
+
+if(perfil) email = perfil.email || "-"
+
+html += `
+<div class="card">
+<b>Depósito</b><br>
+Usuário: ${email}<br>
+Valor: R$ ${formatarReal(d.valor)}<br>
+Status: ${d.status}<br>
+Data: ${horarioBrasil(d.created_at)}<br>
+<button class="aprovar" onclick="aprovarDeposito(${d.id},'${d.usuario_id}',${Number(d.valor)})">Aprovar depósito</button>
+</div>
+`
+}
+
+document.getElementById("depositos").innerHTML = html
+}
+
+async function aprovarDeposito(transacaoId,usuarioId,valor){
+const {data:perfil,error:erroPerfil} = await sb
+.from("profiles")
+.select("saldo,saldo_version,aguardando_primeiro_deposito")
 .eq("id",usuarioId)
 .single()
 
-let novoSaldo = Number(perfil.saldo) + Number(valor)
+if(erroPerfil || !perfil){
+alert("Erro ao buscar perfil.")
+return
+}
 
-await sb
+const novoSaldo = Number(perfil.saldo || 0) + Number(valor || 0)
+const novaVersion = Number(perfil.saldo_version || 0) + 1
+
+const {error:erroUpdate} = await sb
 .from("profiles")
-.update({saldo:novoSaldo})
+.update({
+saldo: novoSaldo,
+saldo_version: novaVersion,
+aguardando_primeiro_deposito: false
+})
 .eq("id",usuarioId)
 
-await sb
+if(erroUpdate){
+alert("Erro ao atualizar saldo.")
+return
+}
+
+const {error:erroTransacao} = await sb
 .from("transacoes")
 .update({status:"aprovado"})
-.eq("id",id)
+.eq("id",transacaoId)
 
-await sb
-.from("notificacoes")
-.insert({
-usuario_id:usuarioId,
-titulo:"Depósito aprovado",
-mensagem:"Seu depósito de R$ "+formatarReal(valor)+" foi aprovado.",
-created_at:new Date().toISOString()
-})
+if(erroTransacao){
+alert("Erro ao aprovar depósito.")
+return
+}
 
-document.getElementById("msg").innerText="Depósito aprovado"
+await sb.from("notificacoes").insert([{
+usuario_id: usuarioId,
+titulo: "Depósito aprovado",
+mensagem: "Seu depósito de R$ " + formatarReal(valor) + " foi aprovado.",
+lida: false
+}])
+
+document.getElementById("mensagem").innerHTML = `<div class="msg">Depósito aprovado com sucesso.</div>`
+carregarDepositos()
+}
+
+async function logout(){
+await sb.auth.signOut()
+location.href = "login.html"
+}
 
 carregarDepositos()
-
-}
-
-function voltar(){
-
-location.href="admin.html"
-
-}
-
-async function iniciar(){
-
-await verificarLogin()
-carregarDepositos()
-
-}
-
-iniciar()
-
 </script>
 
 </body>

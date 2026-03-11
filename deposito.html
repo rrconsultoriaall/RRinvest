@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Depósito - RRinvest</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+max-width:400px;
+margin:auto;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+margin-bottom:10px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#0b3d91;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Depósito</h2>
+
+<input id="valor" placeholder="Valor do depósito">
+
+<button onclick="depositar()">Depositar</button>
+
+<div id="msg"></div>
+
+<br>
+
+<button onclick="voltar()">Voltar</button>
+
+</div>
+
+<script>
+
+let usuario
+
+async function iniciar(){
+
+const { data } = await sb.auth.getUser()
+
+if(!data.user){
+window.location.href="login.html"
+return
+}
+
+usuario = data.user
+
+}
+
+async function depositar(){
+
+const valor = Number(document.getElementById("valor").value)
+
+await sb.from("transacoes").insert({
+
+usuario_id:usuario.id,
+tipo:"deposito",
+valor:valor,
+descricao:"Depósito solicitado"
+
+})
+
+document.getElementById("msg").innerText="Depósito registrado"
+
+}
+
+function voltar(){
+
+window.location.href="index.html"
+
+}
+
+iniciar()
+
+</script>
+
+</body>
+</html>

@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=130">
+<link rel="stylesheet" href="style.css?v=131">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -74,14 +74,15 @@
 
 .quadro-scroll{
   width:100%;
-  overflow:visible;
+  overflow-x:hidden;
+  overflow-y:hidden;
   padding-bottom:0;
 }
 
 .quadro-scroll.quadro-scroll-ativo{
   overflow-x:auto;
   overflow-y:hidden;
-  padding-bottom:6px;
+  padding-bottom:8px;
   -webkit-overflow-scrolling:touch;
 }
 
@@ -352,9 +353,11 @@ function obterColunas(qtd){
   return 20
 }
 
-function obterLarguraMinima(colunas){
-  const larguraCasa = 74
-  return colunas * larguraCasa
+function obterLarguraCasa(qtd){
+  if(qtd === 100) return 1
+  if(qtd === 200) return 74
+  if(qtd === 300) return 72
+  return 70
 }
 
 function precisaRolagem(qtd){
@@ -365,15 +368,17 @@ function configurarAreaDoQuadro(colunas){
   const quadro = document.getElementById("quadro")
   const scroll = document.getElementById("quadroScroll")
   const label = document.getElementById("quadroScrollLabel")
+  const larguraCasa = obterLarguraCasa(qtdQuadrados)
 
   if(precisaRolagem(qtdQuadrados)){
-    const larguraMinima = obterLarguraMinima(colunas)
-    quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(74px, 74px))`
-    quadro.style.minWidth = `${larguraMinima}px`
+    quadro.style.gridTemplateColumns = `repeat(${colunas}, ${larguraCasa}px)`
+    quadro.style.width = `${colunas * larguraCasa}px`
+    quadro.style.minWidth = `${colunas * larguraCasa}px`
     scroll.classList.add("quadro-scroll-ativo")
     label.classList.remove("oculto")
-  } else {
+  }else{
     quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+    quadro.style.width = `100%`
     quadro.style.minWidth = `100%`
     scroll.classList.remove("quadro-scroll-ativo")
     label.classList.add("oculto")

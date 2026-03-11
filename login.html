@@ -1,77 +1,174 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>RRinvest</title>
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<link rel="manifest" href="/RRinvest/manifest.json">
+<meta name="theme-color" content="#1d4ed8">
 
-<link rel="stylesheet" href="style.css?v=100">
+<link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
+<style>
+
+/* SPLASH */
+
+.splash-screen{
+position:fixed;
+inset:0;
+z-index:9999;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+background:linear-gradient(135deg,#1d4ed8,#2563eb,#4f7cff);
+transition:opacity .3s;
+}
+
+.splash-screen.hide{
+opacity:0;
+pointer-events:none;
+}
+
+.splash-logo{
+width:110px;
+height:110px;
+border-radius:26px;
+background:rgba(255,255,255,0.15);
+display:flex;
+align-items:center;
+justify-content:center;
+margin-bottom:18px;
+}
+
+.splash-logo img{
+width:70px;
+}
+
+.splash-title{
+color:#fff;
+font-size:32px;
+font-weight:800;
+}
+
+.install-btn{
+display:none;
+margin-bottom:20px;
+}
+
+.install-btn.show{
+display:flex;
+}
+
+</style>
+
 </head>
+
 <body>
+
+<!-- SPLASH -->
+
+<div id="splashScreen" class="splash-screen">
+
+<div class="splash-logo">
+<img src="/RRinvest/icons/icon-192.png">
+</div>
+
+<div class="splash-title">RRinvest</div>
+
+</div>
 
 <div class="app">
 
 <div class="topbar">
+
 <div>
 <div class="brand">RRinvest</div>
 <div class="brand-sub">Acesso ao sistema</div>
 </div>
+
 <div class="premium-badge">Login</div>
+
 </div>
+
+<button id="installBtn" class="btn btn-xadrez install-btn">
+
+<span class="material-symbols-rounded icon">download</span>
+
+Instalar app
+
+</button>
 
 <div class="card">
 
 <div class="card-title">Entrar</div>
-<div class="card-subtitle">Use seu e-mail e senha</div>
+
+<div class="card-subtitle">Use seu e-mail e senha para acessar.</div>
 
 <div class="form-group">
-<input type="email" id="email" placeholder="Seu e-mail">
+
+<input id="loginEmail" type="email" placeholder="Seu e-mail">
+
 </div>
 
 <div class="form-group">
-<input type="password" id="senha" placeholder="Sua senha">
+
+<input id="loginSenha" type="password" placeholder="Sua senha">
+
 </div>
 
-<button class="btn btn-deposito" style="width:100%" onclick="login()">
+<button class="btn btn-deposito" onclick="login()">
+
 <span class="material-symbols-rounded icon">login</span>
+
 Entrar
+
 </button>
 
-<div style="height:20px"></div>
+<hr style="margin:20px 0">
 
 <div class="card-title">Criar conta</div>
+
 <div class="card-subtitle">Cadastre-se para começar</div>
 
 <div class="form-group">
-<input type="text" id="nome" placeholder="Seu nome">
+
+<input id="cadNome" placeholder="Seu nome">
+
 </div>
 
 <div class="form-group">
-<input type="text" id="telefone" placeholder="Telefone">
+
+<input id="cadTelefone" placeholder="Telefone">
+
 </div>
 
 <div class="form-group">
-<input type="email" id="emailCadastro" placeholder="Seu e-mail">
+
+<input id="cadEmail" placeholder="Seu e-mail">
+
 </div>
 
 <div class="form-group">
-<input type="password" id="senhaCadastro" placeholder="Crie uma senha">
+
+<input id="cadSenha" type="password" placeholder="Crie uma senha">
+
 </div>
 
-<button class="btn btn-xadrez" style="width:100%" onclick="criarConta()">
+<button class="btn btn-xadrez" onclick="criarConta()">
+
 <span class="material-symbols-rounded icon">person_add</span>
-Criar conta
-</button>
 
-<div id="msg" class="vazio" style="margin-top:10px;"></div>
+Criar conta
+
+</button>
 
 </div>
 
@@ -79,117 +176,127 @@ Criar conta
 
 <script>
 
-async function login(){
+let deferredPrompt = null
 
-const email = document.getElementById("email").value.trim()
-const senha = document.getElementById("senha").value.trim()
-const msg = document.getElementById("msg")
+function esconderSplash(){
 
-msg.innerText=""
+document.getElementById("splashScreen").classList.add("hide")
 
-if(!email || !senha){
-msg.innerText="Preencha e-mail e senha"
-return
 }
 
-const { data, error } = await sb.auth.signInWithPassword({
-email: email,
-password: senha
+setTimeout(esconderSplash,1200)
+
+/* INSTALAR APP */
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+
+e.preventDefault()
+
+deferredPrompt=e
+
+document.getElementById("installBtn").classList.add("show")
+
+})
+
+document.getElementById("installBtn").addEventListener("click",async()=>{
+
+if(!deferredPrompt)return
+
+deferredPrompt.prompt()
+
+await deferredPrompt.userChoice
+
+deferredPrompt=null
+
+})
+
+/* LOGIN */
+
+async function login(){
+
+const email=document.getElementById("loginEmail").value
+
+const senha=document.getElementById("loginSenha").value
+
+const { error } = await sb.auth.signInWithPassword({
+
+email:email,
+
+password:senha
+
 })
 
 if(error){
-msg.innerText="Login inválido"
+
+alert("Erro no login")
+
 return
+
 }
-
-const userId = data.user.id
-
-const { data:perfil } = await sb
-.from("profiles")
-.select("admin")
-.eq("id",userId)
-.single()
-
-if(perfil?.admin === true){
-
-location.href="admin.html"
-
-}else{
 
 location.href="index.html"
 
 }
 
-}
+/* CRIAR CONTA */
 
 async function criarConta(){
 
-const nome=document.getElementById("nome").value.trim()
-const telefone=document.getElementById("telefone").value.trim()
-const email=document.getElementById("emailCadastro").value.trim()
-const senha=document.getElementById("senhaCadastro").value.trim()
+const nome=document.getElementById("cadNome").value
+const telefone=document.getElementById("cadTelefone").value
+const email=document.getElementById("cadEmail").value
+const senha=document.getElementById("cadSenha").value
 
-const msg=document.getElementById("msg")
-msg.innerText=""
+if(!nome||!telefone||!email||!senha){
 
-if(!nome || !telefone || !email || !senha){
-msg.innerText="Preencha todos os campos"
+alert("Preencha todos os campos")
+
 return
+
 }
 
 const { data, error } = await sb.auth.signUp({
-email: email,
-password: senha
+
+email:email,
+password:senha
+
 })
 
 if(error){
-msg.innerText=error.message
+
+alert("Erro ao criar conta")
+
 return
+
 }
 
-const userId=data.user.id
+await sb.from("profiles").insert({
 
-await sb.from("profiles").insert([
-{
-id:userId,
+id:data.user.id,
 nome:nome,
 telefone:telefone,
 saldo:0,
 admin:false
-}
-])
 
-msg.innerText="Conta criada! Agora faça login."
+})
 
-}
-
-async function verificarSessao(){
-
-const { data } = await sb.auth.getSession()
-
-if(!data.session) return
-
-const userId=data.session.user.id
-
-const { data:perfil } = await sb
-.from("profiles")
-.select("admin")
-.eq("id",userId)
-.single()
-
-if(perfil?.admin){
-
-location.href="admin.html"
-
-}else{
-
-location.href="index.html"
+alert("Conta criada!")
 
 }
 
-}
+</script>
 
-verificarSessao()
+<script>
+
+if ("serviceWorker" in navigator) {
+
+window.addEventListener("load", () => {
+
+navigator.serviceWorker.register("/RRinvest/service-worker.js")
+
+})
+
+}
 
 </script>
 

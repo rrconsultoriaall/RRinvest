@@ -13,7 +13,7 @@
 
 <title>RRinvest</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -41,12 +41,10 @@ margin-right:5px;
 
 .aprovado{
 color:green;
-font-weight:bold;
 }
 
 .pendente{
 color:orange;
-font-weight:bold;
 }
 
 </style>
@@ -57,9 +55,9 @@ font-weight:bold;
 
 <div class="card">
 
-<h2 id="nome"></h2>
+<h2 id="nome">Carregando...</h2>
 
-<p id="saldo"></p>
+<p id="saldo">Saldo: R$ 0</p>
 
 <button onclick="irDeposito()">Depositar</button>
 <button onclick="irSaque()">Sacar</button>
@@ -71,18 +69,18 @@ font-weight:bold;
 
 <h3>Extrato</h3>
 
-<div id="extrato"></div>
+<div id="extrato">Carregando...</div>
 
 </div>
 
 <script>
 
-const supabase = supabase.createClient(
+const supabase = window.supabase.createClient(
 "https://SEU_PROJETO.supabase.co",
 "SUA_PUBLIC_ANON_KEY"
 )
 
-let user
+let usuario
 
 function horarioBrasil(data){
 
@@ -95,7 +93,7 @@ return new Date(data).toLocaleString(
 
 async function iniciar(){
 
-const {data:{session}} = await supabase.auth.getSession()
+const { data:{ session } } = await supabase.auth.getSession()
 
 if(!session){
 
@@ -104,7 +102,7 @@ return
 
 }
 
-user=session.user
+usuario = session.user
 
 carregarPerfil()
 carregarExtrato()
@@ -113,39 +111,49 @@ carregarExtrato()
 
 async function carregarPerfil(){
 
-let {data} = await supabase
+let { data } = await supabase
 .from("profiles")
 .select("*")
-.eq("id",user.id)
+.eq("id",usuario.id)
 .single()
 
-document.getElementById("nome").innerText=data.nome
-document.getElementById("saldo").innerText="Saldo: R$ "+data.saldo
+if(data){
+
+document.getElementById("nome").innerText = data.nome
+document.getElementById("saldo").innerText = "Saldo: R$ " + data.saldo
+
+}
 
 }
 
 async function carregarExtrato(){
 
-let {data} = await supabase
+let { data } = await supabase
 .from("transacoes")
 .select("*")
-.eq("usuario_id",user.id)
+.eq("usuario_id",usuario.id)
 .order("created_at",{ascending:false})
 
 let html=""
 
-data.forEach(m=>{
+if(!data || data.length==0){
 
-let statusClasse = m.status=="aprovado" ? "aprovado" : "pendente"
+html="Nenhuma movimentação."
+
+}else{
+
+data.forEach(t=>{
+
+let statusClasse = t.status=="aprovado" ? "aprovado" : "pendente"
 
 html+=`
 
 <p>
 
-<b>${m.tipo}</b><br>
-Valor: R$ ${m.valor}<br>
-Status: <span class="${statusClasse}">${m.status}</span><br>
-${horarioBrasil(m.created_at)}
+<b>${t.tipo}</b><br>
+Valor: R$ ${t.valor}<br>
+Status: <span class="${statusClasse}">${t.status}</span><br>
+${horarioBrasil(t.created_at)}
 
 </p>
 
@@ -154,6 +162,8 @@ ${horarioBrasil(m.created_at)}
 `
 
 })
+
+}
 
 document.getElementById("extrato").innerHTML=html
 

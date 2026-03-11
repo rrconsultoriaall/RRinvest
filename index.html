@@ -11,14 +11,135 @@
 
 <link rel="manifest" href="/RRinvest/manifest.json">
 <meta name="theme-color" content="#1d4ed8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-<link rel="stylesheet" href="style.css?v=72">
+<link rel="stylesheet" href="style.css?v=90">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
+<style>
+/* SPLASH */
+.splash-screen{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 50%,#4f7cff 100%);
+  transition:opacity .35s ease, visibility .35s ease;
+}
+
+.splash-screen.hide{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.splash-logo{
+  width:110px;
+  height:110px;
+  border-radius:28px;
+  background:rgba(255,255,255,0.14);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 18px 40px rgba(0,0,0,0.18);
+  margin-bottom:18px;
+}
+
+.splash-logo img{
+  width:74px;
+  height:74px;
+  object-fit:contain;
+  border-radius:18px;
+}
+
+.splash-title{
+  color:#fff;
+  font-size:34px;
+  font-weight:800;
+  letter-spacing:-1px;
+  margin-bottom:6px;
+}
+
+.splash-subtitle{
+  color:rgba(255,255,255,0.88);
+  font-size:15px;
+  font-weight:500;
+}
+
+.splash-loader{
+  width:170px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.2);
+  margin-top:22px;
+  overflow:hidden;
+}
+
+.splash-loader-bar{
+  width:45%;
+  height:100%;
+  border-radius:999px;
+  background:#fff;
+  animation:splashmove 1s infinite ease-in-out;
+}
+
+@keyframes splashmove{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(320%)}
+}
+
+/* BOTÃO INSTALAR */
+.install-box{
+  margin-bottom:18px;
+}
+
+.install-btn{
+  width:100%;
+  display:none;
+}
+
+.install-btn.show{
+  display:flex;
+}
+
+/* AJUSTE SUAVE */
+.card{
+  animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+</style>
 </head>
 <body>
+
+<!-- SPLASH -->
+<div id="splashScreen" class="splash-screen">
+  <div class="splash-logo">
+    <img src="/RRinvest/icons/icon-192.png" alt="RRinvest">
+  </div>
+  <div class="splash-title">RRinvest</div>
+  <div class="splash-subtitle">Carregando seu painel financeiro</div>
+  <div class="splash-loader">
+    <div class="splash-loader-bar"></div>
+  </div>
+</div>
 
 <div class="app">
 
@@ -30,6 +151,15 @@
     <div class="premium-badge">Premium</div>
   </div>
 
+  <!-- BOTÃO INSTALAR -->
+  <div class="install-box">
+    <button id="installBtn" class="btn btn-xadrez install-btn">
+      <span class="material-symbols-rounded icon">download</span>
+      Instalar app
+    </button>
+  </div>
+
+  <!-- CARD 1 -->
   <div class="card saldo-card">
     <div class="saldo-topo">
       <div>
@@ -46,6 +176,7 @@
     </div>
   </div>
 
+  <!-- CARD 2 -->
   <div class="card">
     <div class="acoes-grid">
       <button class="btn btn-deposito" onclick="location.href='deposito.html'">
@@ -71,6 +202,7 @@
     </button>
   </div>
 
+  <!-- CARD 3 -->
   <div class="card">
     <div class="card-title">Estratégia Xadrez</div>
     <div class="card-subtitle">Monte sua estratégia de depósitos do jeito que preferir.</div>
@@ -123,6 +255,7 @@
     </button>
   </div>
 
+  <!-- CARD 4 -->
   <div class="card">
     <div class="extrato-header">
       <div class="card-title">Extrato</div>
@@ -140,6 +273,7 @@
 let usuario = null
 let saldoServidor = 0
 let timerRendimento = null
+let deferredPrompt = null
 
 function formatarReal(v){
   return Number(v || 0).toLocaleString("pt-BR", {
@@ -168,6 +302,10 @@ function chaveDescontoXadrez(){
 
 function chaveResumoXadrez(){
   return "rrinvest_xadrez_resumo_" + usuario.id
+}
+
+function chaveSplash(){
+  return "rrinvest_splash_shown"
 }
 
 function lerDescontoXadrez(){
@@ -259,6 +397,63 @@ function renderizarResumoXadrez(){
   document.getElementById("xadrezMarcadosSalvos").innerText = resumo.marcados || 0
 
   box.classList.remove("oculto")
+}
+
+function abrirEstrategiaXadrez(){
+  const valor = Math.floor(Number(document.getElementById("metaXadrez").value))
+  const quadrados = Number(document.getElementById("qtdQuadrados").value)
+
+  if(!valor || valor <= 0){
+    alert("Digite o valor que você quer juntar.")
+    return
+  }
+
+  localStorage.setItem("rrinvest_meta_xadrez", String(valor))
+  localStorage.setItem("rrinvest_qtd_xadrez", String(quadrados))
+  location.href = "estrategia_xadrez.html"
+}
+
+function esconderSplash(){
+  const splash = document.getElementById("splashScreen")
+  splash.classList.add("hide")
+}
+
+function controlarSplash(){
+  const jaMostrou = sessionStorage.getItem(chaveSplash())
+
+  if(jaMostrou){
+    esconderSplash()
+    return
+  }
+
+  sessionStorage.setItem(chaveSplash(), "1")
+
+  setTimeout(() => {
+    esconderSplash()
+  }, 1300)
+}
+
+function prepararInstalacaoPWA(){
+  const installBtn = document.getElementById("installBtn")
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault()
+    deferredPrompt = e
+    installBtn.classList.add("show")
+  })
+
+  installBtn.addEventListener("click", async () => {
+    if(!deferredPrompt) return
+
+    deferredPrompt.prompt()
+    await deferredPrompt.userChoice
+    deferredPrompt = null
+    installBtn.classList.remove("show")
+  })
+
+  window.addEventListener("appinstalled", () => {
+    installBtn.classList.remove("show")
+  })
 }
 
 async function verificarLogin(){
@@ -374,20 +569,6 @@ async function verificarNotificacoes(){
   }
 }
 
-function abrirEstrategiaXadrez(){
-  const valor = Math.floor(Number(document.getElementById("metaXadrez").value))
-  const quadrados = Number(document.getElementById("qtdQuadrados").value)
-
-  if(!valor || valor <= 0){
-    alert("Digite o valor que você quer juntar.")
-    return
-  }
-
-  localStorage.setItem("rrinvest_meta_xadrez", String(valor))
-  localStorage.setItem("rrinvest_qtd_xadrez", String(quadrados))
-  location.href = "estrategia_xadrez.html"
-}
-
 async function logout(){
   if(timerRendimento){
     clearInterval(timerRendimento)
@@ -409,6 +590,9 @@ window.addEventListener("focus", async () => {
 })
 
 async function iniciar(){
+  controlarSplash()
+  prepararInstalacaoPWA()
+
   const ok = await verificarLogin()
   if(!ok) return
 

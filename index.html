@@ -47,6 +47,13 @@ color:#666;
 margin-top:8px;
 }
 
+.infoDesconto{
+margin-top:10px;
+font-size:15px;
+color:#666;
+line-height:1.6;
+}
+
 input, select{
 width:100%;
 padding:14px;
@@ -141,6 +148,9 @@ font-weight:bold;
 <div class="card">
 <div id="nome" class="nome">Carregando...</div>
 <div id="saldo" class="saldo">R$ 0,00</div>
+<div id="infoDesconto" class="infoDesconto" style="display:none">
+Reservado na Estratégia Xadrez: <strong id="valorReservado">R$ 0,00</strong>
+</div>
 </div>
 
 <!-- CARD 2 -->
@@ -212,12 +222,29 @@ function chaveVersion(){
 return "rrinvest_saldo_version_" + usuario.id
 }
 
+function chaveDescontoXadrez(){
+return "rrinvest_xadrez_desconto_" + usuario.id
+}
+
 function calcularRendimentoPorMinuto(saldo){
 return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
 }
 
 function atualizarSaldoNaTela(){
-document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
+const desconto = Number(localStorage.getItem(chaveDescontoXadrez()) || 0)
+const saldoExibicao = Math.max(0, Number(saldoAtual) - desconto)
+
+document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoExibicao)
+
+const info = document.getElementById("infoDesconto")
+const valorReservado = document.getElementById("valorReservado")
+
+if(desconto > 0){
+info.style.display = "block"
+valorReservado.innerText = "R$ " + formatarReal(desconto)
+}else{
+info.style.display = "none"
+}
 }
 
 function salvarSaldoLocal(){
@@ -361,6 +388,12 @@ limparTimer()
 await sb.auth.signOut()
 location.href = "login.html"
 }
+
+window.addEventListener("focus",()=>{
+if(usuario){
+atualizarSaldoNaTela()
+}
+})
 
 async function iniciar(){
 const ok = await verificarLogin()

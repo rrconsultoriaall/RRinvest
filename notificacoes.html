@@ -1,107 +1,132 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Notificações</title>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial;
+font-family:Arial,sans-serif;
 background:#f4f6f8;
 padding:20px;
+margin:0;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:12px;
-box-shadow:0 4px 15px rgba(0,0,0,0.08);
+border-radius:16px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
 margin-bottom:15px;
 }
 
-.voltar{
+.item{
+border-bottom:1px solid #eee;
+padding:12px 0;
+line-height:1.6;
+}
+
+.item:last-child{
+border-bottom:none;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
 background:#1e4ea1;
 color:white;
-padding:12px;
-border:none;
-border-radius:8px;
-width:100%;
 font-size:16px;
-margin-top:20px;
+cursor:pointer;
 }
-
 </style>
-
 </head>
-
 <body>
 
-<h2>Notificações</h2>
-
-<div id="lista"></div>
-
-<button class="voltar" onclick="voltar()">
-Voltar
-</button>
-
-<script>
-
-let usuario=null
-
-async function iniciar(){
-
-const {data}=await sb.auth.getSession()
-
-usuario=data.session.user
-
-const {data:notificacoes}=await sb
-.from("transacoes")
-.select("*")
-.eq("usuario_id",usuario.id)
-.eq("status","aprovado")
-
-let html=""
-
-if(!notificacoes || notificacoes.length==0){
-
-html="Nenhuma notificação."
-
-}else{
-
-notificacoes.forEach(n=>{
-
-html+=`
-
 <div class="card">
-
-<b>${n.tipo} aprovado</b><br>
-Valor: R$ ${n.valor}
-
+<h2>Notificações</h2>
+<div id="lista">Carregando...</div>
 </div>
 
-`
+<button onclick="voltar()">Voltar</button>
 
+<script>
+let usuario = null
+
+function horarioBrasil(data){
+return new Date(data).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo"
 })
-
 }
 
-document.getElementById("lista").innerHTML=html
+function formatarReal(v){
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+}
 
+async function iniciar(){
+const { data, error } = await sb.auth.getSession()
+
+if(error || !data.session){
+location.href = "login.html"
+return
+}
+
+usuario = data.session.user
+
+await sb
+.from("notificacoes")
+.update({ lida:true })
+.eq("usuario_id", usuario.id)
+.eq("lida", false)
+
+const { data:notificacoes, error:erroNotif } = await sb
+.from("notificacoes")
+.select("*")
+.eq("usuario_id", usuario.id)
+.order("created_at", { ascending:false })
+
+if(erroNotif){
+document.getElementById("lista").innerHTML = "Erro ao carregar notificações."
+return
+}
+
+if(!notificacoes || notificacoes.length === 0){
+document.getElementById("lista").innerHTML = "Nenhuma notificação."
+return
+}
+
+let html = ""
+
+notificacoes.forEach(n => {
+html += `
+<div class="item">
+<b>${n.titulo}</b><br>
+${n.mensagem}<br>
+${horarioBrasil(n.created_at)}
+</div>
+`
+})
+
+document.getElementById("lista").innerHTML = html
 }
 
 function voltar(){
-location.href="index.html"
+location.href = "index.html"
 }
 
 iniciar()
-
 </script>
 
 </body>

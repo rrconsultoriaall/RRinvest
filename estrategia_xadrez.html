@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=131">
+<link rel="stylesheet" href="style.css?v=140">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -47,6 +47,7 @@
 
 .card-xadrez-ajustado{
   padding:16px;
+  overflow:hidden;
 }
 
 .xadrez-title{
@@ -65,11 +66,57 @@
   letter-spacing:-1px;
 }
 
-.quadro-scroll-label{
-  text-align:center;
-  font-size:12px;
-  color:#6b7280;
+.quadro-scroll-head{
+  display:flex;
+  justify-content:center;
+  align-items:center;
   margin-bottom:10px;
+}
+
+.quadro-scroll-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:linear-gradient(135deg, #eef4ff, #f7f4ff);
+  border:1px solid #dde6ff;
+  color:#4b5563;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 8px 18px rgba(37, 99, 235, 0.08);
+}
+
+.quadro-wrapper-premium{
+  position:relative;
+  border-radius:22px;
+  padding:10px;
+  background:linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+  border:1px solid #e6edf7;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 14px 28px rgba(15, 23, 42, 0.06);
+}
+
+.quadro-wrapper-premium::before,
+.quadro-wrapper-premium::after{
+  content:"";
+  position:absolute;
+  top:10px;
+  bottom:22px;
+  width:22px;
+  pointer-events:none;
+  z-index:3;
+}
+
+.quadro-wrapper-premium::before{
+  left:10px;
+  background:linear-gradient(90deg, rgba(248,251,255,1) 0%, rgba(248,251,255,0) 100%);
+}
+
+.quadro-wrapper-premium::after{
+  right:10px;
+  background:linear-gradient(270deg, rgba(248,251,255,1) 0%, rgba(248,251,255,0) 100%);
 }
 
 .quadro-scroll{
@@ -82,22 +129,29 @@
 .quadro-scroll.quadro-scroll-ativo{
   overflow-x:auto;
   overflow-y:hidden;
-  padding-bottom:8px;
+  padding-bottom:10px;
   -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
 }
 
 .quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar{
-  height:8px;
+  height:10px;
 }
 
 .quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar-track{
-  background:#e6ebf2;
+  background:linear-gradient(90deg, #e8eef7, #edf2f9);
   border-radius:999px;
 }
 
 .quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar-thumb{
-  background:#b8c2d1;
+  background:linear-gradient(90deg, #3b82f6, #7c3aed);
   border-radius:999px;
+  border:2px solid #eef3f9;
+}
+
+.quadro-scroll.quadro-scroll-ativo{
+  scrollbar-color:#4f46e5 #e8eef7;
+  scrollbar-width:thin;
 }
 
 .quadro-xadrez{
@@ -105,7 +159,7 @@
   gap:1px;
   background:#cfd4dc;
   border:1px solid #cfd4dc;
-  border-radius:16px;
+  border-radius:18px;
   overflow:hidden;
 }
 
@@ -130,10 +184,15 @@
   background:#f5f7fa;
 }
 
+.casa-xadrez:hover{
+  filter:brightness(0.985);
+}
+
 .casa-xadrez.marcada{
   background:#20b15a !important;
   color:#fff;
   transform:scale(0.98);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,0.18);
 }
 
 .numero-xadrez{
@@ -145,7 +204,7 @@
 }
 
 .casa-xadrez.marcada .numero-xadrez{
-  color:rgba(255,255,255,0.9);
+  color:rgba(255,255,255,0.92);
 }
 
 .valor-xadrez{
@@ -158,6 +217,20 @@
 
 .casa-xadrez.marcada .valor-xadrez{
   color:#fff;
+}
+
+.xadrez-actions{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:16px;
+}
+
+.btn-sacar-marcado{
+  width:100%;
+  background:linear-gradient(135deg, #0f172a, #1e293b);
+  color:#fff;
+  box-shadow:0 12px 24px rgba(15, 23, 42, 0.16);
 }
 
 .xadrez-resumo-box{
@@ -177,6 +250,17 @@
   border-radius:14px;
   background:#eaf8ee;
   color:#12833c;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+}
+
+.mensagem-saque{
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:#eef4ff;
+  color:#1d4ed8;
   font-size:13px;
   font-weight:700;
   text-align:center;
@@ -239,12 +323,24 @@
     <div class="card-title xadrez-title">Estratégia Xadrez</div>
     <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
 
-    <div id="quadroScrollLabel" class="quadro-scroll-label oculto">
-      Deslize para o lado quando tiver muitos quadrados
+    <div id="quadroScrollHead" class="quadro-scroll-head oculto">
+      <div class="quadro-scroll-chip">
+        <span class="material-symbols-rounded" style="font-size:18px;">swipe</span>
+        Deslize para o lado para ver todos os quadrados
+      </div>
     </div>
 
-    <div id="quadroScroll" class="quadro-scroll">
-      <div id="quadro" class="quadro-xadrez"></div>
+    <div class="quadro-wrapper-premium">
+      <div id="quadroScroll" class="quadro-scroll">
+        <div id="quadro" class="quadro-xadrez"></div>
+      </div>
+    </div>
+
+    <div class="xadrez-actions">
+      <button class="btn btn-sacar-marcado" onclick="sacarMarcado()">
+        <span class="material-symbols-rounded icon">payments</span>
+        Sacar marcado
+      </button>
     </div>
 
     <div class="xadrez-resumo-box">
@@ -255,6 +351,10 @@
 
     <div id="mensagemSalvar" class="mensagem-salvar oculto">
       Estratégia salva com sucesso.
+    </div>
+
+    <div id="mensagemSaque" class="mensagem-saque oculto">
+      Valor devolvido para o saldo do Index.
     </div>
   </div>
 
@@ -367,7 +467,7 @@ function precisaRolagem(qtd){
 function configurarAreaDoQuadro(colunas){
   const quadro = document.getElementById("quadro")
   const scroll = document.getElementById("quadroScroll")
-  const label = document.getElementById("quadroScrollLabel")
+  const head = document.getElementById("quadroScrollHead")
   const larguraCasa = obterLarguraCasa(qtdQuadrados)
 
   if(precisaRolagem(qtdQuadrados)){
@@ -375,13 +475,13 @@ function configurarAreaDoQuadro(colunas){
     quadro.style.width = `${colunas * larguraCasa}px`
     quadro.style.minWidth = `${colunas * larguraCasa}px`
     scroll.classList.add("quadro-scroll-ativo")
-    label.classList.remove("oculto")
+    head.classList.remove("oculto")
   }else{
     quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
     quadro.style.width = `100%`
     quadro.style.minWidth = `100%`
     scroll.classList.remove("quadro-scroll-ativo")
-    label.classList.add("oculto")
+    head.classList.add("oculto")
   }
 }
 
@@ -516,7 +616,7 @@ function alternarMarcado(index){
   marcados[index] = !marcados[index]
   salvarMarcadosLocais()
   montarQuadro()
-  esconderMensagemSalvar()
+  esconderMensagens()
 }
 
 function gerarNovaEstrategia(){
@@ -527,7 +627,7 @@ function gerarNovaEstrategia(){
   salvarValores()
   salvarMarcadosLocais()
   limparSalvamentoIndex()
-  esconderMensagemSalvar()
+  esconderMensagens()
   montarQuadro()
   atualizarSaldoEspelhado()
 }
@@ -536,15 +636,38 @@ function mostrarMensagemSalvar(){
   document.getElementById("mensagemSalvar").classList.remove("oculto")
 }
 
-function esconderMensagemSalvar(){
+function mostrarMensagemSaque(){
+  document.getElementById("mensagemSaque").classList.remove("oculto")
+}
+
+function esconderMensagens(){
   document.getElementById("mensagemSalvar").classList.add("oculto")
+  document.getElementById("mensagemSaque").classList.add("oculto")
 }
 
 function salvarEstrategia(){
   const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
   salvarResumoNoIndex(totalMarcado, quantidadeMarcados)
   atualizarSaldoEspelhado()
+  esconderMensagens()
   mostrarMensagemSalvar()
+}
+
+function sacarMarcado(){
+  const { totalMarcado } = calcularTotalMarcado()
+
+  if(totalMarcado <= 0 && lerDescontoSalvo() <= 0){
+    alert("Nenhum valor marcado para sacar.")
+    return
+  }
+
+  marcados = new Array(valores.length).fill(false)
+  salvarMarcadosLocais()
+  limparSalvamentoIndex()
+  montarQuadro()
+  atualizarSaldoEspelhado()
+  esconderMensagens()
+  mostrarMensagemSaque()
 }
 
 async function verificarLogin(){

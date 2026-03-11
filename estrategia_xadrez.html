@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -53,7 +53,11 @@
     <div class="card-title xadrez-title">Estratégia Xadrez</div>
     <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
 
-    <div id="quadro" class="quadro-xadrez"></div>
+    <div class="quadro-scroll-label">Deslize para o lado quando tiver muitos quadrados</div>
+
+    <div class="quadro-scroll">
+      <div id="quadro" class="quadro-xadrez"></div>
+    </div>
 
     <div class="xadrez-resumo-box">
       <div>Saldo marcado: <strong id="saldoMarcado">R$ 0,00</strong></div>
@@ -116,6 +120,11 @@ function obterColunas(qtd){
   if(qtd === 200) return 20
   if(qtd === 300) return 20
   return 20
+}
+
+function obterLarguraMinima(colunas){
+  const larguraCasa = 58
+  return colunas * larguraCasa
 }
 
 function gerarValoresInteiros(metaEscolhida, quantidade){
@@ -223,7 +232,10 @@ function atualizarResumo(){
 function montarQuadro(){
   const quadro = document.getElementById("quadro")
   const colunas = obterColunas(qtdQuadrados)
-  quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+  const larguraMinima = obterLarguraMinima(colunas)
+
+  quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(58px, 58px))`
+  quadro.style.minWidth = `${larguraMinima}px`
 
   let html = ""
 

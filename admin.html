@@ -1,121 +1,203 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Painel Admin</title>
 
-<link rel="stylesheet" href="style.css">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<link rel="stylesheet" href="style.css?v=50">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
 </head>
-
 <body>
 
-<h2>Painel Administrativo</h2>
+<div class="app">
 
-<div id="conteudoAdmin" style="display:none">
+  <div class="topbar">
+    <div>
+      <div class="brand">RRinvest</div>
+      <div class="brand-sub">Painel administrativo</div>
+    </div>
+    <div class="premium-badge">Admin</div>
+  </div>
 
-<h3>Clientes</h3>
-<div id="listaClientes"></div>
+  <div id="loadingCard" class="card">
+    <div class="card-title">Verificando acesso...</div>
+    <div class="card-subtitle">Aguarde um instante.</div>
+  </div>
+
+  <div id="adminConteudo" class="oculto">
+
+    <div class="card saldo-card">
+      <div class="saldo-topo">
+        <div>
+          <div id="adminNome" class="cliente-nome">Administrador</div>
+          <div class="cliente-label">Controle do sistema</div>
+        </div>
+      </div>
+
+      <div class="saldo-valor" id="totalClientes">0</div>
+
+      <div class="reserva-info">
+        Clientes cadastrados no sistema
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="acoes-grid">
+        <button class="btn btn-deposito" onclick="location.href='admin_depositos.html'">
+          <span class="material-symbols-rounded icon">payments</span>
+          Depósitos
+        </button>
+
+        <button class="btn btn-saque" onclick="location.href='admin_saques.html'">
+          <span class="material-symbols-rounded icon">account_balance_wallet</span>
+          Saques
+        </button>
+
+        <button class="btn btn-notificacoes" onclick="location.href='admin_clientes.html'">
+          <span class="material-symbols-rounded icon">groups</span>
+          Clientes
+        </button>
+      </div>
+
+      <button class="btn btn-sair" onclick="logoutAdmin()">
+        <span class="material-symbols-rounded icon">logout</span>
+        Sair
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Resumo</div>
+      <div class="card-subtitle">Últimos clientes cadastrados</div>
+
+      <div id="listaClientes" class="extrato-lista">
+        <div class="vazio">Carregando...</div>
+      </div>
+    </div>
+
+  </div>
 
 </div>
 
 <script>
-
 let usuario = null
+let perfilAdmin = null
+
+function formatarReal(v){
+  return Number(v || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+function horarioBrasil(data){
+  return new Date(data).toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo"
+  })
+}
 
 async function verificarLogin(){
+  const { data, error } = await sb.auth.getSession()
 
-const { data, error } = await sb.auth.getSession()
+  if(error || !data.session){
+    location.href = "login.html"
+    return false
+  }
 
-if(error || !data.session){
-
-location.href = "login.html"
-return false
-
+  usuario = data.session.user
+  return true
 }
 
-usuario = data.session.user
-return true
+async function buscarPerfilAdmin(){
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", usuario.id)
+    .single()
 
+  if(error || !data){
+    alert("Perfil não encontrado.")
+    location.href = "index.html"
+    return false
+  }
+
+  perfilAdmin = data
+
+  if(data.admin !== true){
+    alert("Acesso negado. Esta conta não é admin.")
+    location.href = "index.html"
+    return false
+  }
+
+  return true
 }
 
-async function verificarAdmin(){
+async function carregarResumoAdmin(){
+  document.getElementById("adminNome").innerText = perfilAdmin.nome || "Administrador"
 
-const { data, error } = await sb
-.from("profiles")
-.select("admin")
-.eq("id", usuario.id)
-.single()
+  const { data, error, count } = await sb
+    .from("profiles")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .limit(10)
 
-if(error || !data || data.admin !== true){
+  if(error){
+    document.getElementById("listaClientes").innerHTML = `<div class="vazio">Erro ao carregar clientes.</div>`
+    return
+  }
 
-alert("Acesso negado")
+  document.getElementById("totalClientes").innerText = count || 0
 
-location.href = "index.html"
+  if(!data || data.length === 0){
+    document.getElementById("listaClientes").innerHTML = `<div class="vazio">Nenhum cliente encontrado.</div>`
+    return
+  }
 
-return false
+  let html = ""
 
+  data.forEach(cliente => {
+    html += `
+      <div class="extrato-item">
+        <div class="extrato-linha-topo">
+          <span class="tipo-tag">${cliente.admin ? "admin" : "cliente"}</span>
+          <span class="valor-item">R$ ${formatarReal(cliente.saldo || 0)}</span>
+        </div>
+
+        <div class="status-pendente">${cliente.nome || "Sem nome"}</div>
+        <div class="data-item">${cliente.email || "Sem e-mail"}</div>
+      </div>
+    `
+  })
+
+  document.getElementById("listaClientes").innerHTML = html
 }
 
-return true
-
+async function logoutAdmin(){
+  await sb.auth.signOut()
+  location.href = "login.html"
 }
 
-async function carregarClientes(){
+async function iniciarAdmin(){
+  const logado = await verificarLogin()
+  if(!logado) return
 
-const { data, error } = await sb
-.from("profiles")
-.select("*")
-.order("created_at",{ascending:false})
+  const autorizado = await buscarPerfilAdmin()
+  if(!autorizado) return
 
-const lista = document.getElementById("listaClientes")
+  document.getElementById("loadingCard").classList.add("oculto")
+  document.getElementById("adminConteudo").classList.remove("oculto")
 
-if(error){
-lista.innerHTML = "Erro ao carregar"
-return
+  await carregarResumoAdmin()
 }
 
-let html = ""
-
-data.forEach(cliente =>{
-
-html += `
-<div style="border:1px solid #ddd;padding:10px;margin-bottom:10px">
-<strong>${cliente.nome || "Cliente"}</strong><br>
-Saldo: R$ ${Number(cliente.saldo || 0).toFixed(2)}
-</div>
-`
-
-})
-
-lista.innerHTML = html
-
-}
-
-async function iniciar(){
-
-const logado = await verificarLogin()
-
-if(!logado) return
-
-const admin = await verificarAdmin()
-
-if(!admin) return
-
-document.getElementById("conteudoAdmin").style.display = "block"
-
-carregarClientes()
-
-}
-
-iniciar()
-
+iniciarAdmin()
 </script>
 
 </body>

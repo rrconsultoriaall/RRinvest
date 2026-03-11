@@ -34,52 +34,47 @@ font-weight:bold;
 }
 
 .saldo{
-font-size:46px;
+font-size:48px;
 font-weight:bold;
 color:#0b3d91;
 margin-top:10px;
 }
 
+/* mineração */
+
 .mineracao{
-background:#111;
+background:#0d0d0d;
 border-radius:14px;
 padding:20px;
 color:white;
 }
 
 .mineracaoTitulo{
+font-size:18px;
 font-weight:bold;
-margin-bottom:12px;
+margin-bottom:15px;
 }
 
 .cena{
 display:flex;
 align-items:center;
-justify-content:space-between;
+justify-content:space-around;
+position:relative;
 }
 
 .mineiro{
-width:120px;
-animation:mineiro 0.8s infinite alternate;
+width:130px;
+animation:mineiro 0.9s infinite alternate ease-in-out;
 }
 
 @keyframes mineiro{
-0%{transform:rotate(-2deg)}
-100%{transform:rotate(2deg)}
-}
-
-.picareta{
-animation:picareta 0.6s infinite alternate;
-}
-
-@keyframes picareta{
-0%{transform:rotate(-10deg)}
-100%{transform:rotate(12deg)}
+0%{transform:translateY(0px)}
+100%{transform:translateY(-4px)}
 }
 
 .pedra{
 width:90px;
-animation:pedra 0.6s infinite alternate;
+animation:pedra 0.7s infinite alternate;
 }
 
 @keyframes pedra{
@@ -103,9 +98,15 @@ opacity:1;
 }
 100%{
 opacity:0;
-transform:translateY(-40px);
+transform:translateY(-45px);
 }
 }
+
+.m1{left:55%; animation-delay:0s;}
+.m2{left:60%; animation-delay:.7s;}
+.m3{left:65%; animation-delay:1.3s;}
+
+/* botões */
 
 .botoes{
 display:flex;
@@ -165,13 +166,18 @@ justify-content:center;
 display:none;
 }
 
+.pendente{
+color:orange;
+font-weight:bold;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<!-- CARD 1 -->
+<!-- CARD 1 SALDO -->
 <div class="card">
 
 <div id="nome" class="nome">Carregando...</div>
@@ -180,7 +186,7 @@ display:none;
 
 </div>
 
-<!-- CARD 2 ANIMAÇÃO -->
+<!-- CARD 2 MINERAÇÃO -->
 <div class="card mineracao">
 
 <div class="mineracaoTitulo">
@@ -189,17 +195,14 @@ display:none;
 
 <div class="cena">
 
-<img src="minerador.png" class="mineiro">
-
-<div style="position:relative">
-
-<div class="moeda" style="left:10px">💰</div>
-<div class="moeda" style="left:30px;animation-delay:.7s">💰</div>
+<img src="./minerador.png" class="mineiro">
 
 <img src="https://cdn-icons-png.flaticon.com/512/809/809957.png"
 class="pedra">
 
-</div>
+<div class="moeda m1">💰</div>
+<div class="moeda m2">💰</div>
+<div class="moeda m3">💰</div>
 
 </div>
 
@@ -308,7 +311,7 @@ html+=`
 
 Valor: R$ ${formatarReal(t.valor)}<br>
 
-Status: pendente
+Status: <span class="pendente">${t.status}</span>
 
 </p>
 

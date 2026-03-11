@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saques pendentes</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f3f3f3;
+padding:20px;
+margin:0;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:15px;
+margin-top:10px;
+}
+
+.aprovar{
+background:#28a745;
+color:white;
+}
+
+.voltar{
+background:#1e4ea1;
+color:white;
+}
+
+.item{
+border-bottom:1px solid #eee;
+padding:12px 0;
+line-height:1.6;
+}
+
+.item:last-child{
+border-bottom:none;
+}
+
+.msg{
+margin-top:10px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Saques pendentes</h2>
+
+<button class="voltar" onclick="voltar()">Voltar</button>
+
+<div id="lista">Carregando...</div>
+
+<div class="msg" id="msg"></div>
+
+</div>
+
+<script>
+
+let usuario
+
+function horarioBrasil(data){
+
+return new Date(data).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo"
+})
+
+}
+
+function formatarReal(valor){
+
+return Number(valor).toLocaleString("pt-BR",{
+minimumFractionDigits:2
+})
+
+}
+
+async function verificarLogin(){
+
+const { data } = await sb.auth.getSession()
+
+if(!data.session){
+
+location.href="login.html"
+return
+
+}
+
+usuario=data.session.user
+
+}
+
+async function carregarSaques(){
+
+let { data } = await sb
+.from("transacoes")
+.select("*")
+.eq("tipo","saque")
+.eq("status","pendente")
+.order("created_at",{ascending:false})
+
+if(!data || data.length==0){
+
+document.getElementById("lista").innerHTML="Nenhum saque pendente"
+return
+
+}
+
+let html=""
+
+data.forEach(s=>{
+
+html+=`
+
+<div class="item">
+
+<b>Saque</b><br>
+Usuário: ${s.usuario_email}<br>
+Valor: R$ ${formatarReal(s.valor)}<br>
+Chave PIX: ${s.descricao}<br>
+Data: ${horarioBrasil(s.created_at)}<br>
+
+<button class="aprovar" onclick="aprovar(${s.id},'${s.usuario_id}',${s.valor})">
+Aprovar saque
+</button>
+
+</div>
+
+`
+
+})
+
+document.getElementById("lista").innerHTML=html
+
+}
+
+async function aprovar(id,usuarioId,valor){
+
+document.getElementById("msg").innerText="Aprovando..."
+
+let { data:perfil } = await sb
+.from("profiles")
+.select("saldo")
+.eq("id",usuarioId)
+.single()
+
+let saldoAtual = Number(perfil.saldo)
+let valorSaque = Number(valor)
+
+if(saldoAtual < valorSaque){
+
+document.getElementById("msg").innerText="Saldo insuficiente"
+return
+
+}
+
+let novoSaldo = saldoAtual - valorSaque
+
+await sb
+.from("profiles")
+.update({saldo:novoSaldo})
+.eq("id",usuarioId)
+
+await sb
+.from("transacoes")
+.update({status:"aprovado"})
+.eq("id",id)
+
+await sb
+.from("notificacoes")
+.insert({
+usuario_id:usuarioId,
+titulo:"Saque aprovado",
+mensagem:"Seu saque de R$ "+formatarReal(valor)+" foi aprovado.",
+created_at:new Date().toISOString()
+})
+
+document.getElementById("msg").innerText="Saque aprovado"
+
+carregarSaques()
+
+}
+
+function voltar(){
+
+location.href="admin.html"
+
+}
+
+async function iniciar(){
+
+await verificarLogin()
+carregarSaques()
+
+}
+
+iniciar()
+
+</script>
+
+</body>
+</html>

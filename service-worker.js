@@ -1,14 +1,14 @@
-const CACHE_NAME = "rrinvest-cache-v2";
+const CACHE_NAME = "rrinvest-cache-v4";
 
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/login.html",
-  "/style.css",
-  "/config.js",
-  "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  "/RRinvest/",
+  "/RRinvest/index.html",
+  "/RRinvest/login.html",
+  "/RRinvest/style.css",
+  "/RRinvest/config.js",
+  "/RRinvest/manifest.json",
+  "/RRinvest/icons/icon-192.png",
+  "/RRinvest/icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {

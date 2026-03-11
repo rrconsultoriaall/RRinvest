@@ -120,7 +120,8 @@ usuario_email: usuario.email,
 tipo: "deposito",
 valor: valor,
 descricao: "Depósito solicitado",
-status: "pendente"
+status: "pendente",
+created_at: new Date().toISOString()
 })
 
 if(error){

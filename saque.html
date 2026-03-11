@@ -5,15 +5,14 @@
 
 <meta charset="UTF-8">
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Saque</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
 <style>
 
@@ -55,86 +54,42 @@ margin-top:10px;
 
 <h2>Saque</h2>
 
-<input
-id="valor"
-placeholder="Valor do saque"
-/>
+<input id="valor" placeholder="Valor do saque">
 
-<input
-id="pix"
-placeholder="Chave PIX"
-/>
+<input id="pix" placeholder="Chave PIX">
 
-<button onclick="sacar()">
+<button onclick="sacar()">Solicitar saque</button>
 
-Solicitar saque
-
-</button>
-
-<button onclick="voltar()">
-
-Voltar
-
-</button>
+<button onclick="voltar()">Voltar</button>
 
 </div>
 
 <script>
 
-const supabase = supabase.createClient(
-"https://SEU_PROJETO.supabase.co",
-"SUA_PUBLIC_ANON_KEY"
-)
-
-let user
-
-function horarioBrasil(){
-
-return new Date().toLocaleString(
-"sv-SE",
-{timeZone:"America/Sao_Paulo"}
-)
-
-}
+let usuario
 
 async function iniciar(){
 
-const {data:{session}} = await supabase.auth.getSession()
+const { data:{ session } } = await sb.auth.getSession()
 
-if(!session){
-
-location.href="login.html"
-return
-
-}
-
-user=session.user
+usuario=session.user
 
 }
 
 async function sacar(){
 
-let valor = document.getElementById("valor").value
-let pix = document.getElementById("pix").value
+let valor=document.getElementById("valor").value
+let pix=document.getElementById("pix").value
 
-if(!valor || !pix){
+await sb.from("transacoes").insert({
 
-alert("Preencha todos os campos")
-return
-
-}
-
-await supabase
-.from("transacoes")
-.insert({
-
-usuario_id:user.id,
-usuario_email:user.email,
+usuario_id:usuario.id,
+usuario_email:usuario.email,
 tipo:"saque",
 valor:valor,
-descricao:"PIX: "+pix,
+descricao:"PIX:"+pix,
 status:"pendente",
-created_at:horarioBrasil()
+created_at:new Date()
 
 })
 

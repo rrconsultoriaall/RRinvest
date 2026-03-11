@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=150">
+<link rel="stylesheet" href="style.css?v=151">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -302,11 +302,6 @@
     <button class="btn btn-deposito" onclick="location.href='index.html'">
       <span class="material-symbols-rounded icon">arrow_back</span>
       Voltar
-    </button>
-
-    <button class="btn btn-xadrez" onclick="gerarNovaEstrategia()">
-      <span class="material-symbols-rounded icon">refresh</span>
-      Atualizar
     </button>
 
     <button class="btn btn-saque" onclick="salvarEstrategia()">
@@ -615,19 +610,6 @@ function alternarMarcado(index){
   salvarMarcadosLocais()
   montarQuadro()
   esconderMensagens()
-}
-
-function gerarNovaEstrategia(){
-  const resultado = gerarValoresInteiros(meta, qtdQuadrados)
-  valores = embaralhar(resultado.valores)
-  marcados = new Array(valores.length).fill(false)
-
-  salvarValores()
-  salvarMarcadosLocais()
-  limparSalvamentoIndex()
-  esconderMensagens()
-  montarQuadro()
-  atualizarSaldoEspelhado()
 }
 
 function mostrarMensagemSalvar(){

@@ -14,6 +14,7 @@
 <title>RRinvest</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
 <style>
 
@@ -55,9 +56,9 @@ color:orange;
 
 <div class="card">
 
-<h2 id="nome">Carregando...</h2>
+<h2 id="nome">...</h2>
 
-<p id="saldo">Saldo: R$ 0</p>
+<p id="saldo"></p>
 
 <button onclick="irDeposito()">Depositar</button>
 <button onclick="irSaque()">Sacar</button>
@@ -69,16 +70,11 @@ color:orange;
 
 <h3>Extrato</h3>
 
-<div id="extrato">Carregando...</div>
+<div id="extrato"></div>
 
 </div>
 
 <script>
-
-const supabase = window.supabase.createClient(
-"https://SEU_PROJETO.supabase.co",
-"SUA_PUBLIC_ANON_KEY"
-)
 
 let usuario
 
@@ -93,7 +89,7 @@ return new Date(data).toLocaleString(
 
 async function iniciar(){
 
-const { data:{ session } } = await supabase.auth.getSession()
+const { data:{ session } } = await sb.auth.getSession()
 
 if(!session){
 
@@ -102,7 +98,7 @@ return
 
 }
 
-usuario = session.user
+usuario=session.user
 
 carregarPerfil()
 carregarExtrato()
@@ -111,24 +107,20 @@ carregarExtrato()
 
 async function carregarPerfil(){
 
-let { data } = await supabase
+let { data } = await sb
 .from("profiles")
 .select("*")
 .eq("id",usuario.id)
 .single()
 
-if(data){
-
-document.getElementById("nome").innerText = data.nome
-document.getElementById("saldo").innerText = "Saldo: R$ " + data.saldo
-
-}
+document.getElementById("nome").innerText=data.nome
+document.getElementById("saldo").innerText="Saldo: R$ "+data.saldo
 
 }
 
 async function carregarExtrato(){
 
-let { data } = await supabase
+let { data } = await sb
 .from("transacoes")
 .select("*")
 .eq("usuario_id",usuario.id)
@@ -138,13 +130,13 @@ let html=""
 
 if(!data || data.length==0){
 
-html="Nenhuma movimentação."
+html="Nenhuma movimentação"
 
 }else{
 
 data.forEach(t=>{
 
-let statusClasse = t.status=="aprovado" ? "aprovado" : "pendente"
+let cor = t.status=="aprovado" ? "aprovado" : "pendente"
 
 html+=`
 
@@ -152,7 +144,7 @@ html+=`
 
 <b>${t.tipo}</b><br>
 Valor: R$ ${t.valor}<br>
-Status: <span class="${statusClasse}">${t.status}</span><br>
+Status: <span class="${cor}">${t.status}</span><br>
 ${horarioBrasil(t.created_at)}
 
 </p>
@@ -183,7 +175,7 @@ location.href="saque.html"
 
 async function logout(){
 
-await supabase.auth.signOut()
+await sb.auth.signOut()
 
 location.href="login.html"
 

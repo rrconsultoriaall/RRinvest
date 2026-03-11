@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=70">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -284,7 +284,13 @@ async function carregarPerfil(){
   if(error || !data){
     document.getElementById("nomeCliente").innerText = "Erro ao carregar"
     document.getElementById("saldo").innerText = "R$ 0,00"
-    return
+    return false
+  }
+
+  /* AQUI ESTÁ A CORREÇÃO DO ADMIN */
+  if(data.admin === true){
+    location.href = "admin.html"
+    return false
   }
 
   document.getElementById("nomeCliente").innerText = data.nome || "Cliente"
@@ -298,10 +304,6 @@ async function carregarPerfil(){
   }else{
     const diferenca = Math.abs(Number(estado.base) - saldoServidor)
 
-    /* 
-      Só reinicia quando o saldo real do banco mudou.
-      Isso evita reset ao dar refresh normal.
-    */
     if(diferenca > 0.000001){
       resetarRendimentoComSaldoDoServidor()
     }
@@ -309,6 +311,7 @@ async function carregarPerfil(){
 
   atualizarSaldoNaTela()
   iniciarTimerRendimento()
+  return true
 }
 
 async function carregarExtrato(){
@@ -398,7 +401,9 @@ async function logout(){
 
 window.addEventListener("focus", async () => {
   if(usuario){
-    await carregarPerfil()
+    const podeContinuar = await carregarPerfil()
+    if(!podeContinuar) return
+
     await carregarExtrato()
     await verificarNotificacoes()
     renderizarResumoXadrez()
@@ -409,7 +414,9 @@ async function iniciar(){
   const ok = await verificarLogin()
   if(!ok) return
 
-  await carregarPerfil()
+  const podeContinuar = await carregarPerfil()
+  if(!podeContinuar) return
+
   await carregarExtrato()
   await verificarNotificacoes()
   renderizarResumoXadrez()

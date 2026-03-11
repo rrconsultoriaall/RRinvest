@@ -1,329 +1,421 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>RRinvest</title>
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=30">
-
+<link rel="stylesheet" href="style.css?v=31">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
 </head>
-
 <body>
 
 <div class="app">
 
-<div class="topbar">
+  <div class="topbar">
+    <div>
+      <div class="brand">RRinvest</div>
+      <div class="brand-sub">Painel financeiro</div>
+    </div>
+    <div class="premium-badge">Premium</div>
+  </div>
 
-<div>
-<div class="brand">RRinvest</div>
-<div class="brand-sub">Painel financeiro</div>
-</div>
+  <!-- CARD 1 -->
+  <div class="card saldo-card">
+    <div class="saldo-topo">
+      <div>
+        <div id="nomeCliente" class="cliente-nome">Carregando...</div>
+        <div class="cliente-label">Saldo disponível</div>
+      </div>
+    </div>
 
-<div class="premium-badge">Premium</div>
+    <div id="saldo" class="saldo-valor">R$ 0,00</div>
 
-</div>
+    <div id="reservaXadrez" class="reserva-info oculto">
+      Reservado na Estratégia Xadrez:
+      <strong id="valorReservado">R$ 0,00</strong>
+    </div>
+  </div>
 
+  <!-- CARD 2 -->
+  <div class="card">
+    <div class="acoes-grid">
+      <button class="btn btn-deposito" onclick="location.href='deposito.html'">
+        <span class="material-symbols-rounded icon">add</span>
+        Depositar
+      </button>
 
+      <button class="btn btn-saque" onclick="location.href='saque.html'">
+        <span class="material-symbols-rounded icon">south</span>
+        Sacar
+      </button>
 
-<!-- CARD SALDO -->
+      <button class="btn btn-notificacoes" onclick="location.href='notificacoes.html'">
+        <span class="material-symbols-rounded icon">notifications</span>
+        Notificações
+        <span id="badge" class="badge oculto">0</span>
+      </button>
+    </div>
 
-<div class="card saldo-card">
+    <button class="btn btn-sair" onclick="logout()">
+      <span class="material-symbols-rounded icon">logout</span>
+      Sair
+    </button>
+  </div>
 
-<div class="saldo-topo">
+  <!-- CARD 3 -->
+  <div class="card">
+    <div class="card-title">Estratégia Xadrez</div>
+    <div class="card-subtitle">Monte sua estratégia de depósitos do jeito que preferir.</div>
 
-<div id="nomeCliente" class="cliente-nome">...</div>
-<div class="cliente-label">Saldo disponível</div>
+    <div id="xadrezSalvaBox" class="xadrez-salva-box oculto">
+      <div class="xadrez-salva-topo">
+        <div class="xadrez-salva-titulo">Estratégia salva</div>
+        <div class="xadrez-salva-status">Ativa</div>
+      </div>
 
-</div>
+      <div class="xadrez-salva-grid">
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Meta</span>
+          <strong id="xadrezMetaSalva">R$ 0,00</strong>
+        </div>
 
-<div id="saldo" class="saldo-valor">R$ 0,00</div>
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Reservado</span>
+          <strong id="xadrezReservadoSalvo">R$ 0,00</strong>
+        </div>
 
-<div id="reservaXadrez" class="reserva-info oculto">
-Reservado na Estratégia Xadrez: <strong id="valorReservado">R$ 0,00</strong>
-</div>
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Marcados</span>
+          <strong id="xadrezMarcadosSalvos">0</strong>
+        </div>
+      </div>
 
-</div>
+      <button class="btn btn-abrir-salva" onclick="location.href='estrategia_xadrez.html'">
+        <span class="material-symbols-rounded icon">open_in_new</span>
+        Abrir estratégia
+      </button>
+    </div>
 
+    <div class="form-group">
+      <input type="number" id="metaXadrez" placeholder="Digite o valor que quer juntar" min="1" step="1">
+    </div>
 
+    <div class="form-group">
+      <select id="qtdQuadrados">
+        <option value="100">100 quadrados</option>
+        <option value="200">200 quadrados</option>
+        <option value="300">300 quadrados</option>
+        <option value="500">500 quadrados</option>
+      </select>
+    </div>
 
-<!-- BOTÕES -->
+    <button class="btn btn-xadrez" onclick="abrirEstrategiaXadrez()">
+      <span class="material-symbols-rounded icon">grid_view</span>
+      Criar estratégia
+    </button>
+  </div>
 
-<div class="card">
+  <!-- CARD 4 -->
+  <div class="card">
+    <div class="extrato-header">
+      <div class="card-title">Extrato</div>
+      <div class="card-subtitle">Últimas movimentações pendentes</div>
+    </div>
 
-<div class="acoes-grid">
-
-<button class="btn btn-deposito" onclick="location.href='deposito.html'">
-<span class="material-symbols-rounded icon">add</span>
-Depositar
-</button>
-
-<button class="btn btn-saque" onclick="location.href='saque.html'">
-<span class="material-symbols-rounded icon">south</span>
-Sacar
-</button>
-
-<button class="btn btn-notificacoes" onclick="location.href='notificacoes.html'">
-<span class="material-symbols-rounded icon">notifications</span>
-Notificações
-</button>
-
-</div>
-
-<button class="btn btn-sair" onclick="logout()">
-<span class="material-symbols-rounded icon">logout</span>
-Sair
-</button>
-
-</div>
-
-
-
-<!-- ESTRATÉGIA -->
-
-<div class="card">
-
-<div class="card-title">Estratégia Xadrez</div>
-
-<div class="card-subtitle">
-Monte sua estratégia de depósitos.
-</div>
-
-<div id="xadrezSalvaBox" class="xadrez-salva-box oculto">
-
-<div class="xadrez-salva-topo">
-
-<div class="xadrez-salva-titulo">Estratégia salva</div>
-<div class="xadrez-salva-status">Ativa</div>
-
-</div>
-
-<div class="xadrez-salva-grid">
-
-<div class="xadrez-info-item">
-<span class="xadrez-info-label">Meta</span>
-<strong id="xadrezMetaSalva">R$ 0,00</strong>
-</div>
-
-<div class="xadrez-info-item">
-<span class="xadrez-info-label">Reservado</span>
-<strong id="xadrezReservadoSalvo">R$ 0,00</strong>
-</div>
-
-<div class="xadrez-info-item">
-<span class="xadrez-info-label">Marcados</span>
-<strong id="xadrezMarcadosSalvos">0</strong>
-</div>
-
-</div>
-
-<button class="btn btn-abrir-salva" onclick="location.href='estrategia_xadrez.html'">
-<span class="material-symbols-rounded icon">open_in_new</span>
-Abrir estratégia
-</button>
-
-</div>
-
-<div class="form-group">
-<input type="number" id="metaXadrez" placeholder="Digite o valor que quer juntar">
-</div>
-
-<div class="form-group">
-
-<select id="qtdQuadrados">
-
-<option value="100">100 quadrados</option>
-<option value="200">200 quadrados</option>
-<option value="300">300 quadrados</option>
-<option value="500">500 quadrados</option>
-
-</select>
+    <div id="extrato" class="extrato-lista">
+      <div class="vazio">Carregando...</div>
+    </div>
+  </div>
 
 </div>
-
-<button class="btn btn-xadrez" onclick="abrirEstrategiaXadrez()">
-
-<span class="material-symbols-rounded icon">grid_view</span>
-Criar estratégia
-
-</button>
-
-</div>
-
-
-
-<!-- EXTRATO -->
-
-<div class="card">
-
-<div class="card-title">Extrato</div>
-
-<div id="extrato" class="extrato-lista">
-<div class="vazio">Carregando...</div>
-</div>
-
-</div>
-
-
-</div>
-
-
 
 <script>
-
 let usuario = null
-
-let saldoBase = 0
-let rendimentoPorSegundo = 0
-let inicioRendimento = 0
-
-
+let saldoServidor = 0
+let timerRendimento = null
 
 function formatarReal(v){
-
-return Number(v).toLocaleString("pt-BR",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-})
-
+  return Number(v || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }
 
-
-
-function iniciarRendimento(saldoInicial){
-
-saldoBase = Number(saldoInicial)
-
-rendimentoPorSegundo = saldoBase * 0.20 / 30 / 24 / 60 / 60
-
-inicioRendimento = Date.now()
-
-atualizarSaldo()
-
-setInterval(atualizarSaldo,100)
-
+function horarioBrasil(data){
+  return new Date(data).toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo"
+  })
 }
 
-
-
-function atualizarSaldo(){
-
-const agora = Date.now()
-
-const segundos = (agora - inicioRendimento) / 1000
-
-const crescimento = segundos * rendimentoPorSegundo
-
-const saldoAtual = saldoBase + crescimento
-
-document.getElementById("saldo").innerText =
-"R$ " + formatarReal(saldoAtual)
-
+function chaveBase(){
+  return "rrinvest_rendimento_base_" + usuario.id
 }
 
+function chaveInicio(){
+  return "rrinvest_rendimento_inicio_" + usuario.id
+}
 
+function chaveDescontoXadrez(){
+  return "rrinvest_xadrez_desconto_" + usuario.id
+}
+
+function chaveResumoXadrez(){
+  return "rrinvest_xadrez_resumo_" + usuario.id
+}
+
+function lerDescontoXadrez(){
+  return Number(localStorage.getItem(chaveDescontoXadrez()) || 0)
+}
+
+function lerResumoXadrez(){
+  try{
+    return JSON.parse(localStorage.getItem(chaveResumoXadrez()) || "null")
+  }catch{
+    return null
+  }
+}
+
+function salvarEstadoRendimento(base, inicio){
+  localStorage.setItem(chaveBase(), String(base))
+  localStorage.setItem(chaveInicio(), String(inicio))
+}
+
+function lerEstadoRendimento(){
+  const base = Number(localStorage.getItem(chaveBase()) || 0)
+  const inicio = Number(localStorage.getItem(chaveInicio()) || 0)
+  return { base, inicio }
+}
+
+function resetarRendimentoComSaldoDoServidor(){
+  const agora = Date.now()
+  salvarEstadoRendimento(saldoServidor, agora)
+}
+
+function calcularRendimentoPorSegundo(base){
+  return Number(base || 0) * 0.20 / 30 / 24 / 60 / 60
+}
+
+function calcularSaldoAtual(){
+  const { base, inicio } = lerEstadoRendimento()
+  const agora = Date.now()
+
+  if(!inicio){
+    return Number(base || 0)
+  }
+
+  const segundosPassados = (agora - inicio) / 1000
+  const rendimentoPorSegundo = calcularRendimentoPorSegundo(base)
+  return Number(base) + (segundosPassados * rendimentoPorSegundo)
+}
+
+function atualizarSaldoNaTela(){
+  const saldoAtual = calcularSaldoAtual()
+  const desconto = lerDescontoXadrez()
+  const saldoExibicao = Math.max(0, saldoAtual - desconto)
+
+  document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoExibicao)
+
+  const reservaBox = document.getElementById("reservaXadrez")
+  const valorReservado = document.getElementById("valorReservado")
+
+  if(desconto > 0){
+    valorReservado.innerText = "R$ " + formatarReal(desconto)
+    reservaBox.classList.remove("oculto")
+  }else{
+    reservaBox.classList.add("oculto")
+  }
+}
+
+function iniciarTimerRendimento(){
+  if(timerRendimento){
+    clearInterval(timerRendimento)
+  }
+
+  atualizarSaldoNaTela()
+
+  timerRendimento = setInterval(() => {
+    atualizarSaldoNaTela()
+  }, 100)
+}
+
+function renderizarResumoXadrez(){
+  const box = document.getElementById("xadrezSalvaBox")
+  const resumo = lerResumoXadrez()
+
+  if(!resumo || !resumo.salvo){
+    box.classList.add("oculto")
+    return
+  }
+
+  document.getElementById("xadrezMetaSalva").innerText = "R$ " + formatarReal(resumo.meta || 0)
+  document.getElementById("xadrezReservadoSalvo").innerText = "R$ " + formatarReal(resumo.reservado || 0)
+  document.getElementById("xadrezMarcadosSalvos").innerText = resumo.marcados || 0
+
+  box.classList.remove("oculto")
+}
 
 async function verificarLogin(){
+  const { data, error } = await sb.auth.getSession()
 
-const {data,error} = await sb.auth.getSession()
+  if(error || !data.session){
+    location.href = "login.html"
+    return false
+  }
 
-if(error || !data.session){
-
-location.href = "login.html"
-
-return false
-
+  usuario = data.session.user
+  return true
 }
-
-usuario = data.session.user
-
-return true
-
-}
-
-
 
 async function carregarPerfil(){
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", usuario.id)
+    .single()
 
-const {data,error} = await sb
-.from("profiles")
-.select("*")
-.eq("id",usuario.id)
-.single()
+  if(error || !data){
+    document.getElementById("nomeCliente").innerText = "Erro ao carregar"
+    document.getElementById("saldo").innerText = "R$ 0,00"
+    return
+  }
 
-if(error || !data){
+  document.getElementById("nomeCliente").innerText = data.nome || "Cliente"
 
-document.getElementById("nomeCliente").innerText = "Erro"
+  saldoServidor = Number(data.saldo || 0)
 
-return
+  const estado = lerEstadoRendimento()
 
+  if(!estado.inicio){
+    resetarRendimentoComSaldoDoServidor()
+  }else{
+    const diferenca = Math.abs(Number(estado.base) - saldoServidor)
+
+    /* 
+      Só reinicia quando o saldo real do banco mudou.
+      Isso evita reset ao dar refresh normal.
+    */
+    if(diferenca > 0.000001){
+      resetarRendimentoComSaldoDoServidor()
+    }
+  }
+
+  atualizarSaldoNaTela()
+  iniciarTimerRendimento()
 }
 
-document.getElementById("nomeCliente").innerText =
-data.nome || "Cliente"
+async function carregarExtrato(){
+  const { data, error } = await sb
+    .from("transacoes")
+    .select("*")
+    .eq("usuario_id", usuario.id)
+    .eq("status", "pendente")
+    .order("created_at", { ascending: false })
+    .limit(20)
 
-iniciarRendimento(data.saldo || 0)
+  const extrato = document.getElementById("extrato")
 
+  if(error){
+    extrato.innerHTML = `<div class="vazio">Erro ao carregar extrato.</div>`
+    return
+  }
+
+  if(!data || data.length === 0){
+    extrato.innerHTML = `<div class="vazio">Nenhuma solicitação pendente.</div>`
+    return
+  }
+
+  let html = ""
+
+  data.forEach(item => {
+    html += `
+      <div class="extrato-item">
+        <div class="extrato-linha-topo">
+          <span class="tipo-tag">${item.tipo}</span>
+          <span class="valor-item">R$ ${formatarReal(item.valor)}</span>
+        </div>
+
+        <div class="status-pendente">Status: ${item.status}</div>
+        <div class="data-item">${horarioBrasil(item.created_at)}</div>
+      </div>
+    `
+  })
+
+  extrato.innerHTML = html
 }
 
+async function verificarNotificacoes(){
+  const { count, error } = await sb
+    .from("notificacoes")
+    .select("*", { count: "exact", head: true })
+    .eq("usuario_id", usuario.id)
+    .eq("lida", false)
 
+  const badge = document.getElementById("badge")
+
+  if(error){
+    badge.classList.add("oculto")
+    return
+  }
+
+  if(count && count > 0){
+    badge.innerText = count > 99 ? "99+" : count
+    badge.classList.remove("oculto")
+  }else{
+    badge.classList.add("oculto")
+  }
+}
 
 function abrirEstrategiaXadrez(){
+  const valor = Math.floor(Number(document.getElementById("metaXadrez").value))
+  const quadrados = Number(document.getElementById("qtdQuadrados").value)
 
-const valor = document.getElementById("metaXadrez").value
-const qtd = document.getElementById("qtdQuadrados").value
+  if(!valor || valor <= 0){
+    alert("Digite o valor que você quer juntar.")
+    return
+  }
 
-if(!valor){
-
-alert("Digite o valor da meta")
-
-return
-
+  localStorage.setItem("rrinvest_meta_xadrez", String(valor))
+  localStorage.setItem("rrinvest_qtd_xadrez", String(quadrados))
+  location.href = "estrategia_xadrez.html"
 }
-
-localStorage.setItem("rrinvest_meta_xadrez",valor)
-localStorage.setItem("rrinvest_qtd_xadrez",qtd)
-
-location.href="estrategia_xadrez.html"
-
-}
-
-
 
 async function logout(){
+  if(timerRendimento){
+    clearInterval(timerRendimento)
+  }
 
-await sb.auth.signOut()
-
-location.href="login.html"
-
+  await sb.auth.signOut()
+  location.href = "login.html"
 }
 
-
+window.addEventListener("focus", async () => {
+  if(usuario){
+    await carregarPerfil()
+    await carregarExtrato()
+    await verificarNotificacoes()
+    renderizarResumoXadrez()
+  }
+})
 
 async function iniciar(){
+  const ok = await verificarLogin()
+  if(!ok) return
 
-const ok = await verificarLogin()
-
-if(!ok) return
-
-await carregarPerfil()
-
+  await carregarPerfil()
+  await carregarExtrato()
+  await verificarNotificacoes()
+  renderizarResumoXadrez()
 }
 
 iniciar()
-
 </script>
 
 </body>

@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=140">
+<link rel="stylesheet" href="style.css?v=150">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -46,7 +46,7 @@
 }
 
 .card-xadrez-ajustado{
-  padding:16px;
+  padding:14px;
   overflow:hidden;
 }
 
@@ -90,7 +90,7 @@
 .quadro-wrapper-premium{
   position:relative;
   border-radius:22px;
-  padding:10px;
+  padding:8px;
   background:linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
   border:1px solid #e6edf7;
   box-shadow:
@@ -102,20 +102,20 @@
 .quadro-wrapper-premium::after{
   content:"";
   position:absolute;
-  top:10px;
-  bottom:22px;
-  width:22px;
+  top:8px;
+  bottom:18px;
+  width:18px;
   pointer-events:none;
   z-index:3;
 }
 
 .quadro-wrapper-premium::before{
-  left:10px;
+  left:8px;
   background:linear-gradient(90deg, rgba(248,251,255,1) 0%, rgba(248,251,255,0) 100%);
 }
 
 .quadro-wrapper-premium::after{
-  right:10px;
+  right:8px;
   background:linear-gradient(270deg, rgba(248,251,255,1) 0%, rgba(248,251,255,0) 100%);
 }
 
@@ -161,11 +161,12 @@
   border:1px solid #cfd4dc;
   border-radius:18px;
   overflow:hidden;
+  margin:0 auto;
 }
 
 .casa-xadrez{
-  min-height:74px;
-  padding:6px 4px;
+  min-height:58px;
+  padding:4px 2px;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -196,11 +197,11 @@
 }
 
 .numero-xadrez{
-  font-size:11px;
+  font-size:10px;
   font-weight:700;
   line-height:1;
   color:#6b7280;
-  margin-bottom:8px;
+  margin-bottom:7px;
 }
 
 .casa-xadrez.marcada .numero-xadrez{
@@ -208,7 +209,7 @@
 }
 
 .valor-xadrez{
-  font-size:18px;
+  font-size:15px;
   font-weight:800;
   line-height:1;
   white-space:nowrap;
@@ -276,11 +277,11 @@
   }
 
   .casa-xadrez{
-    min-height:66px;
+    min-height:56px;
   }
 
   .valor-xadrez{
-    font-size:16px;
+    font-size:14px;
   }
 }
 </style>
@@ -453,11 +454,8 @@ function obterColunas(qtd){
   return 20
 }
 
-function obterLarguraCasa(qtd){
-  if(qtd === 100) return 1
-  if(qtd === 200) return 74
-  if(qtd === 300) return 72
-  return 70
+function obterLarguraCasa(){
+  return 58
 }
 
 function precisaRolagem(qtd){
@@ -468,7 +466,7 @@ function configurarAreaDoQuadro(colunas){
   const quadro = document.getElementById("quadro")
   const scroll = document.getElementById("quadroScroll")
   const head = document.getElementById("quadroScrollHead")
-  const larguraCasa = obterLarguraCasa(qtdQuadrados)
+  const larguraCasa = obterLarguraCasa()
 
   if(precisaRolagem(qtdQuadrados)){
     quadro.style.gridTemplateColumns = `repeat(${colunas}, ${larguraCasa}px)`
@@ -477,7 +475,7 @@ function configurarAreaDoQuadro(colunas){
     scroll.classList.add("quadro-scroll-ativo")
     head.classList.remove("oculto")
   }else{
-    quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+    quadro.style.gridTemplateColumns = `repeat(${colunas}, minmax(0, 1fr))`
     quadro.style.width = `100%`
     quadro.style.minWidth = `100%`
     scroll.classList.remove("quadro-scroll-ativo")
@@ -655,8 +653,9 @@ function salvarEstrategia(){
 
 function sacarMarcado(){
   const { totalMarcado } = calcularTotalMarcado()
+  const reservadoAtual = lerDescontoSalvo()
 
-  if(totalMarcado <= 0 && lerDescontoSalvo() <= 0){
+  if(totalMarcado <= 0 && reservadoAtual <= 0){
     alert("Nenhum valor marcado para sacar.")
     return
   }

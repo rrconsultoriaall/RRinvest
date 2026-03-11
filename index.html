@@ -37,10 +37,67 @@ font-weight:bold;
 }
 
 .saldo{
-font-size:44px;
+font-size:46px;
 font-weight:bold;
 color:#0b3d91;
 margin-top:8px;
+}
+
+.caverna{
+background:#1c1c1c;
+border-radius:14px;
+padding:10px;
+height:180px;
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative;
+overflow:hidden;
+}
+
+svg{
+width:260px;
+}
+
+.picareta{
+transform-origin:140px 70px;
+animation:bate 0.7s infinite alternate;
+}
+
+@keyframes bate{
+from{transform:rotate(-20deg)}
+to{transform:rotate(15deg)}
+}
+
+.pedra{
+animation:pedra 0.7s infinite alternate;
+}
+
+@keyframes pedra{
+from{transform:translateX(0px)}
+to{transform:translateX(3px)}
+}
+
+.particula{
+opacity:0;
+animation:particula 1s infinite;
+}
+
+@keyframes particula{
+0%{opacity:0; transform:translateY(0px)}
+50%{opacity:1}
+100%{opacity:0; transform:translateY(-20px)}
+}
+
+.moeda{
+opacity:0;
+animation:moeda 2s infinite;
+}
+
+@keyframes moeda{
+0%{opacity:0; transform:translateY(0)}
+50%{opacity:1}
+100%{opacity:0; transform:translateY(-40px)}
 }
 
 .botoes{
@@ -97,79 +154,14 @@ align-items:center;
 justify-content:center;
 }
 
-.caverna{
-background:#1f1f1f;
-border-radius:12px;
-padding:20px;
-display:flex;
-justify-content:center;
-align-items:center;
-height:160px;
-position:relative;
-overflow:hidden;
-}
-
-.mineiro{
-position:absolute;
-bottom:20px;
-left:40%;
-font-size:42px;
-animation:minerando 0.7s infinite alternate;
-}
-
-@keyframes minerando{
-from{transform:rotate(-20deg)}
-to{transform:rotate(20deg)}
-}
-
-.pedra{
-position:absolute;
-bottom:20px;
-right:40%;
-font-size:34px;
-animation:pedra 0.7s infinite alternate;
-}
-
-@keyframes pedra{
-from{transform:translateX(0px)}
-to{transform:translateX(4px)}
-}
-
-.moeda{
-position:absolute;
-font-size:20px;
-animation:moeda 2s infinite;
-}
-
-@keyframes moeda{
-0%{transform:translateY(0px);opacity:0}
-50%{opacity:1}
-100%{transform:translateY(-40px);opacity:0}
-}
-
-.m1{left:45%; bottom:60px; animation-delay:0s}
-.m2{left:50%; bottom:70px; animation-delay:0.5s}
-.m3{left:55%; bottom:65px; animation-delay:1s}
-
 .pendente{
 color:orange;
 font-weight:bold;
 }
 
-.notificacao{
-border-bottom:1px solid #eee;
-padding:12px 0;
-line-height:1.6;
-}
-
-.oculto{
-display:none;
-}
-
 </style>
 
 </head>
-
 <body>
 
 <!-- CARD 1 -->
@@ -181,7 +173,7 @@ display:none;
 
 </div>
 
-<!-- CARD 2 ANIMAÇÃO -->
+<!-- CARD 2 -->
 <div class="card">
 
 <div style="margin-bottom:10px;font-weight:bold">
@@ -190,19 +182,51 @@ display:none;
 
 <div class="caverna">
 
-<div class="mineiro">⛏️</div>
+<svg viewBox="0 0 260 160">
 
-<div class="pedra">🪨</div>
+<!-- chão -->
+<rect x="0" y="120" width="260" height="40" fill="#2a2a2a"/>
 
-<div class="moeda m1">💰</div>
-<div class="moeda m2">💰</div>
-<div class="moeda m3">💰</div>
+<!-- pedra -->
+<polygon class="pedra" points="170,110 190,80 220,90 210,120"
+fill="#777"/>
+
+<!-- mineiro corpo -->
+<circle cx="110" cy="80" r="12" fill="#ffcc99"/>
+
+<!-- capacete -->
+<rect x="98" y="66" width="24" height="8" fill="#f4c542"/>
+
+<!-- corpo -->
+<rect x="104" y="90" width="12" height="20" fill="#3366cc"/>
+
+<!-- braço -->
+<line x1="110" y1="95" x2="140" y2="70" stroke="#ffcc99" stroke-width="5"/>
+
+<!-- picareta -->
+<g class="picareta">
+<line x1="140" y1="70" x2="165" y2="55"
+stroke="#8b5a2b" stroke-width="4"/>
+<line x1="160" y1="50" x2="175" y2="60"
+stroke="#bbb" stroke-width="4"/>
+</g>
+
+<!-- partículas -->
+<circle class="particula" cx="200" cy="80" r="2" fill="#ffdd55"/>
+<circle class="particula" cx="210" cy="90" r="2" fill="#ffdd55"/>
+<circle class="particula" cx="195" cy="95" r="2" fill="#ffdd55"/>
+
+<!-- moedas -->
+<circle class="moeda" cx="210" cy="70" r="5" fill="#ffd700"/>
+<circle class="moeda" cx="220" cy="75" r="5" fill="#ffd700"/>
+
+</svg>
 
 </div>
 
 </div>
 
-<!-- CARD 3 BOTÕES -->
+<!-- CARD 3 -->
 <div class="card">
 
 <div class="botoes">
@@ -228,7 +252,7 @@ Sair
 
 </div>
 
-<!-- CARD 4 EXTRATO -->
+<!-- CARD 4 -->
 <div class="card">
 
 <h3>Extrato</h3>
@@ -276,7 +300,6 @@ const {data}=await sb
 .single()
 
 document.getElementById("nome").innerText=data.nome
-
 document.getElementById("saldo").innerText="R$ "+formatarReal(data.saldo)
 
 }
@@ -325,27 +348,6 @@ document.getElementById("extrato").innerHTML=html
 
 }
 
-async function carregarNotificacoes(){
-
-const {data}=await sb
-.from("notificacoes")
-.select("*")
-.eq("usuario_id",usuario.id)
-
-if(!data) return
-
-let nova=false
-
-data.forEach(n=>{
-if(!n.lida) nova=true
-})
-
-if(nova){
-document.getElementById("badge").classList.remove("oculto")
-}
-
-}
-
 function irDeposito(){
 location.href="deposito.html"
 }
@@ -370,8 +372,6 @@ if(!ok) return
 await carregarPerfil()
 
 await carregarExtrato()
-
-await carregarNotificacoes()
 
 }
 

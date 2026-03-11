@@ -32,6 +32,8 @@ color:white;
 border:none;
 border-radius:6px;
 cursor:pointer;
+margin-right:10px;
+margin-top:10px;
 }
 
 </style>
@@ -43,9 +45,22 @@ cursor:pointer;
 <div class="card">
 
 <h2 id="nome"></h2>
+
 <h3 id="saldo"></h3>
 
-<button onclick="logout()">Sair</button>
+<button onclick="window.location.href='deposito.html'">
+Depositar
+</button>
+
+<button onclick="window.location.href='saque.html'">
+Sacar
+</button>
+
+<br><br>
+
+<button onclick="logout()">
+Sair
+</button>
 
 </div>
 
@@ -97,7 +112,9 @@ const { data:perfil } = await sb
 .single()
 
 document.getElementById("nome").innerText = perfil.nome
-document.getElementById("saldo").innerText = "Saldo: R$ "+formatarReal(perfil.saldo)
+
+document.getElementById("saldo").innerText =
+"Saldo: R$ "+formatarReal(perfil.saldo)
 
 carregarExtrato()
 

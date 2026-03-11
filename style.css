@@ -446,22 +446,27 @@ select:focus{
 
 .quadro-scroll{
   width:100%;
+  overflow:visible;
+  padding-bottom:0;
+}
+
+.quadro-scroll.quadro-scroll-ativo{
   overflow-x:auto;
   overflow-y:hidden;
   padding-bottom:6px;
   -webkit-overflow-scrolling:touch;
 }
 
-.quadro-scroll::-webkit-scrollbar{
+.quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar{
   height:8px;
 }
 
-.quadro-scroll::-webkit-scrollbar-track{
+.quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar-track{
   background:#e6ebf2;
   border-radius:999px;
 }
 
-.quadro-scroll::-webkit-scrollbar-thumb{
+.quadro-scroll.quadro-scroll-ativo::-webkit-scrollbar-thumb{
   background:#b8c2d1;
   border-radius:999px;
 }

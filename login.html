@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RRinvest</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:10px;
+max-width:400px;
+margin:auto;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+margin-bottom:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#0b3d91;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+h1{
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>RRinvest</h1>
+
+<h2>Entrar</h2>
+
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
+
+<button onclick="login()">Entrar</button>
+
+<hr>
+
+<h2>Criar conta</h2>
+
+<input id="nome" placeholder="Nome completo">
+<input id="email2" placeholder="Email">
+<input id="telefone" placeholder="Telefone">
+<input id="senha2" type="password" placeholder="Senha">
+
+<button onclick="criarConta()">Criar conta</button>
+
+<div id="msg"></div>
+
+</div>
+
+<script>
+
+async function login(){
+
+const email = document.getElementById("email").value
+const senha = document.getElementById("senha").value
+
+const { error } = await sb.auth.signInWithPassword({
+email:email,
+password:senha
+})
+
+if(error){
+document.getElementById("msg").innerText = error.message
+return
+}
+
+window.location.href = "index.html"
+
+}
+
+async function criarConta(){
+
+const nome = document.getElementById("nome").value
+const email = document.getElementById("email2").value
+const telefone = document.getElementById("telefone").value
+const senha = document.getElementById("senha2").value
+
+const { data , error } = await sb.auth.signUp({
+email:email,
+password:senha
+})
+
+if(error){
+document.getElementById("msg").innerText = error.message
+return
+}
+
+await sb.from("profiles").insert({
+id:data.user.id,
+nome:nome,
+email:email,
+telefone:telefone
+})
+
+document.getElementById("msg").innerText = "Conta criada com sucesso"
+
+}
+
+</script>
+
+</body>
+</html>

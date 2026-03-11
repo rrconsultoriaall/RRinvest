@@ -12,7 +12,6 @@
 <script src="config.js"></script>
 
 <style>
-
 body{
 font-family:Arial;
 background:#f3f3f3;
@@ -61,7 +60,6 @@ border-bottom:none;
 margin-top:10px;
 font-weight:bold;
 }
-
 </style>
 </head>
 
@@ -80,42 +78,33 @@ font-weight:bold;
 </div>
 
 <script>
-
 let usuario
 
 function horarioBrasil(data){
-
 return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo"
 })
-
 }
 
 function formatarReal(valor){
-
 return Number(valor).toLocaleString("pt-BR",{
-minimumFractionDigits:2
+minimumFractionDigits:2,
+maximumFractionDigits:2
 })
-
 }
 
 async function verificarLogin(){
-
 const { data } = await sb.auth.getSession()
 
 if(!data.session){
-
 location.href="login.html"
 return
-
 }
 
 usuario=data.session.user
-
 }
 
 async function carregarSaques(){
-
 let { data } = await sb
 .from("transacoes")
 .select("*")
@@ -124,20 +113,15 @@ let { data } = await sb
 .order("created_at",{ascending:false})
 
 if(!data || data.length==0){
-
 document.getElementById("lista").innerHTML="Nenhum saque pendente"
 return
-
 }
 
 let html=""
 
 data.forEach(s=>{
-
 html+=`
-
 <div class="item">
-
 <b>Saque</b><br>
 Usuário: ${s.usuario_email}<br>
 Valor: R$ ${formatarReal(s.valor)}<br>
@@ -147,43 +131,15 @@ Data: ${horarioBrasil(s.created_at)}<br>
 <button class="aprovar" onclick="aprovar(${s.id},'${s.usuario_id}',${s.valor})">
 Aprovar saque
 </button>
-
 </div>
-
 `
-
 })
 
 document.getElementById("lista").innerHTML=html
-
 }
 
 async function aprovar(id,usuarioId,valor){
-
 document.getElementById("msg").innerText="Aprovando..."
-
-let { data:perfil } = await sb
-.from("profiles")
-.select("saldo")
-.eq("id",usuarioId)
-.single()
-
-let saldoAtual = Number(perfil.saldo)
-let valorSaque = Number(valor)
-
-if(saldoAtual < valorSaque){
-
-document.getElementById("msg").innerText="Saldo insuficiente"
-return
-
-}
-
-let novoSaldo = saldoAtual - valorSaque
-
-await sb
-.from("profiles")
-.update({saldo:novoSaldo})
-.eq("id",usuarioId)
 
 await sb
 .from("transacoes")
@@ -196,30 +152,25 @@ await sb
 usuario_id:usuarioId,
 titulo:"Saque aprovado",
 mensagem:"Seu saque de R$ "+formatarReal(valor)+" foi aprovado.",
+lida:false,
 created_at:new Date().toISOString()
 })
 
 document.getElementById("msg").innerText="Saque aprovado"
 
 carregarSaques()
-
 }
 
 function voltar(){
-
 location.href="admin.html"
-
 }
 
 async function iniciar(){
-
 await verificarLogin()
 carregarSaques()
-
 }
 
 iniciar()
-
 </script>
 
 </body>

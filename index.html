@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=10">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,7 +27,6 @@
     <div class="premium-badge">Premium</div>
   </div>
 
-  <!-- CARD SALDO -->
   <div class="card saldo-card">
     <div class="saldo-topo">
       <div>
@@ -44,10 +43,38 @@
     </div>
   </div>
 
-  <!-- CARD ESTRATÉGIA -->
   <div class="card">
     <div class="card-title">Estratégia Xadrez</div>
     <div class="card-subtitle">Monte sua estratégia de depósitos do jeito que preferir.</div>
+
+    <div id="xadrezSalvaBox" class="xadrez-salva-box oculto">
+      <div class="xadrez-salva-topo">
+        <div class="xadrez-salva-titulo">Estratégia salva</div>
+        <div class="xadrez-salva-status">Ativa</div>
+      </div>
+
+      <div class="xadrez-salva-grid">
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Meta</span>
+          <strong id="xadrezMetaSalva">R$ 0,00</strong>
+        </div>
+
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Reservado</span>
+          <strong id="xadrezReservadoSalvo">R$ 0,00</strong>
+        </div>
+
+        <div class="xadrez-info-item">
+          <span class="xadrez-info-label">Marcados</span>
+          <strong id="xadrezMarcadosSalvos">0</strong>
+        </div>
+      </div>
+
+      <button class="btn btn-abrir-salva" onclick="location.href='estrategia_xadrez.html'">
+        <span class="material-symbols-rounded icon">open_in_new</span>
+        Abrir estratégia salva
+      </button>
+    </div>
 
     <div class="form-group">
       <input type="number" id="metaXadrez" placeholder="Digite o valor que quer juntar" min="1" step="1">
@@ -68,10 +95,8 @@
     </button>
   </div>
 
-  <!-- CARD AÇÕES -->
   <div class="card">
     <div class="acoes-grid">
-
       <button class="btn btn-deposito" onclick="location.href='deposito.html'">
         <span class="material-symbols-rounded icon">add</span>
         Depositar
@@ -87,7 +112,6 @@
         Notificações
         <span id="badge" class="badge oculto">0</span>
       </button>
-
     </div>
 
     <button class="btn btn-sair" onclick="logout()">
@@ -96,7 +120,6 @@
     </button>
   </div>
 
-  <!-- CARD EXTRATO -->
   <div class="card">
     <div class="extrato-header">
       <div class="card-title">Extrato</div>
@@ -131,8 +154,20 @@ function chaveDescontoXadrez(){
   return "rrinvest_xadrez_desconto_" + usuario.id
 }
 
+function chaveResumoXadrez(){
+  return "rrinvest_xadrez_resumo_" + usuario.id
+}
+
 function lerDescontoXadrez(){
   return Number(localStorage.getItem(chaveDescontoXadrez()) || 0)
+}
+
+function lerResumoXadrez(){
+  try{
+    return JSON.parse(localStorage.getItem(chaveResumoXadrez()) || "null")
+  }catch{
+    return null
+  }
 }
 
 function atualizarSaldoNaTela(){
@@ -150,6 +185,22 @@ function atualizarSaldoNaTela(){
   }else{
     reservaInfo.classList.add("oculto")
   }
+}
+
+function renderizarResumoXadrez(){
+  const box = document.getElementById("xadrezSalvaBox")
+  const resumo = lerResumoXadrez()
+
+  if(!resumo || !resumo.salvo){
+    box.classList.add("oculto")
+    return
+  }
+
+  document.getElementById("xadrezMetaSalva").innerText = "R$ " + formatarReal(resumo.meta || 0)
+  document.getElementById("xadrezReservadoSalvo").innerText = "R$ " + formatarReal(resumo.reservado || 0)
+  document.getElementById("xadrezMarcadosSalvos").innerText = resumo.marcados || 0
+
+  box.classList.remove("oculto")
 }
 
 async function verificarLogin(){
@@ -268,6 +319,7 @@ window.addEventListener("focus", async () => {
     await carregarPerfil()
     await carregarExtrato()
     await verificarNotificacoes()
+    renderizarResumoXadrez()
   }
 })
 
@@ -278,6 +330,7 @@ async function iniciar(){
   await carregarPerfil()
   await carregarExtrato()
   await verificarNotificacoes()
+  renderizarResumoXadrez()
 }
 
 iniciar()

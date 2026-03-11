@@ -70,63 +70,61 @@ display:block;
 }
 
 .luz{
-animation:luzPulse 2s infinite ease-in-out;
+animation:luzPulse 2.4s infinite ease-in-out;
 transform-origin:300px 92px;
 }
 
 @keyframes luzPulse{
-0%,100%{opacity:.65}
-50%{opacity:1}
+0%,100%{opacity:.55}
+50%{opacity:.9}
 }
 
 .picaretaGrupo{
 transform-origin:180px 112px;
-animation:picaretaBate .7s infinite ease-in-out;
+animation:picaretaBate 1s infinite ease-in-out;
 }
 
 @keyframes picaretaBate{
-0%{transform:rotate(-18deg)}
-45%{transform:rotate(8deg)}
-100%{transform:rotate(-18deg)}
+0%{transform:rotate(-12deg)}
+45%{transform:rotate(6deg)}
+100%{transform:rotate(-12deg)}
 }
 
 .pedra{
-animation:pedraTreme .7s infinite ease-in-out;
+animation:pedraTreme 1s infinite ease-in-out;
 transform-origin:310px 150px;
 }
 
 @keyframes pedraTreme{
 0%,100%{transform:translateX(0)}
-45%{transform:translateX(4px)}
+45%{transform:translateX(2px)}
 }
 
-.faisca1,.faisca2,.faisca3{
+.faisca1,.faisca2{
 opacity:0;
-animation:faisca 1s infinite ease-out;
+animation:faisca 1.4s infinite ease-out;
 }
 
-.faisca2{animation-delay:.2s}
-.faisca3{animation-delay:.4s}
+.faisca2{animation-delay:.4s}
 
 @keyframes faisca{
 0%{opacity:0; transform:translate(0,0) scale(.8)}
-30%{opacity:1}
-100%{opacity:0; transform:translate(10px,-18px) scale(1.2)}
+30%{opacity:.8}
+100%{opacity:0; transform:translate(6px,-10px) scale(1.1)}
 }
 
-.moeda1,.moeda2,.moeda3{
+.moeda1,.moeda2{
 opacity:0;
-animation:moedaSobe 1.8s infinite ease-out;
+animation:moedaSobe 2.2s infinite ease-out;
 transform-origin:center;
 }
 
-.moeda2{animation-delay:.35s}
-.moeda3{animation-delay:.7s}
+.moeda2{animation-delay:.7s}
 
 @keyframes moedaSobe{
-0%{opacity:0; transform:translateY(10px) scale(.7) rotate(0deg)}
+0%{opacity:0; transform:translateY(8px) scale(.8)}
 20%{opacity:1}
-100%{opacity:0; transform:translateY(-45px) scale(1) rotate(20deg)}
+100%{opacity:0; transform:translateY(-26px) scale(1)}
 }
 
 .progressoBox{
@@ -142,12 +140,12 @@ height:100%;
 width:35%;
 background:linear-gradient(90deg,#f7c948,#ffd700);
 border-radius:999px;
-animation:barraLoop 2.2s infinite ease-in-out;
+animation:barraLoop 3s infinite ease-in-out;
 }
 
 @keyframes barraLoop{
 0%{width:18%}
-50%{width:88%}
+50%{width:70%}
 100%{width:18%}
 }
 
@@ -244,7 +242,7 @@ border-bottom:none;
 
 <svg class="caverna" viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
 <rect x="0" y="0" width="420" height="220" rx="18" fill="#111"/>
-<ellipse class="luz" cx="300" cy="92" rx="95" ry="60" fill="rgba(255,215,0,0.10)"/>
+<ellipse class="luz" cx="300" cy="92" rx="95" ry="60" fill="rgba(255,215,0,0.08)"/>
 <rect x="25" y="168" width="370" height="38" rx="8" fill="#202225"/>
 
 <!-- mineiro -->
@@ -267,12 +265,10 @@ border-bottom:none;
 <!-- faiscas -->
 <circle class="faisca1" cx="305" cy="120" r="3" fill="#ffd700"/>
 <circle class="faisca2" cx="315" cy="125" r="3" fill="#ffd700"/>
-<circle class="faisca3" cx="298" cy="132" r="3" fill="#ffd700"/>
 
 <!-- moedas -->
 <circle class="moeda1" cx="330" cy="118" r="7" fill="#ffd700"/>
 <circle class="moeda2" cx="345" cy="122" r="7" fill="#ffd700"/>
-<circle class="moeda3" cx="315" cy="114" r="7" fill="#ffd700"/>
 </svg>
 
 <div class="progressoBox">
@@ -302,7 +298,7 @@ Notificações
 
 <script>
 let usuario = null
-let saldoBase = 0
+let saldoAtual = 0
 let rendimentoPorMinuto = 0
 let timerSaldo = null
 
@@ -331,33 +327,12 @@ function calcularRendimentoPorMinuto(saldo){
 return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
 }
 
-function salvarSaldoLocal(saldo){
-localStorage.setItem(chaveSaldo(), String(saldo))
+function salvarSaldoLocal(valor){
+localStorage.setItem(chaveSaldo(), String(valor))
 localStorage.setItem(chaveTempo(), String(Date.now()))
 }
 
-function lerSaldoCorrigido(){
-const saldoSalvo = Number(localStorage.getItem(chaveSaldo()) || saldoBase)
-const tempoSalvo = Number(localStorage.getItem(chaveTempo()) || Date.now())
-
-const agora = Date.now()
-const minutosPassados = Math.floor((agora - tempoSalvo) / 60000)
-
-if(minutosPassados <= 0){
-return saldoSalvo
-}
-
-const acrescimo = rendimentoPorMinuto * minutosPassados
-const novoSaldo = saldoSalvo + acrescimo
-
-localStorage.setItem(chaveSaldo(), String(novoSaldo))
-localStorage.setItem(chaveTempo(), String(tempoSalvo + (minutosPassados * 60000)))
-
-return novoSaldo
-}
-
 function atualizarSaldoNaTela(){
-const saldoAtual = lerSaldoCorrigido()
 document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
 document.getElementById("rendimento").innerText = "Rendimento por minuto: R$ " + formatarReal(rendimentoPorMinuto)
 }
@@ -367,9 +342,9 @@ if(timerSaldo){
 clearInterval(timerSaldo)
 }
 
-atualizarSaldoNaTela()
-
 timerSaldo = setInterval(()=>{
+saldoAtual = Number(saldoAtual) + Number(rendimentoPorMinuto)
+salvarSaldoLocal(saldoAtual)
 atualizarSaldoNaTela()
 },60000)
 }
@@ -397,15 +372,11 @@ if(error || !data) return
 
 document.getElementById("nome").innerText = data.nome
 
-saldoBase = Number(data.saldo || 0)
-rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoBase)
+saldoAtual = Number(data.saldo || 0)
+rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoAtual)
 
-const saldoLocal = Number(localStorage.getItem(chaveSaldo()) || 0)
-
-if(!saldoLocal || saldoLocal < saldoBase){
-salvarSaldoLocal(saldoBase)
-}
-
+salvarSaldoLocal(saldoAtual)
+atualizarSaldoNaTela()
 iniciarLoopSaldo()
 }
 

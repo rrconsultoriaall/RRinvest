@@ -9,6 +9,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d4ed8">
+
 <link rel="stylesheet" href="style.css?v=70">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
@@ -287,7 +290,6 @@ async function carregarPerfil(){
     return false
   }
 
-  /* AQUI ESTÁ A CORREÇÃO DO ADMIN */
   if(data.admin === true){
     location.href = "admin.html"
     return false
@@ -423,6 +425,14 @@ async function iniciar(){
 }
 
 iniciar()
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("Service Worker registrado com sucesso"))
+    .catch((error) => console.log("Erro ao registrar Service Worker:", error))
+}
 </script>
 
 </body>

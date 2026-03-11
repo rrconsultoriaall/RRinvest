@@ -41,79 +41,13 @@ font-size:44px;
 font-weight:bold;
 color:#0b3d91;
 margin-top:8px;
-display:none;
-}
-
-.mineracao{
-margin-top:10px;
-}
-
-.mensagemMineracao{
-font-size:16px;
-color:#666;
-margin-bottom:10px;
-}
-
-.mineiro{
-font-size:46px;
-display:inline-block;
-animation:minerando 0.8s infinite alternate;
-}
-
-@keyframes minerando{
-from{transform:rotate(-20deg)}
-to{transform:rotate(20deg)}
-}
-
-.pedra{
-font-size:36px;
-display:inline-block;
-margin-left:8px;
-animation:pedra 0.8s infinite alternate;
-}
-
-@keyframes pedra{
-from{transform:translateX(0px)}
-to{transform:translateX(4px)}
-}
-
-.moedas{
-font-size:22px;
-margin-top:10px;
-animation:moeda 1s infinite;
-}
-
-@keyframes moeda{
-0%{opacity:0; transform:translateY(-10px)}
-50%{opacity:1}
-100%{opacity:0; transform:translateY(10px)}
-}
-
-.barra{
-height:10px;
-background:#ddd;
-border-radius:10px;
-overflow:hidden;
-margin-top:10px;
-}
-
-.progresso{
-height:10px;
-width:0%;
-background:#1faa59;
-animation:progressoMineracao 3s forwards;
-}
-
-@keyframes progressoMineracao{
-0%{width:0%}
-100%{width:100%}
 }
 
 .botoes{
 display:flex;
 flex-wrap:wrap;
 gap:10px;
-margin-top:20px;
+margin-top:10px;
 }
 
 button{
@@ -163,9 +97,59 @@ align-items:center;
 justify-content:center;
 }
 
-.oculto{
-display:none;
+.caverna{
+background:#1f1f1f;
+border-radius:12px;
+padding:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+height:160px;
+position:relative;
+overflow:hidden;
 }
+
+.mineiro{
+position:absolute;
+bottom:20px;
+left:40%;
+font-size:42px;
+animation:minerando 0.7s infinite alternate;
+}
+
+@keyframes minerando{
+from{transform:rotate(-20deg)}
+to{transform:rotate(20deg)}
+}
+
+.pedra{
+position:absolute;
+bottom:20px;
+right:40%;
+font-size:34px;
+animation:pedra 0.7s infinite alternate;
+}
+
+@keyframes pedra{
+from{transform:translateX(0px)}
+to{transform:translateX(4px)}
+}
+
+.moeda{
+position:absolute;
+font-size:20px;
+animation:moeda 2s infinite;
+}
+
+@keyframes moeda{
+0%{transform:translateY(0px);opacity:0}
+50%{opacity:1}
+100%{transform:translateY(-40px);opacity:0}
+}
+
+.m1{left:45%; bottom:60px; animation-delay:0s}
+.m2{left:50%; bottom:70px; animation-delay:0.5s}
+.m3{left:55%; bottom:65px; animation-delay:1s}
 
 .pendente{
 color:orange;
@@ -178,38 +162,48 @@ padding:12px 0;
 line-height:1.6;
 }
 
+.oculto{
+display:none;
+}
+
 </style>
 
 </head>
 
 <body>
 
+<!-- CARD 1 -->
 <div class="card">
 
 <div class="nome" id="nome">Carregando...</div>
 
 <div class="saldo" id="saldo">R$ 0,00</div>
 
-<div class="mineracao" id="mineracao">
+</div>
 
-<div class="mensagemMineracao">
+<!-- CARD 2 ANIMAÇÃO -->
+<div class="card">
+
+<div style="margin-bottom:10px;font-weight:bold">
 ⛏️ Minerando lucros...
 </div>
 
-<div>
-<span class="mineiro">⛏️</span>
-<span class="pedra">🪨</span>
-</div>
+<div class="caverna">
 
-<div class="moedas">
-💰 💰 💰
-</div>
+<div class="mineiro">⛏️</div>
 
-<div class="barra">
-<div class="progresso"></div>
-</div>
+<div class="pedra">🪨</div>
+
+<div class="moeda m1">💰</div>
+<div class="moeda m2">💰</div>
+<div class="moeda m3">💰</div>
 
 </div>
+
+</div>
+
+<!-- CARD 3 BOTÕES -->
+<div class="card">
 
 <div class="botoes">
 
@@ -234,16 +228,7 @@ Sair
 
 </div>
 
-<div class="card oculto" id="cardNotif">
-
-<h3>Notificações</h3>
-
-<div id="notificacoes">
-Carregando...
-</div>
-
-</div>
-
+<!-- CARD 4 EXTRATO -->
 <div class="card">
 
 <h3>Extrato</h3>
@@ -361,30 +346,6 @@ document.getElementById("badge").classList.remove("oculto")
 
 }
 
-async function marcarLidas(){
-
-await sb
-.from("notificacoes")
-.update({lida:true})
-.eq("usuario_id",usuario.id)
-.eq("lida",false)
-
-document.getElementById("badge").classList.add("oculto")
-
-}
-
-function toggleNotificacoes(){
-
-const card=document.getElementById("cardNotif")
-
-card.classList.toggle("oculto")
-
-if(!card.classList.contains("oculto")){
-marcarLidas()
-}
-
-}
-
 function irDeposito(){
 location.href="deposito.html"
 }
@@ -411,14 +372,6 @@ await carregarPerfil()
 await carregarExtrato()
 
 await carregarNotificacoes()
-
-setTimeout(()=>{
-
-document.getElementById("mineracao").style.display="none"
-
-document.getElementById("saldo").style.display="block"
-
-},3000)
 
 }
 

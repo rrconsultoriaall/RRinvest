@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - RRinvest</title>
+<title>RRinvest</title>
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=80">
+<link rel="stylesheet" href="style.css?v=100">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,35 +19,61 @@
 
 <div class="app">
 
-  <div class="topbar">
-    <div>
-      <div class="brand">RRinvest</div>
-      <div class="brand-sub">Acesso ao sistema</div>
-    </div>
-    <div class="premium-badge">Login</div>
-  </div>
+<div class="topbar">
+<div>
+<div class="brand">RRinvest</div>
+<div class="brand-sub">Acesso ao sistema</div>
+</div>
+<div class="premium-badge">Login</div>
+</div>
 
-  <div class="card">
+<div class="card">
 
-    <div class="card-title">Entrar</div>
-    <div class="card-subtitle">Digite seu e-mail e senha</div>
+<div class="card-title">Entrar</div>
+<div class="card-subtitle">Use seu e-mail e senha</div>
 
-    <div class="form-group">
-      <input type="email" id="email" placeholder="E-mail">
-    </div>
+<div class="form-group">
+<input type="email" id="email" placeholder="Seu e-mail">
+</div>
 
-    <div class="form-group">
-      <input type="password" id="senha" placeholder="Senha">
-    </div>
+<div class="form-group">
+<input type="password" id="senha" placeholder="Sua senha">
+</div>
 
-    <button class="btn btn-deposito" style="width:100%" onclick="login()">
-      <span class="material-symbols-rounded icon">login</span>
-      Entrar
-    </button>
+<button class="btn btn-deposito" style="width:100%" onclick="login()">
+<span class="material-symbols-rounded icon">login</span>
+Entrar
+</button>
 
-    <div id="msg" class="vazio" style="margin-top:10px;"></div>
+<div style="height:20px"></div>
 
-  </div>
+<div class="card-title">Criar conta</div>
+<div class="card-subtitle">Cadastre-se para começar</div>
+
+<div class="form-group">
+<input type="text" id="nome" placeholder="Seu nome">
+</div>
+
+<div class="form-group">
+<input type="text" id="telefone" placeholder="Telefone">
+</div>
+
+<div class="form-group">
+<input type="email" id="emailCadastro" placeholder="Seu e-mail">
+</div>
+
+<div class="form-group">
+<input type="password" id="senhaCadastro" placeholder="Crie uma senha">
+</div>
+
+<button class="btn btn-xadrez" style="width:100%" onclick="criarConta()">
+<span class="material-symbols-rounded icon">person_add</span>
+Criar conta
+</button>
+
+<div id="msg" class="vazio" style="margin-top:10px;"></div>
+
+</div>
 
 </div>
 
@@ -59,20 +85,20 @@ const email = document.getElementById("email").value.trim()
 const senha = document.getElementById("senha").value.trim()
 const msg = document.getElementById("msg")
 
-msg.innerText = ""
+msg.innerText=""
 
 if(!email || !senha){
-msg.innerText = "Preencha e-mail e senha."
+msg.innerText="Preencha e-mail e senha"
 return
 }
 
 const { data, error } = await sb.auth.signInWithPassword({
-email,
+email: email,
 password: senha
 })
 
-if(error || !data.user){
-msg.innerText = "Login inválido."
+if(error){
+msg.innerText="Login inválido"
 return
 }
 
@@ -86,17 +112,56 @@ const { data:perfil } = await sb
 
 if(perfil?.admin === true){
 
-location.href = "admin.html"
+location.href="admin.html"
 
 }else{
 
-location.href = "index.html"
+location.href="index.html"
 
 }
 
 }
 
+async function criarConta(){
 
+const nome=document.getElementById("nome").value.trim()
+const telefone=document.getElementById("telefone").value.trim()
+const email=document.getElementById("emailCadastro").value.trim()
+const senha=document.getElementById("senhaCadastro").value.trim()
+
+const msg=document.getElementById("msg")
+msg.innerText=""
+
+if(!nome || !telefone || !email || !senha){
+msg.innerText="Preencha todos os campos"
+return
+}
+
+const { data, error } = await sb.auth.signUp({
+email: email,
+password: senha
+})
+
+if(error){
+msg.innerText=error.message
+return
+}
+
+const userId=data.user.id
+
+await sb.from("profiles").insert([
+{
+id:userId,
+nome:nome,
+telefone:telefone,
+saldo:0,
+admin:false
+}
+])
+
+msg.innerText="Conta criada! Agora faça login."
+
+}
 
 async function verificarSessao(){
 
@@ -104,7 +169,7 @@ const { data } = await sb.auth.getSession()
 
 if(!data.session) return
 
-const userId = data.session.user.id
+const userId=data.session.user.id
 
 const { data:perfil } = await sb
 .from("profiles")
@@ -112,13 +177,13 @@ const { data:perfil } = await sb
 .eq("id",userId)
 .single()
 
-if(perfil?.admin === true){
+if(perfil?.admin){
 
-location.href = "admin.html"
+location.href="admin.html"
 
 }else{
 
-location.href = "index.html"
+location.href="index.html"
 
 }
 

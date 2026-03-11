@@ -14,55 +14,94 @@
 <style>
 body{
 font-family:Arial,sans-serif;
-background:#f3f3f3;
+background:#f4f6f8;
 padding:20px;
 margin:0;
 }
 
 .card{
 background:white;
-padding:20px;
+padding:24px;
+border-radius:16px;
+max-width:480px;
+margin:40px auto;
+box-shadow:0 4px 18px rgba(0,0,0,0.08);
+}
+
+h2{
+margin-top:0;
+margin-bottom:20px;
+font-size:40px;
+}
+
+p{
+margin:0 0 12px 0;
+font-size:18px;
+color:#333;
+}
+
+.pix-box{
+background:#eef3ff;
+padding:16px;
 border-radius:12px;
-max-width:500px;
-margin:auto;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
+font-weight:bold;
+font-size:22px;
+text-align:center;
+margin-bottom:14px;
+word-break:break-all;
+color:#0b3d91;
 }
 
 input{
 width:100%;
-padding:12px;
+padding:14px;
 margin-top:10px;
 margin-bottom:10px;
 box-sizing:border-box;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
+border:1px solid #d9d9d9;
+border-radius:12px;
+font-size:18px;
+outline:none;
+}
+
+input:focus{
+border-color:#1e4ea1;
 }
 
 button{
-padding:12px;
-border:none;
-border-radius:8px;
-background:#1e4ea1;
-color:white;
 width:100%;
-margin-top:10px;
-font-size:16px;
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:20px;
 cursor:pointer;
+margin-top:10px;
 }
 
-.pix{
-background:#eef2ff;
-padding:12px;
-border-radius:8px;
-font-weight:bold;
-font-size:18px;
-word-break:break-all;
+.btn-principal{
+background:#0b3d91;
+color:white;
+}
+
+.btn-secundario{
+background:#e9eef7;
+color:#0b3d91;
 }
 
 .msg{
-margin-top:10px;
+margin-top:16px;
+font-size:18px;
 font-weight:bold;
+text-align:center;
+min-height:24px;
+}
+
+.ok{
+color:#1f8f4e;
+}
+
+.erro{
+color:#c0392b;
 }
 </style>
 </head>
@@ -72,14 +111,15 @@ font-weight:bold;
 <h2>Depósito</h2>
 
 <p>Faça o PIX para:</p>
-<div class="pix" id="pix">40223218812</div>
 
-<button onclick="copiarPix()">Copiar PIX</button>
+<div class="pix-box" id="pix">40223218812</div>
+
+<button class="btn-secundario" onclick="copiarPix()">Copiar PIX</button>
 
 <input id="valor" placeholder="Valor do depósito">
 
-<button onclick="depositar()">Solicitar depósito</button>
-<button onclick="voltar()">Voltar</button>
+<button class="btn-principal" onclick="depositar()">Solicitar depósito</button>
+<button class="btn-secundario" onclick="voltar()">Voltar</button>
 
 <div class="msg" id="msg"></div>
 </div>
@@ -99,16 +139,22 @@ usuario = data.session.user
 return true
 }
 
+function mostrarMsg(texto,tipo=""){
+const el = document.getElementById("msg")
+el.className = "msg " + tipo
+el.innerText = texto
+}
+
 function copiarPix(){
 navigator.clipboard.writeText("40223218812")
-document.getElementById("msg").innerText = "PIX copiado"
+mostrarMsg("PIX copiado com sucesso","ok")
 }
 
 async function depositar(){
 const valor = document.getElementById("valor").value.trim()
 
 if(!valor){
-document.getElementById("msg").innerText = "Digite o valor"
+mostrarMsg("Digite o valor do depósito","erro")
 return
 }
 
@@ -125,12 +171,15 @@ created_at: new Date().toISOString()
 })
 
 if(error){
-document.getElementById("msg").innerText = error.message
+mostrarMsg(error.message,"erro")
 return
 }
 
-alert("Depósito solicitado")
+mostrarMsg("Depósito solicitado com sucesso","ok")
+
+setTimeout(()=>{
 location.href = "index.html"
+},800)
 }
 
 function voltar(){

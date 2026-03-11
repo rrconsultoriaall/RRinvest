@@ -1,68 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta http-equiv="Cache-Control" content="no-cache">
-
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Depósito</title>
+<title>Depósito - RRinvest</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial;
+font-family:Arial,sans-serif;
 background:#f3f3f3;
 padding:20px;
+margin:0;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
+border-radius:12px;
+max-width:500px;
+margin:auto;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+margin-bottom:10px;
+box-sizing:border-box;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:16px;
 }
 
 button{
 padding:12px;
 border:none;
-border-radius:6px;
+border-radius:8px;
 background:#1e4ea1;
 color:white;
 width:100%;
 margin-top:10px;
+font-size:16px;
+cursor:pointer;
 }
 
 .pix{
 background:#eef2ff;
-padding:10px;
-border-radius:6px;
+padding:12px;
+border-radius:8px;
+font-weight:bold;
+font-size:18px;
+word-break:break-all;
+}
+
+.msg{
+margin-top:10px;
 font-weight:bold;
 }
-
-input{
-width:100%;
-padding:10px;
-margin-top:10px;
-}
-
 </style>
-
 </head>
-
 <body>
 
 <div class="card">
-
 <h2>Depósito</h2>
 
 <p>Faça o PIX para:</p>
-
 <div class="pix" id="pix">40223218812</div>
 
 <button onclick="copiarPix()">Copiar PIX</button>
@@ -70,62 +79,69 @@ margin-top:10px;
 <input id="valor" placeholder="Valor do depósito">
 
 <button onclick="depositar()">Solicitar depósito</button>
-
 <button onclick="voltar()">Voltar</button>
 
+<div class="msg" id="msg"></div>
 </div>
 
 <script>
+let usuario = null
 
-let usuario
+async function verificarLogin(){
+const { data, error } = await sb.auth.getSession()
 
-async function iniciar(){
+if(error || !data.session){
+location.href = "login.html"
+return false
+}
 
-const { data:{ session } } = await sb.auth.getSession()
-
-usuario=session.user
-
+usuario = data.session.user
+return true
 }
 
 function copiarPix(){
-
 navigator.clipboard.writeText("40223218812")
-
-alert("PIX copiado")
-
+document.getElementById("msg").innerText = "PIX copiado"
 }
 
 async function depositar(){
+const valor = document.getElementById("valor").value.trim()
 
-let valor=document.getElementById("valor").value
+if(!valor){
+document.getElementById("msg").innerText = "Digite o valor"
+return
+}
 
-await sb.from("transacoes").insert({
-
-usuario_id:usuario.id,
-usuario_email:usuario.email,
-tipo:"deposito",
-valor:valor,
-descricao:"Depósito solicitado",
-status:"pendente",
-created_at:new Date()
-
+const { error } = await sb
+.from("transacoes")
+.insert({
+usuario_id: usuario.id,
+usuario_email: usuario.email,
+tipo: "deposito",
+valor: valor,
+descricao: "Depósito solicitado",
+status: "pendente"
 })
 
+if(error){
+document.getElementById("msg").innerText = error.message
+return
+}
+
 alert("Depósito solicitado")
-
-location.href="index.html"
-
+location.href = "index.html"
 }
 
 function voltar(){
+location.href = "index.html"
+}
 
-location.href="index.html"
-
+async function iniciar(){
+const ok = await verificarLogin()
+if(!ok) return
 }
 
 iniciar()
-
 </script>
-
 </body>
 </html>

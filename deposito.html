@@ -5,15 +5,14 @@
 
 <meta charset="UTF-8">
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Depósito</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
 <style>
 
@@ -27,7 +26,6 @@ padding:20px;
 background:white;
 padding:20px;
 border-radius:10px;
-margin-bottom:20px;
 }
 
 button{
@@ -40,18 +38,17 @@ width:100%;
 margin-top:10px;
 }
 
+.pix{
+background:#eef2ff;
+padding:10px;
+border-radius:6px;
+font-weight:bold;
+}
+
 input{
 width:100%;
 padding:10px;
 margin-top:10px;
-}
-
-.pix{
-background:#f2f6ff;
-padding:10px;
-border-radius:6px;
-margin-top:10px;
-font-weight:bold;
 }
 
 </style>
@@ -64,69 +61,29 @@ font-weight:bold;
 
 <h2>Depósito</h2>
 
-<p>Faça o depósito usando o PIX abaixo:</p>
+<p>Faça o PIX para:</p>
 
-<div class="pix" id="pix">
+<div class="pix" id="pix">40223218812</div>
 
-40223218812
+<button onclick="copiarPix()">Copiar PIX</button>
 
-</div>
+<input id="valor" placeholder="Valor do depósito">
 
-<button onclick="copiarPix()">
+<button onclick="depositar()">Solicitar depósito</button>
 
-Copiar PIX
-
-</button>
-
-<input
-id="valor"
-placeholder="Valor do depósito"
-/>
-
-<button onclick="depositar()">
-
-Depositar
-
-</button>
-
-<button onclick="voltar()">
-
-Voltar
-
-</button>
+<button onclick="voltar()">Voltar</button>
 
 </div>
 
 <script>
 
-const supabase = supabase.createClient(
-"https://SEU_PROJETO.supabase.co",
-"SUA_PUBLIC_ANON_KEY"
-)
-
-let user
-
-function horarioBrasil(){
-
-return new Date().toLocaleString(
-"sv-SE",
-{timeZone:"America/Sao_Paulo"}
-)
-
-}
+let usuario
 
 async function iniciar(){
 
-const {data:{session}} = await supabase.auth.getSession()
+const { data:{ session } } = await sb.auth.getSession()
 
-if(!session){
-
-location.href="login.html"
-return
-
-}
-
-user=session.user
+usuario=session.user
 
 }
 
@@ -134,32 +91,23 @@ function copiarPix(){
 
 navigator.clipboard.writeText("40223218812")
 
-alert("PIX copiado!")
+alert("PIX copiado")
 
 }
 
 async function depositar(){
 
-let valor = document.getElementById("valor").value
+let valor=document.getElementById("valor").value
 
-if(!valor){
+await sb.from("transacoes").insert({
 
-alert("Digite o valor")
-return
-
-}
-
-await supabase
-.from("transacoes")
-.insert({
-
-usuario_id:user.id,
-usuario_email:user.email,
+usuario_id:usuario.id,
+usuario_email:usuario.email,
 tipo:"deposito",
 valor:valor,
 descricao:"Depósito solicitado",
 status:"pendente",
-created_at:horarioBrasil()
+created_at:new Date()
 
 })
 

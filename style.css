@@ -1,152 +1,335 @@
 :root{
---bg:#eef2f7;
---card:#ffffff;
---text:#111827;
---muted:#6b7280;
---line:#e5e7eb;
---primary:#163d8f;
---primary-dark:#0d2b69;
---success:#159a52;
---success-dark:#0d7a3f;
---dark:#2c2f36;
---shadow:0 10px 30px rgba(15, 23, 42, 0.08);
---radius:22px;
+  --bg:#eef3f8;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --primary:#1d4ed8;
+  --primary-dark:#163ea3;
+  --success:#16a34a;
+  --success-dark:#12833c;
+  --dark:#3f3f46;
+  --danger:#ef4444;
+  --purple:#7c3aed;
+  --purple-dark:#6933d3;
+  --shadow:0 12px 30px rgba(15, 23, 42, 0.08);
+  --radius:24px;
 }
 
 *{
-box-sizing:border-box;
+  box-sizing:border-box;
 }
 
 body{
-font-family:Arial,sans-serif;
-background:linear-gradient(180deg,#f3f6fb 0%, #eef2f7 100%);
-margin:0;
-padding:20px;
-color:var(--text);
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#f4f7fb 0%, #edf2f7 100%);
+  color:var(--text);
+  padding:20px;
 }
 
-.container{
-max-width:720px;
-margin:auto;
+.app{
+  max-width:720px;
+  margin:0 auto;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.brand{
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:-0.5px;
+}
+
+.brand-sub{
+  font-size:15px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.premium-badge{
+  background:#eaf8ee;
+  color:var(--success-dark);
+  padding:12px 18px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:700;
+  white-space:nowrap;
 }
 
 .card{
-background:var(--card);
-padding:22px;
-border-radius:var(--radius);
-margin-bottom:18px;
-box-shadow:var(--shadow);
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
 }
 
-.topoApp{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+.saldo-card{
+  background:linear-gradient(135deg,#1d4ed8 0%, #2558e0 55%, #3467ea 100%);
+  color:#fff;
+  position:relative;
+  overflow:hidden;
 }
 
-.logoIcon{
-width:42px;
-height:42px;
-border-radius:14px;
-background:linear-gradient(135deg,var(--primary),#3e69c6);
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-font-size:20px;
+.saldo-card::before{
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  top:-65px;
+  right:-40px;
 }
 
-.logoNome{
-font-size:20px;
-font-weight:bold;
+.saldo-card::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.05);
+  bottom:-40px;
+  left:-30px;
 }
 
-.logoSub{
-font-size:12px;
-color:var(--muted);
+.saldo-topo{
+  position:relative;
+  z-index:1;
 }
 
-.statusChip{
-padding:10px 14px;
-border-radius:999px;
-font-size:12px;
-font-weight:bold;
-background:#e9f8ef;
-color:var(--success-dark);
+.cliente-nome{
+  font-size:18px;
+  font-weight:700;
+  line-height:1.3;
 }
 
-.cardSaldo{
-background:linear-gradient(135deg,#173e92 0%, #2957bb 100%);
-color:white;
+.cliente-label{
+  margin-top:6px;
+  font-size:14px;
+  color:rgba(255,255,255,0.82);
 }
 
-.nome{
-font-size:22px;
-font-weight:bold;
+.saldo-valor{
+  position:relative;
+  z-index:1;
+  margin-top:18px;
+  font-size:62px;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-2px;
 }
 
-.saldo{
-font-size:54px;
-font-weight:bold;
-margin-top:12px;
+.reserva-info{
+  position:relative;
+  z-index:1;
+  margin-top:18px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.12);
+  font-size:14px;
+  line-height:1.5;
 }
 
-input,select{
-width:100%;
-padding:14px;
-border-radius:12px;
-border:1px solid var(--line);
-background:#f9fafb;
-font-size:16px;
+.oculto{
+  display:none !important;
 }
 
-button{
-padding:14px;
-border-radius:14px;
-border:none;
-font-size:16px;
-cursor:pointer;
+.card-title{
+  font-size:24px;
+  font-weight:800;
+  margin-bottom:8px;
+  letter-spacing:-0.4px;
 }
 
-.depositar{
-background:#1e4ea1;
-color:white;
+.card-subtitle{
+  font-size:15px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:14px;
 }
 
-.sacar{
-background:#1faa59;
-color:white;
+.form-group{
+  margin-bottom:12px;
 }
 
-.notif{
-background:#444;
-color:white;
-position:relative;
+input,
+select{
+  width:100%;
+  padding:16px 16px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#f8fafc;
+  font-size:16px;
+  outline:none;
+  transition:all .2s ease;
 }
 
-.sair{
-background:#f3f4f6;
+input:focus,
+select:focus{
+  border-color:#a8b8ec;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(29,78,216,0.08);
+}
+
+.btn{
+  border:none;
+  border-radius:18px;
+  padding:16px 18px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.btn:active{
+  transform:scale(0.99);
+}
+
+.btn-xadrez{
+  width:100%;
+  background:linear-gradient(135deg,var(--purple),var(--purple-dark));
+  color:#fff;
+  box-shadow:0 10px 20px rgba(124,58,237,0.18);
+}
+
+.acoes-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.btn-deposito{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;
+  box-shadow:0 10px 20px rgba(29,78,216,0.16);
+}
+
+.btn-saque{
+  background:linear-gradient(135deg,var(--success),var(--success-dark));
+  color:#fff;
+  box-shadow:0 10px 20px rgba(22,163,74,0.16);
+}
+
+.btn-notificacoes{
+  background:linear-gradient(135deg,#454850,#34363d);
+  color:#fff;
+  position:relative;
+  box-shadow:0 10px 20px rgba(52,54,61,0.16);
+}
+
+.btn-sair{
+  width:100%;
+  margin-top:12px;
+  background:#f3f4f6;
+  color:#111827;
+  border:1px solid #e5e7eb;
 }
 
 .badge{
-position:absolute;
-top:-8px;
-right:-8px;
-background:red;
-color:white;
-padding:4px 6px;
-border-radius:20px;
-font-size:12px;
-display:none;
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  background:var(--danger);
+  color:#fff;
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 8px 16px rgba(239,68,68,0.25);
 }
 
-.extratoItem{
-padding:12px 0;
-border-bottom:1px solid var(--line);
+.extrato-header{
+  margin-bottom:8px;
 }
 
-.statusPendente{
-color:#d97706;
-font-weight:bold;
+.extrato-lista{
+  margin-top:10px;
+}
+
+.extrato-item{
+  border-top:1px solid var(--line);
+  padding:16px 0;
+}
+
+.extrato-item:first-child{
+  border-top:none;
+  padding-top:6px;
+}
+
+.extrato-linha-topo{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.tipo-tag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:var(--primary);
+  font-size:12px;
+  font-weight:700;
+  text-transform:capitalize;
+}
+
+.valor-item{
+  font-size:18px;
+  font-weight:800;
+  color:#111827;
+}
+
+.status-pendente{
+  font-size:14px;
+  color:#d97706;
+  font-weight:700;
+  margin-bottom:4px;
+  text-transform:capitalize;
+}
+
+.data-item{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.vazio{
+  color:var(--muted);
+  font-size:15px;
+  padding:10px 0 4px 0;
+}
+
+@media (max-width:640px){
+  .saldo-valor{
+    font-size:52px;
+  }
+
+  .acoes-grid{
+    grid-template-columns:1fr;
+  }
+
+  .premium-badge{
+    font-size:13px;
+    padding:10px 14px;
+  }
+
+  .brand{
+    font-size:24px;
+  }
 }

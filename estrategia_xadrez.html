@@ -40,7 +40,7 @@ color:white;
 flex:1;
 }
 
-.refazer{
+.atualizar{
 background:#6f42c1;
 color:white;
 flex:1;
@@ -56,7 +56,7 @@ text-align:center;
 }
 
 .titulo{
-font-size:30px;
+font-size:32px;
 font-weight:bold;
 color:#5f8f42;
 margin-bottom:8px;
@@ -72,16 +72,12 @@ margin-bottom:10px;
 .info{
 font-size:15px;
 color:#555;
-line-height:1.7;
-}
-
-.porquinho{
-font-size:42px;
+line-height:1.8;
+margin-bottom:14px;
 }
 
 .quadro{
 display:grid;
-grid-template-columns:repeat(20,1fr);
 gap:1px;
 background:#cfcfcf;
 border:1px solid #cfcfcf;
@@ -89,13 +85,16 @@ margin-top:16px;
 }
 
 .casa{
-min-height:36px;
-padding:2px 1px;
+min-height:42px;
+padding:4px 2px;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
 background:white;
+cursor:pointer;
+user-select:none;
+transition:all .15s ease;
 }
 
 .casa.clara{
@@ -106,27 +105,43 @@ background:#ffffff;
 background:#f3f3f3;
 }
 
+.casa.marcada{
+background:#1faa59 !important;
+color:white;
+transform:scale(0.98);
+}
+
 .numero{
-font-size:9px;
+font-size:10px;
 font-weight:bold;
-color:#444;
 line-height:1;
 }
 
 .valor{
-font-size:8px;
-color:#111;
+font-size:12px;
 line-height:1.1;
-margin-top:2px;
-text-align:center;
-word-break:break-word;
+margin-top:3px;
+font-weight:bold;
 }
 
 .rodape{
 margin-top:16px;
 font-size:14px;
 color:#666;
-line-height:1.6;
+line-height:1.7;
+}
+
+.resumo{
+margin-top:18px;
+padding:16px;
+background:#f8f9fb;
+border-radius:14px;
+line-height:1.9;
+font-size:16px;
+}
+
+.resumo strong{
+color:#111;
 }
 </style>
 </head>
@@ -134,22 +149,33 @@ line-height:1.6;
 
 <div class="topo">
 <button class="voltar" onclick="location.href='index.html'">Voltar</button>
-<button class="refazer" onclick="location.href='index.html'">Nova meta</button>
+<button class="atualizar" onclick="gerarNovaEstrategia()">Atualizar</button>
 </div>
 
 <div class="card">
-<div class="porquinho">🐷</div>
-<div class="titulo">Desafio dos 500 depósitos</div>
+<div class="titulo">Estratégia Xadrez</div>
 <div id="totalPlanejado" class="total">R$ 0,00</div>
 <div id="infoMeta" class="info">Carregando...</div>
 <div id="quadro" class="quadro"></div>
+
+<div class="resumo">
+<div>Saldo marcado: <strong id="saldoMarcado">R$ 0,00</strong></div>
+<div>Falta marcar: <strong id="saldoFaltando">R$ 0,00</strong></div>
+<div>Quadrados marcados: <strong id="qtdMarcados">0</strong></div>
+</div>
+
 <div class="rodape">
-Estratégia xadrez criada com 500 depósitos.<br>
-O total pode passar um pouco da meta para fechar a conta certinho.
+Clique nos quadrados para marcar os depósitos já feitos.<br>
+O botão <b>Atualizar</b> gera uma nova distribuição de valores.
 </div>
 </div>
 
 <script>
+let meta = 0
+let qtdQuadrados = 500
+let valores = []
+let marcados = []
+
 async function verificarLogin(){
 const {data,error} = await sb.auth.getSession()
 
@@ -168,85 +194,180 @@ maximumFractionDigits:2
 })
 }
 
-function formatarCurto(v){
-return Number(v || 0).toLocaleString("pt-BR",{
-minimumFractionDigits:0,
-maximumFractionDigits:2
-})
+function chaveValores(){
+return "rrinvest_xadrez_valores_" + meta + "_" + qtdQuadrados
 }
 
-function gerarValores(meta){
-const totalCasas = 500
-const pesos = []
+function chaveMarcados(){
+return "rrinvest_xadrez_marcados_" + meta + "_" + qtdQuadrados
+}
 
-for(let i=0;i<totalCasas;i++){
-pesos.push((i % 25) + 1)
+function obterColunas(qtd){
+if(qtd === 100) return 10
+if(qtd === 200) return 20
+if(qtd === 300) return 20
+return 20
+}
+
+function gerarValoresInteiros(metaEscolhida, quantidade){
+const pesos = []
+const grupos = [1,2,3,4,5,6,7,8,9,10]
+
+for(let i=0;i<quantidade;i++){
+const aleatorio = grupos[Math.floor(Math.random() * grupos.length)]
+pesos.push(aleatorio)
 }
 
 const somaPesos = pesos.reduce((a,b)=>a+b,0)
-const metaCentavos = Math.ceil(Number(meta) * 100)
+let inteiros = pesos.map(p => Math.max(1, Math.floor((metaEscolhida * p) / somaPesos)))
 
-let valoresCentavos = pesos.map(p=>{
-const bruto = Math.floor((metaCentavos * p) / somaPesos)
-return bruto < 1 ? 1 : bruto
-})
+let totalAtual = inteiros.reduce((a,b)=>a+b,0)
 
-let totalAtual = valoresCentavos.reduce((a,b)=>a+b,0)
-
-let idx = totalCasas - 1
-while(totalAtual < metaCentavos){
-valoresCentavos[idx] += 1
+while(totalAtual < metaEscolhida){
+const idx = Math.floor(Math.random() * quantidade)
+inteiros[idx] += 1
 totalAtual += 1
-idx--
-if(idx < 0) idx = totalCasas - 1
+}
+
+while(totalAtual > metaEscolhida + quantidade){
+const idx = Math.floor(Math.random() * quantidade)
+if(inteiros[idx] > 1){
+inteiros[idx] -= 1
+totalAtual -= 1
+}
 }
 
 return {
-valores: valoresCentavos.map(v=>v/100),
-total: totalAtual / 100
+valores: inteiros,
+total: totalAtual
 }
 }
 
-function montarQuadro(valores){
+function embaralhar(lista){
+const copia = [...lista]
+for(let i=copia.length-1;i>0;i--){
+const j = Math.floor(Math.random() * (i+1))
+const temp = copia[i]
+copia[i] = copia[j]
+copia[j] = temp
+}
+return copia
+}
+
+function salvarValores(){
+localStorage.setItem(chaveValores(), JSON.stringify(valores))
+}
+
+function salvarMarcados(){
+localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
+}
+
+function carregarMarcados(){
+const salvo = JSON.parse(localStorage.getItem(chaveMarcados()) || "[]")
+if(Array.isArray(salvo) && salvo.length === valores.length){
+marcados = salvo
+}else{
+marcados = new Array(valores.length).fill(false)
+}
+}
+
+function atualizarResumo(){
+let totalMarcado = 0
+let quantidadeMarcados = 0
+
+for(let i=0;i<valores.length;i++){
+if(marcados[i]){
+totalMarcado += Number(valores[i])
+quantidadeMarcados++
+}
+}
+
+const totalPlanejado = valores.reduce((a,b)=>a+b,0)
+const falta = totalPlanejado - totalMarcado
+
+document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
+document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
+document.getElementById("qtdMarcados").innerText = quantidadeMarcados
+}
+
+function montarQuadro(){
 const quadro = document.getElementById("quadro")
+const colunas = obterColunas(qtdQuadrados)
+quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+
 let html = ""
 
 valores.forEach((valor,index)=>{
-const linha = Math.floor(index / 20)
-const coluna = index % 20
-const classe = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
+const linha = Math.floor(index / colunas)
+const coluna = index % colunas
+const classeCor = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
+const classeMarcada = marcados[index] ? "marcada" : ""
 
 html += `
-<div class="casa ${classe}">
+<div class="casa ${classeCor} ${classeMarcada}" onclick="alternarMarcado(${index})">
 <div class="numero">${index + 1}</div>
-<div class="valor">${formatarCurto(valor)}</div>
+<div class="valor">${valor}</div>
 </div>
 `
 })
 
 quadro.innerHTML = html
+atualizarResumo()
+}
+
+function alternarMarcado(index){
+marcados[index] = !marcados[index]
+salvarMarcados()
+montarQuadro()
+}
+
+function gerarNovaEstrategia(){
+const resultado = gerarValoresInteiros(meta, qtdQuadrados)
+valores = embaralhar(resultado.valores)
+marcados = new Array(valores.length).fill(false)
+
+salvarValores()
+salvarMarcados()
+atualizarCabecalho(resultado.total)
+montarQuadro()
+}
+
+function atualizarCabecalho(total){
+document.getElementById("totalPlanejado").innerText = "R$ " + formatarReal(total)
+document.getElementById("infoMeta").innerHTML = `
+Meta escolhida: <b>R$ ${formatarReal(meta)}</b><br>
+Total planejado: <b>R$ ${formatarReal(total)}</b><br>
+Quantidade de quadrados: <b>${qtdQuadrados}</b>
+`
 }
 
 async function iniciar(){
 const ok = await verificarLogin()
 if(!ok) return
 
-const meta = Number(localStorage.getItem("rrinvest_meta_xadrez") || 0)
+meta = Math.floor(Number(localStorage.getItem("rrinvest_meta_xadrez") || 0))
+qtdQuadrados = Number(localStorage.getItem("rrinvest_qtd_xadrez") || 500)
 
 if(!meta || meta <= 0){
 document.getElementById("infoMeta").innerText = "Nenhuma meta encontrada."
 return
 }
 
-const resultado = gerarValores(meta)
+const valoresSalvos = JSON.parse(localStorage.getItem(chaveValores()) || "[]")
 
-document.getElementById("totalPlanejado").innerText = "R$ " + formatarReal(resultado.total)
-document.getElementById("infoMeta").innerHTML = `
-Meta escolhida: <b>R$ ${formatarReal(meta)}</b><br>
-Total planejado: <b>R$ ${formatarReal(resultado.total)}</b>
-`
+if(Array.isArray(valoresSalvos) && valoresSalvos.length === qtdQuadrados){
+valores = valoresSalvos
+}else{
+const resultado = gerarValoresInteiros(meta, qtdQuadrados)
+valores = embaralhar(resultado.valores)
+salvarValores()
+}
 
-montarQuadro(resultado.valores)
+carregarMarcados()
+
+const total = valores.reduce((a,b)=>a+b,0)
+atualizarCabecalho(total)
+montarQuadro()
 }
 
 iniciar()

@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,6 +27,7 @@
     <div class="premium-badge">Premium</div>
   </div>
 
+  <!-- CARD 1 -->
   <div class="card saldo-card">
     <div class="saldo-topo">
       <div>
@@ -43,6 +44,33 @@
     </div>
   </div>
 
+  <!-- CARD 2 -->
+  <div class="card">
+    <div class="acoes-grid">
+      <button class="btn btn-deposito" onclick="location.href='deposito.html'">
+        <span class="material-symbols-rounded icon">add</span>
+        Depositar
+      </button>
+
+      <button class="btn btn-saque" onclick="location.href='saque.html'">
+        <span class="material-symbols-rounded icon">south</span>
+        Sacar
+      </button>
+
+      <button class="btn btn-notificacoes" onclick="location.href='notificacoes.html'">
+        <span class="material-symbols-rounded icon">notifications</span>
+        Notificações
+        <span id="badge" class="badge oculto">0</span>
+      </button>
+    </div>
+
+    <button class="btn btn-sair" onclick="logout()">
+      <span class="material-symbols-rounded icon">logout</span>
+      Sair
+    </button>
+  </div>
+
+  <!-- CARD 3 -->
   <div class="card">
     <div class="card-title">Estratégia Xadrez</div>
     <div class="card-subtitle">Monte sua estratégia de depósitos do jeito que preferir.</div>
@@ -95,31 +123,7 @@
     </button>
   </div>
 
-  <div class="card">
-    <div class="acoes-grid">
-      <button class="btn btn-deposito" onclick="location.href='deposito.html'">
-        <span class="material-symbols-rounded icon">add</span>
-        Depositar
-      </button>
-
-      <button class="btn btn-saque" onclick="location.href='saque.html'">
-        <span class="material-symbols-rounded icon">south</span>
-        Sacar
-      </button>
-
-      <button class="btn btn-notificacoes" onclick="location.href='notificacoes.html'">
-        <span class="material-symbols-rounded icon">notifications</span>
-        Notificações
-        <span id="badge" class="badge oculto">0</span>
-      </button>
-    </div>
-
-    <button class="btn btn-sair" onclick="logout()">
-      <span class="material-symbols-rounded icon">logout</span>
-      Sair
-    </button>
-  </div>
-
+  <!-- CARD 4 -->
   <div class="card">
     <div class="extrato-header">
       <div class="card-title">Extrato</div>

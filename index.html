@@ -28,40 +28,47 @@ padding:24px;
 border-radius:16px;
 margin-bottom:20px;
 box-shadow:0 4px 18px rgba(0,0,0,0.08);
+text-align:center;
 }
 
 .nome{
-font-size:24px;
+font-size:22px;
 font-weight:bold;
 }
 
 .saldo{
-font-size:40px;
+font-size:44px;
 font-weight:bold;
 color:#0b3d91;
 margin-top:8px;
+display:none;
 }
 
 .mineracao{
-display:flex;
-justify-content:center;
-align-items:center;
-margin:20px 0;
+margin-top:10px;
 }
 
-.picareta{
-font-size:40px;
-animation:minerar 0.8s infinite alternate;
+.mensagemMineracao{
+font-size:16px;
+color:#666;
+margin-bottom:10px;
 }
 
-@keyframes minerar{
+.mineiro{
+font-size:46px;
+display:inline-block;
+animation:minerando 0.8s infinite alternate;
+}
+
+@keyframes minerando{
 from{transform:rotate(-20deg)}
 to{transform:rotate(20deg)}
 }
 
 .pedra{
-font-size:34px;
-margin-left:10px;
+font-size:36px;
+display:inline-block;
+margin-left:8px;
 animation:pedra 0.8s infinite alternate;
 }
 
@@ -70,11 +77,43 @@ from{transform:translateX(0px)}
 to{transform:translateX(4px)}
 }
 
+.moedas{
+font-size:22px;
+margin-top:10px;
+animation:moeda 1s infinite;
+}
+
+@keyframes moeda{
+0%{opacity:0; transform:translateY(-10px)}
+50%{opacity:1}
+100%{opacity:0; transform:translateY(10px)}
+}
+
+.barra{
+height:10px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.progresso{
+height:10px;
+width:0%;
+background:#1faa59;
+animation:progressoMineracao 3s forwards;
+}
+
+@keyframes progressoMineracao{
+0%{width:0%}
+100%{width:100%}
+}
+
 .botoes{
 display:flex;
 flex-wrap:wrap;
 gap:10px;
-margin-top:10px;
+margin-top:20px;
 }
 
 button{
@@ -105,6 +144,8 @@ position:relative;
 .sair{
 background:#1e4ea1;
 color:white;
+width:100%;
+margin-top:10px;
 }
 
 .badge{
@@ -122,6 +163,10 @@ align-items:center;
 justify-content:center;
 }
 
+.oculto{
+display:none;
+}
+
 .pendente{
 color:orange;
 font-weight:bold;
@@ -133,13 +178,10 @@ padding:12px 0;
 line-height:1.6;
 }
 
-.oculto{
-display:none;
-}
-
 </style>
 
 </head>
+
 <body>
 
 <div class="card">
@@ -148,9 +190,25 @@ display:none;
 
 <div class="saldo" id="saldo">R$ 0,00</div>
 
-<div class="mineracao">
-<div class="picareta">⛏️</div>
-<div class="pedra">🪨</div>
+<div class="mineracao" id="mineracao">
+
+<div class="mensagemMineracao">
+⛏️ Minerando lucros...
+</div>
+
+<div>
+<span class="mineiro">⛏️</span>
+<span class="pedra">🪨</span>
+</div>
+
+<div class="moedas">
+💰 💰 💰
+</div>
+
+<div class="barra">
+<div class="progresso"></div>
+</div>
+
 </div>
 
 <div class="botoes">
@@ -163,16 +221,16 @@ Depositar
 Sacar
 </button>
 
-<button class="notif" onclick="toggleNotificacoes()" id="btnNotif">
+<button class="notif" onclick="toggleNotificacoes()">
 Notificações
 <span id="badge" class="badge oculto">!</span>
 </button>
 
+</div>
+
 <button class="sair" onclick="logout()">
 Sair
 </button>
-
-</div>
 
 </div>
 
@@ -226,17 +284,14 @@ return true
 
 async function carregarPerfil(){
 
-const {data,error}=await sb
+const {data}=await sb
 .from("profiles")
 .select("*")
 .eq("id",usuario.id)
 .single()
 
-if(error){
-return
-}
-
 document.getElementById("nome").innerText=data.nome
+
 document.getElementById("saldo").innerText="R$ "+formatarReal(data.saldo)
 
 }
@@ -291,41 +346,14 @@ const {data}=await sb
 .from("notificacoes")
 .select("*")
 .eq("usuario_id",usuario.id)
-.order("created_at",{ascending:false})
 
-if(!data || data.length==0){
-
-document.getElementById("notificacoes").innerHTML="Nenhuma notificação."
-document.getElementById("badge").classList.add("oculto")
-return
-
-}
-
-let html=""
+if(!data) return
 
 let nova=false
 
 data.forEach(n=>{
-
 if(!n.lida) nova=true
-
-html+=`
-
-<div class="notificacao">
-
-<b>${n.titulo}</b><br>
-
-${n.mensagem}<br>
-
-${horarioBrasil(n.created_at)}
-
-</div>
-
-`
-
 })
-
-document.getElementById("notificacoes").innerHTML=html
 
 if(nova){
 document.getElementById("badge").classList.remove("oculto")
@@ -345,17 +373,14 @@ document.getElementById("badge").classList.add("oculto")
 
 }
 
-async function toggleNotificacoes(){
+function toggleNotificacoes(){
 
 const card=document.getElementById("cardNotif")
 
 card.classList.toggle("oculto")
 
 if(!card.classList.contains("oculto")){
-
-await marcarLidas()
-await carregarNotificacoes()
-
+marcarLidas()
 }
 
 }
@@ -386,6 +411,14 @@ await carregarPerfil()
 await carregarExtrato()
 
 await carregarNotificacoes()
+
+setTimeout(()=>{
+
+document.getElementById("mineracao").style.display="none"
+
+document.getElementById("saldo").style.display="block"
+
+},3000)
 
 }
 

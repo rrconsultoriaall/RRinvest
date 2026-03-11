@@ -1,4 +1,4 @@
-const CACHE_NAME = "rrinvest-cache-v4";
+const CACHE_NAME = "rrinvest-cache-v5";
 
 const urlsToCache = [
   "/RRinvest/",
@@ -36,13 +36,24 @@ self.addEventListener("activate", event => {
           }
         })
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
+
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        const responseClone = response.clone();
+
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone).catch(() => {});
+        });
+
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

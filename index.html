@@ -1,39 +1,48 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RRinvest</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+background:#f3f3f3;
 padding:20px;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
 margin-bottom:20px;
+border-radius:10px;
 }
 
 button{
-padding:10px 20px;
-background:#0b3d91;
-color:white;
+padding:10px 15px;
 border:none;
 border-radius:6px;
 cursor:pointer;
-margin-right:10px;
+background:#1e4ea1;
+color:white;
+margin:5px;
+}
+
+input{
+width:100%;
+padding:10px;
 margin-top:10px;
+margin-bottom:10px;
 }
 
 </style>
@@ -45,22 +54,11 @@ margin-top:10px;
 <div class="card">
 
 <h2 id="nome"></h2>
+<p id="saldo"></p>
 
-<h3 id="saldo"></h3>
-
-<button onclick="window.location.href='deposito.html'">
-Depositar
-</button>
-
-<button onclick="window.location.href='saque.html'">
-Sacar
-</button>
-
-<br><br>
-
-<button onclick="logout()">
-Sair
-</button>
+<button onclick="depositar()">Depositar</button>
+<button onclick="sacar()">Sacar</button>
+<button onclick="logout()">Sair</button>
 
 </div>
 
@@ -74,21 +72,16 @@ Sair
 
 <script>
 
-let usuario
+const supabase = supabase.createClient(
+"https://SEU_PROJETO.supabase.co",
+"SUA_PUBLIC_ANON_KEY"
+)
 
-function formatarReal(valor){
+let user
 
-return Number(valor).toLocaleString("pt-BR",{
-minimumFractionDigits:2
-})
+function horarioBrasil(data){
 
-}
-
-function formatarData(data){
-
-const d = new Date(data)
-
-return d.toLocaleString("pt-BR",{
+return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo"
 })
 
@@ -96,67 +89,122 @@ timeZone:"America/Sao_Paulo"
 
 async function iniciar(){
 
-const { data } = await sb.auth.getUser()
+const {data:{session}} = await supabase.auth.getSession()
 
-if(!data.user){
-window.location.href="login.html"
+if(!session){
+
+location.href="login.html"
 return
+
 }
 
-usuario = data.user
+user=session.user
 
-const { data:perfil } = await sb
+carregarPerfil()
+carregarExtrato()
+
+}
+
+async function carregarPerfil(){
+
+let {data} = await supabase
 .from("profiles")
 .select("*")
-.eq("id",usuario.id)
+.eq("id",user.id)
 .single()
 
-document.getElementById("nome").innerText = perfil.nome
-
-document.getElementById("saldo").innerText =
-"Saldo: R$ "+formatarReal(perfil.saldo)
-
-carregarExtrato()
+document.getElementById("nome").innerText=data.nome
+document.getElementById("saldo").innerText="Saldo: R$ "+data.saldo
 
 }
 
 async function carregarExtrato(){
 
-const { data } = await sb
+let {data} = await supabase
 .from("transacoes")
 .select("*")
-.eq("usuario_id",usuario.id)
-.order("id",{ascending:false})
+.eq("usuario_id",user.id)
+.eq("status","aprovado")
+.order("created_at",{ascending:false})
 
-const div = document.getElementById("extrato")
+let html=""
 
-div.innerHTML=""
+data.forEach(m=>{
 
-data.forEach(t=>{
+html+=`
 
-div.innerHTML += `
-<div style="border-bottom:1px solid #eee;padding:10px 0">
+<p>
 
-<strong>${t.tipo}</strong><br>
+<b>${m.tipo}</b><br>
+Valor: R$ ${m.valor}<br>
+${m.descricao}<br>
+${horarioBrasil(m.created_at)}
 
-Valor: R$ ${formatarReal(t.valor)}<br>
+</p>
 
-${t.descricao || ""}<br>
+<hr>
 
-${formatarData(t.created_at)}
-
-</div>
 `
 
 })
+
+document.getElementById("extrato").innerHTML=html
+
+}
+
+async function depositar(){
+
+let valor = prompt("Valor do depósito")
+
+if(!valor) return
+
+await supabase
+.from("transacoes")
+.insert({
+
+usuario_id:user.id,
+usuario_email:user.email,
+tipo:"deposito",
+valor:valor,
+descricao:"Depósito solicitado",
+status:"pendente",
+created_at:new Date().toISOString()
+
+})
+
+alert("Depósito solicitado. Aguarde aprovação.")
+
+}
+
+async function sacar(){
+
+let valor = prompt("Valor do saque")
+
+if(!valor) return
+
+await supabase
+.from("transacoes")
+.insert({
+
+usuario_id:user.id,
+usuario_email:user.email,
+tipo:"saque",
+valor:valor,
+descricao:"Saque solicitado",
+status:"pendente",
+created_at:new Date().toISOString()
+
+})
+
+alert("Saque solicitado.")
 
 }
 
 async function logout(){
 
-await sb.auth.signOut()
+await supabase.auth.signOut()
 
-window.location.href="login.html"
+location.href="login.html"
 
 }
 

@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RRinvest</title>
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial,Helvetica,sans-serif;
+font-family:Arial,sans-serif;
 background:#f4f6f8;
 margin:0;
 padding:20px;
@@ -29,6 +32,7 @@ text-align:center;
 .nome{
 font-size:22px;
 font-weight:bold;
+color:#111;
 }
 
 .saldo{
@@ -36,99 +40,127 @@ font-size:54px;
 font-weight:bold;
 color:#0b3d91;
 margin-top:12px;
+letter-spacing:-1px;
 }
 
 .mineracaoCard{
-background:linear-gradient(180deg,#101010,#1c1c1c);
+background:linear-gradient(180deg,#101010 0%,#1d1d1d 100%);
 color:white;
 overflow:hidden;
+position:relative;
 }
 
 .mineracaoTitulo{
+font-size:18px;
 font-weight:bold;
-margin-bottom:10px;
+margin-bottom:12px;
 }
 
-svg{
-max-width:420px;
+.caverna{
 width:100%;
+max-width:430px;
+margin:0 auto;
 display:block;
-margin:auto;
 }
 
-/* braço picareta */
-
-.braco{
-transform-origin:245px 130px;
-animation:golpe .6s infinite ease-in-out;
+.luzMina{
+animation:luzMina 2.2s infinite ease-in-out;
 }
 
-@keyframes golpe{
-0%{transform:rotate(-20deg)}
-40%{transform:rotate(15deg)}
-100%{transform:rotate(-20deg)}
+@keyframes luzMina{
+0%,100%{opacity:.35}
+50%{opacity:.75}
 }
 
-/* pedra tremendo */
+.carrinho{
+animation:carrinhoBalanco 1.6s infinite ease-in-out;
+transform-origin:65px 162px;
+}
+
+@keyframes carrinhoBalanco{
+0%,100%{transform:rotate(0deg)}
+50%{transform:rotate(-3deg)}
+}
+
+.mineiroCorpo{
+animation:mineiroRespira 1.4s infinite ease-in-out;
+transform-origin:210px 150px;
+}
+
+@keyframes mineiroRespira{
+0%,100%{transform:translateY(0)}
+50%{transform:translateY(-2px)}
+}
+
+.bracoPicareta{
+animation:golpePicareta .7s infinite ease-in-out;
+transform-origin:248px 132px;
+}
+
+@keyframes golpePicareta{
+0%{transform:rotate(-18deg)}
+45%{transform:rotate(12deg)}
+100%{transform:rotate(-18deg)}
+}
 
 .pedra{
-animation:pedra .6s infinite;
+animation:pedraTreme .7s infinite ease-in-out;
+transform-origin:346px 155px;
 }
 
-@keyframes pedra{
+@keyframes pedraTreme{
 0%,100%{transform:translateX(0)}
-50%{transform:translateX(5px)}
+45%{transform:translateX(5px)}
 }
 
-/* moedas voando */
+.fa1,.fa2,.fa3{
+opacity:0;
+animation:faisca 1s infinite ease-out;
+}
+
+.fa2{animation-delay:.18s}
+.fa3{animation-delay:.36s}
+
+@keyframes faisca{
+0%{opacity:0;transform:translate(0,0) scale(.7)}
+30%{opacity:1}
+100%{opacity:0;transform:translate(10px,-16px) scale(1.15)}
+}
 
 .moeda1,.moeda2,.moeda3{
 opacity:0;
-animation:moeda 1.8s infinite ease-out;
+animation:moedaVoando 1.8s infinite ease-out;
+transform-origin:center;
 }
 
-.moeda2{animation-delay:.4s}
-.moeda3{animation-delay:.8s}
+.moeda2{animation-delay:.35s}
+.moeda3{animation-delay:.7s}
 
-@keyframes moeda{
-0%{opacity:0;transform:translate(0,0)}
-30%{opacity:1}
-100%{opacity:0;transform:translate(-90px,-30px)}
+@keyframes moedaVoando{
+0%{opacity:0;transform:translate(0,0) scale(.7)}
+25%{opacity:1}
+100%{opacity:0;transform:translate(-120px,-12px) scale(1)}
 }
-
-/* carrinho balançando */
-
-.carrinho{
-animation:carrinho 2s infinite ease-in-out;
-}
-
-@keyframes carrinho{
-0%,100%{transform:rotate(0deg)}
-50%{transform:rotate(-4deg)}
-}
-
-/* barra mineração */
 
 .barraBox{
-margin-top:12px;
-height:10px;
-background:#333;
-border-radius:20px;
+margin-top:14px;
+height:11px;
+background:rgba(255,255,255,0.14);
+border-radius:999px;
 overflow:hidden;
 }
 
 .barra{
 height:100%;
 background:linear-gradient(90deg,#ffd700,#f7c948);
-animation:barra 2.4s infinite linear;
+animation:barraMinerando 2.6s infinite linear;
+border-radius:999px;
 }
 
-@keyframes barra{
+@keyframes barraMinerando{
 0%{width:0%}
 100%{width:100%}
 }
-
-/* botões */
 
 .botoes{
 display:flex;
@@ -144,206 +176,331 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
+font-weight:500;
 }
 
-.depositar{background:#1e4ea1;color:white}
-.sacar{background:#1faa59;color:white}
-.notif{background:#444;color:white;position:relative}
-.sair{background:#1e4ea1;color:white;width:100%;margin-top:10px}
+.depositar{
+background:#1e4ea1;
+color:white;
+}
+
+.sacar{
+background:#1faa59;
+color:white;
+}
+
+.notif{
+background:#444;
+color:white;
+position:relative;
+}
+
+.sair{
+background:#1e4ea1;
+color:white;
+width:100%;
+margin-top:10px;
+}
 
 .badge{
 position:absolute;
 top:-8px;
 right:-8px;
-background:red;
+background:#ff2d2d;
 color:white;
+min-width:20px;
+height:20px;
+border-radius:999px;
 font-size:12px;
-padding:4px 6px;
-border-radius:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:0 6px;
+font-weight:bold;
+box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+
+.oculto{
+display:none;
+}
+
+.pendente{
+color:orange;
+font-weight:bold;
 }
 
 .extratoItem{
-padding:10px 0;
+padding:12px 0;
 border-bottom:1px solid #eee;
+line-height:1.6;
 }
 
+.extratoItem:last-child{
+border-bottom:none;
+}
 </style>
 </head>
-
 <body>
 
-<!-- CARD SALDO -->
-
+<!-- CARD 1 -->
 <div class="card">
 <div id="nome" class="nome">Carregando...</div>
 <div id="saldo" class="saldo">R$ 0,00</div>
 </div>
 
-
-<!-- CARD MINERAÇÃO -->
-
+<!-- CARD 2 -->
 <div class="card mineracaoCard">
-
 <div class="mineracaoTitulo">⛏️ Minerando lucros...</div>
 
-<svg viewBox="0 0 420 200">
+<svg class="caverna" viewBox="0 0 430 230" xmlns="http://www.w3.org/2000/svg">
 
-<!-- chão -->
-
-<rect x="20" y="140" width="380" height="40" rx="8" fill="#222"/>
+<rect x="0" y="0" width="430" height="230" rx="18" fill="#101010"/>
+<rect x="25" y="168" width="380" height="38" rx="8" fill="#23252c"/>
+<ellipse class="luzMina" cx="235" cy="118" rx="150" ry="78" fill="rgba(255,215,0,0.08)"/>
 
 <!-- carrinho -->
-
 <g class="carrinho">
-<rect x="30" y="110" width="60" height="30" fill="#ccc"/>
-<circle cx="45" cy="145" r="8" fill="#c68a2f"/>
-<circle cx="75" cy="145" r="8" fill="#c68a2f"/>
+  <polygon points="32,132 86,132 97,156 23,156" fill="#d5d7dc" stroke="#3a3c42" stroke-width="3"/>
+  <polygon points="41,139 77,139 84,151 34,151" fill="#c28a37"/>
+  <polygon points="40,132 79,132 70,118 49,118" fill="#4f5055"/>
+  <circle cx="40" cy="165" r="10" fill="#cf9632" stroke="#4a4a4a" stroke-width="3"/>
+  <circle cx="79" cy="165" r="10" fill="#cf9632" stroke="#4a4a4a" stroke-width="3"/>
 </g>
 
-<!-- mineiro -->
+<!-- mineiro cartoon -->
+<g class="mineiroCorpo">
 
-<circle cx="210" cy="80" r="22" fill="#f5d7b7"/>
-<rect x="190" y="100" width="40" height="40" fill="#ef9b52"/>
+  <!-- cabeça -->
+  <circle cx="208" cy="88" r="28" fill="#f6d7b5"/>
+  <circle cx="197" cy="84" r="4" fill="#222"/>
+  <circle cx="220" cy="84" r="4" fill="#222"/>
+  <path d="M198 99 Q208 106 218 99" fill="none" stroke="#d45545" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="185" cy="97" r="4" fill="#ee9f92"/>
+  <circle cx="231" cy="97" r="4" fill="#ee9f92"/>
 
-<!-- braço -->
+  <!-- barba -->
+  <path d="M191 101 L191 123 L199 123 L199 108 L217 108 L217 123 L225 123 L225 101" fill="#1e1e24"/>
 
-<g class="braco">
-<line x1="230" y1="110" x2="260" y2="95" stroke="#f5d7b7" stroke-width="8"/>
-<line x1="260" y1="95" x2="290" y2="80" stroke="#8b5a2b" stroke-width="8"/>
-<line x1="290" y1="75" x2="310" y2="95" stroke="#777" stroke-width="8"/>
+  <!-- capacete -->
+  <path d="M176 70 Q208 42 240 70 L244 80 L172 80 Z" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
+  <rect x="172" y="77" width="72" height="8" rx="4" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
+  <rect x="203" y="50" width="10" height="29" fill="#22252c"/>
+  <circle cx="208" cy="80" r="10" fill="#89dceb" stroke="#22252c" stroke-width="4"/>
+
+  <!-- corpo -->
+  <rect x="185" y="122" width="46" height="52" rx="8" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
+  <rect x="203" y="122" width="10" height="52" fill="#2b3b7b"/>
+  <rect x="190" y="135" width="12" height="16" fill="#f5efdc" stroke="#22252c" stroke-width="2"/>
+  <rect x="215" y="135" width="12" height="16" fill="#f5efdc" stroke="#22252c" stroke-width="2"/>
+
+  <!-- braço esquerdo -->
+  <line x1="186" y1="134" x2="165" y2="128" stroke="#f6d7b5" stroke-width="8" stroke-linecap="round"/>
+  <path d="M159 121 Q150 126 154 136 Q160 141 169 138 L169 120 Z" fill="#f6d7b5"/>
+
+  <!-- pernas -->
+  <path d="M196 174 L190 198 Q199 208 207 196 L207 174 Z" fill="#2b3b7b"/>
+  <path d="M220 174 L226 198 Q217 208 209 196 L209 174 Z" fill="#2b3b7b"/>
+
+  <!-- braço direito + picareta -->
+  <g class="bracoPicareta">
+    <line x1="230" y1="134" x2="268" y2="120" stroke="#f6d7b5" stroke-width="8" stroke-linecap="round"/>
+    <line x1="268" y1="120" x2="302" y2="106" stroke="#8b5a2b" stroke-width="8" stroke-linecap="round"/>
+    <line x1="295" y1="96" x2="314" y2="116" stroke="#5e6068" stroke-width="8" stroke-linecap="round"/>
+    <line x1="304" y1="94" x2="325" y2="115" stroke="#3d3f46" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
 </g>
 
 <!-- pedra -->
+<g class="pedra">
+  <path d="M315 176 L342 126 L401 146 L375 186 Z" fill="#6d6d72"/>
+  <polyline points="349,136 358,150 347,170" stroke="#4b4b51" stroke-width="4" fill="none" stroke-linecap="round"/>
+</g>
 
-<polygon class="pedra" points="300,140 340,90 380,140" fill="#666"/>
+<!-- faíscas -->
+<circle class="fa1" cx="326" cy="116" r="3.5" fill="#ffd700"/>
+<circle class="fa2" cx="337" cy="121" r="3.5" fill="#ffd700"/>
+<circle class="fa3" cx="318" cy="126" r="3.5" fill="#ffd700"/>
 
-<!-- moedas -->
-
-<circle class="moeda1" cx="320" cy="80" r="6" fill="gold"/>
-<circle class="moeda2" cx="340" cy="85" r="6" fill="gold"/>
-<circle class="moeda3" cx="300" cy="85" r="6" fill="gold"/>
+<!-- moedas voando para o carrinho -->
+<circle class="moeda1" cx="348" cy="115" r="7" fill="#ffd700"/>
+<circle class="moeda2" cx="363" cy="119" r="7" fill="#ffd700"/>
+<circle class="moeda3" cx="334" cy="111" r="7" fill="#ffd700"/>
 
 </svg>
 
 <div class="barraBox">
 <div class="barra"></div>
 </div>
-
 </div>
 
-
-<!-- BOTÕES -->
-
+<!-- CARD 3 -->
 <div class="card">
-
 <div class="botoes">
-<button class="depositar" onclick="location.href='deposito.html'">Depositar</button>
-<button class="sacar" onclick="location.href='saque.html'">Sacar</button>
-
-<button class="notif" onclick="location.href='notificacoes.html'">
+<button class="depositar" onclick="irDeposito()">Depositar</button>
+<button class="sacar" onclick="irSaque()">Sacar</button>
+<button class="notif" onclick="abrirNotificacoes()">
 Notificações
-<span id="badge" class="badge" style="display:none">0</span>
+<span id="badge" class="badge oculto">0</span>
 </button>
-
 </div>
 
 <button class="sair" onclick="logout()">Sair</button>
-
 </div>
 
-
-<!-- EXTRATO -->
-
+<!-- CARD 4 -->
 <div class="card">
 <h3>Extrato</h3>
 <div id="extrato">Carregando...</div>
 </div>
 
-
 <script>
-
-let usuario=null
+let usuario = null
+let saldoAtual = 0
+let rendimentoPorMinuto = 0
+let timerSaldo = null
 
 function formatarReal(v){
-return Number(v).toLocaleString("pt-BR",{minimumFractionDigits:2})
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
 }
 
-async function iniciar(){
-
-const {data}=await sb.auth.getSession()
-
-if(!data.session){
-location.href="login.html"
-return
+function calcularRendimentoPorMinuto(saldo){
+return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
 }
 
-usuario=data.session.user
+function horarioBrasil(data){
+return new Date(data).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo"
+})
+}
 
-const perfil=await sb
+function atualizarSaldoNaTela(){
+document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
+}
+
+function iniciarLoopSaldo(){
+if(timerSaldo){
+clearInterval(timerSaldo)
+}
+
+timerSaldo = setInterval(()=>{
+saldoAtual = Number(saldoAtual) + Number(rendimentoPorMinuto)
+atualizarSaldoNaTela()
+},60000)
+}
+
+async function verificarLogin(){
+const { data, error } = await sb.auth.getSession()
+
+if(error || !data.session){
+location.href = "login.html"
+return false
+}
+
+usuario = data.session.user
+return true
+}
+
+async function carregarPerfil(){
+const { data, error } = await sb
 .from("profiles")
 .select("*")
-.eq("id",usuario.id)
+.eq("id", usuario.id)
 .single()
 
-document.getElementById("nome").innerText=perfil.data.nome
-document.getElementById("saldo").innerText="R$ "+formatarReal(perfil.data.saldo)
+if(error || !data) return
 
-carregarExtrato()
-verificarNotificacoes()
+document.getElementById("nome").innerText = data.nome
+saldoAtual = Number(data.saldo || 0)
+rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoAtual)
 
+atualizarSaldoNaTela()
+iniciarLoopSaldo()
 }
 
 async function carregarExtrato(){
-
-const {data}=await sb
+const { data, error } = await sb
 .from("transacoes")
 .select("*")
-.eq("usuario_id",usuario.id)
-.eq("status","pendente")
+.eq("usuario_id", usuario.id)
+.eq("status", "pendente")
+.order("created_at", { ascending:false })
 
-if(!data.length){
-document.getElementById("extrato").innerHTML="Nenhuma solicitação pendente."
+if(error){
+document.getElementById("extrato").innerHTML = "Erro ao carregar extrato."
 return
 }
 
-let html=""
+if(!data || data.length === 0){
+document.getElementById("extrato").innerHTML = "Nenhuma solicitação pendente."
+return
+}
 
-data.forEach(t=>{
-html+=`
+let html = ""
+
+data.forEach(t => {
+html += `
 <div class="extratoItem">
 <b>${t.tipo}</b><br>
-R$ ${formatarReal(t.valor)}
+Valor: R$ ${formatarReal(t.valor)}<br>
+Status: <span class="pendente">${t.status}</span><br>
+${horarioBrasil(t.created_at)}
 </div>
 `
 })
 
-document.getElementById("extrato").innerHTML=html
-
+document.getElementById("extrato").innerHTML = html
 }
 
 async function verificarNotificacoes(){
-
-const {count}=await sb
+const { count, error } = await sb
 .from("notificacoes")
-.select("*",{count:"exact",head:true})
-.eq("usuario_id",usuario.id)
-.eq("lida",false)
+.select("*", { count:"exact", head:true })
+.eq("usuario_id", usuario.id)
+.eq("lida", false)
 
-if(count>0){
-const badge=document.getElementById("badge")
-badge.style.display="block"
-badge.innerText=count
+if(error) return
+
+const badge = document.getElementById("badge")
+
+if(count && count > 0){
+badge.innerText = count > 99 ? "99+" : count
+badge.classList.remove("oculto")
+}else{
+badge.classList.add("oculto")
+}
 }
 
+function abrirNotificacoes(){
+location.href = "notificacoes.html"
+}
+
+function irDeposito(){
+location.href = "deposito.html"
+}
+
+function irSaque(){
+location.href = "saque.html"
 }
 
 async function logout(){
 await sb.auth.signOut()
-location.href="login.html"
+location.href = "login.html"
+}
+
+async function iniciar(){
+const ok = await verificarLogin()
+if(!ok) return
+
+await carregarPerfil()
+await carregarExtrato()
+await verificarNotificacoes()
 }
 
 iniciar()
-
 </script>
 
 </body>

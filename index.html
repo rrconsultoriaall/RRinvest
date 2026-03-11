@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RRinvest</title>
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
 font-family:Arial,sans-serif;
 background:#f4f6f8;
@@ -86,27 +89,33 @@ color:white;
 font-size:12px;
 padding:4px 6px;
 border-radius:20px;
+min-width:20px;
+text-align:center;
 }
 
 .extratoItem{
 padding:10px 0;
 border-bottom:1px solid #eee;
+line-height:1.6;
 }
 
+.extratoItem:last-child{
+border-bottom:none;
+}
+
+.pendente{
+color:orange;
+font-weight:bold;
+}
 </style>
 </head>
 
 <body>
 
-<!-- CARD SALDO -->
-
 <div class="card">
 <div id="nome" class="nome">Carregando...</div>
 <div id="saldo" class="saldo">R$ 0,00</div>
 </div>
-
-
-<!-- CARD BOTÕES -->
 
 <div class="card">
 
@@ -118,107 +127,193 @@ border-bottom:1px solid #eee;
 Notificações
 <span id="badge" class="badge" style="display:none">0</span>
 </button>
-
 </div>
 
 <button class="sair" onclick="logout()">Sair</button>
 
 </div>
 
-
-<!-- CARD EXTRATO -->
-
 <div class="card">
 <h3>Extrato</h3>
 <div id="extrato">Carregando...</div>
 </div>
 
-
 <script>
-
-let usuario=null
+let usuario = null
+let saldoAtual = 0
+let rendimentoPorMinuto = 0
+let timerSaldo = null
+let aguardandoPrimeiroDeposito = false
+let saldoVersion = 0
 
 function formatarReal(v){
-return Number(v).toLocaleString("pt-BR",{minimumFractionDigits:2})
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
 }
 
-async function iniciar(){
+function horarioBrasil(data){
+return new Date(data).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo"
+})
+}
 
-const {data}=await sb.auth.getSession()
+function chaveSaldo(){
+return "rrinvest_saldo_" + usuario.id
+}
 
-if(!data.session){
-location.href="login.html"
+function chaveVersion(){
+return "rrinvest_saldo_version_" + usuario.id
+}
+
+function calcularRendimentoPorMinuto(saldo){
+return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
+}
+
+function atualizarSaldoNaTela(){
+document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
+}
+
+function salvarSaldoLocal(){
+localStorage.setItem(chaveSaldo(), String(saldoAtual))
+localStorage.setItem(chaveVersion(), String(saldoVersion))
+}
+
+function limparTimer(){
+if(timerSaldo){
+clearInterval(timerSaldo)
+timerSaldo = null
+}
+}
+
+function iniciarLoopSaldo(){
+limparTimer()
+
+if(aguardandoPrimeiroDeposito || Number(saldoAtual) <= 0){
+atualizarSaldoNaTela()
 return
 }
 
-usuario=data.session.user
+timerSaldo = setInterval(()=>{
+saldoAtual = Number(saldoAtual) + Number(rendimentoPorMinuto)
+salvarSaldoLocal()
+atualizarSaldoNaTela()
+},60000)
 
-const perfil=await sb
+atualizarSaldoNaTela()
+}
+
+async function verificarLogin(){
+const {data,error} = await sb.auth.getSession()
+
+if(error || !data.session){
+location.href = "login.html"
+return false
+}
+
+usuario = data.session.user
+return true
+}
+
+async function carregarPerfil(){
+const {data,error} = await sb
 .from("profiles")
 .select("*")
 .eq("id",usuario.id)
 .single()
 
-document.getElementById("nome").innerText=perfil.data.nome
-document.getElementById("saldo").innerText="R$ "+formatarReal(perfil.data.saldo)
+if(error || !data) return
 
-carregarExtrato()
-verificarNotificacoes()
+document.getElementById("nome").innerText = data.nome
 
+const versionLocal = Number(localStorage.getItem(chaveVersion()) || -1)
+const saldoLocal = Number(localStorage.getItem(chaveSaldo()) || 0)
+
+saldoVersion = Number(data.saldo_version || 0)
+aguardandoPrimeiroDeposito = !!data.aguardando_primeiro_deposito
+
+if(versionLocal !== saldoVersion){
+saldoAtual = Number(data.saldo || 0)
+salvarSaldoLocal()
+}else{
+saldoAtual = saldoLocal
+}
+
+rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoAtual)
+iniciarLoopSaldo()
 }
 
 async function carregarExtrato(){
-
-const {data}=await sb
+const {data,error} = await sb
 .from("transacoes")
 .select("*")
 .eq("usuario_id",usuario.id)
 .eq("status","pendente")
+.order("created_at",{ascending:false})
 
-if(!data.length){
-document.getElementById("extrato").innerHTML="Nenhuma solicitação pendente."
+if(error){
+document.getElementById("extrato").innerHTML = "Erro ao carregar extrato."
 return
 }
 
-let html=""
+if(!data || data.length === 0){
+document.getElementById("extrato").innerHTML = "Nenhuma solicitação pendente."
+return
+}
+
+let html = ""
 
 data.forEach(t=>{
-html+=`
+html += `
 <div class="extratoItem">
 <b>${t.tipo}</b><br>
-R$ ${formatarReal(t.valor)}
+Valor: R$ ${formatarReal(t.valor)}<br>
+Status: <span class="pendente">${t.status}</span><br>
+${horarioBrasil(t.created_at)}
 </div>
 `
 })
 
-document.getElementById("extrato").innerHTML=html
-
+document.getElementById("extrato").innerHTML = html
 }
 
 async function verificarNotificacoes(){
-
-const {count}=await sb
+const {count,error} = await sb
 .from("notificacoes")
 .select("*",{count:"exact",head:true})
 .eq("usuario_id",usuario.id)
 .eq("lida",false)
 
-if(count>0){
-const badge=document.getElementById("badge")
-badge.style.display="block"
-badge.innerText=count
-}
+if(error) return
 
+const badge = document.getElementById("badge")
+
+if(count && count > 0){
+badge.style.display = "block"
+badge.innerText = count > 99 ? "99+" : count
+}else{
+badge.style.display = "none"
+}
 }
 
 async function logout(){
+limparTimer()
 await sb.auth.signOut()
-location.href="login.html"
+location.href = "login.html"
+}
+
+async function iniciar(){
+const ok = await verificarLogin()
+if(!ok) return
+
+await carregarPerfil()
+await carregarExtrato()
+await verificarNotificacoes()
 }
 
 iniciar()
-
 </script>
 
 </body>
-</html>
+  </html>

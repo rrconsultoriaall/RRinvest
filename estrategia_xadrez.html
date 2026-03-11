@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -49,7 +49,7 @@
     <div id="saldoAtualTopo" class="saldo-topo-xadrez">R$ 0,00</div>
   </div>
 
-  <div class="card">
+  <div class="card card-xadrez-ajustado">
     <div class="card-title xadrez-title">Estratégia Xadrez</div>
     <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
 
@@ -170,6 +170,11 @@ function salvarMarcadosLocais(){
   localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
 }
 
+function limparSalvamentoIndex(){
+  localStorage.setItem(chaveDescontoXadrez(), "0")
+  localStorage.removeItem(chaveResumoXadrez())
+}
+
 function salvarResumoNoIndex(totalMarcado, quantidadeMarcados){
   localStorage.setItem(chaveDescontoXadrez(), String(totalMarcado))
 
@@ -254,6 +259,7 @@ function gerarNovaEstrategia(){
 
   salvarValores()
   salvarMarcadosLocais()
+  limparSalvamentoIndex()
   esconderMensagemSalvar()
   montarQuadro()
 }
@@ -322,4 +328,4 @@ iniciar()
 </script>
 
 </body>
-        </html>
+</html>

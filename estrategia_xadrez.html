@@ -231,6 +231,10 @@ function chaveMarcados(){
 return "rrinvest_xadrez_marcados_" + meta + "_" + qtdQuadrados
 }
 
+function chaveDescontoXadrez(){
+return "rrinvest_xadrez_desconto_" + usuario.id
+}
+
 function obterColunas(qtd){
 if(qtd === 100) return 10
 if(qtd === 200) return 20
@@ -291,6 +295,10 @@ function salvarMarcados(){
 localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
 }
 
+function salvarDescontoNoIndex(totalMarcado){
+localStorage.setItem(chaveDescontoXadrez(), String(totalMarcado))
+}
+
 function carregarMarcados(){
 const salvo = JSON.parse(localStorage.getItem(chaveMarcados()) || "[]")
 if(Array.isArray(salvo) && salvo.length === valores.length){
@@ -318,12 +326,14 @@ function atualizarResumo(){
 const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
 const totalPlanejado = valores.reduce((a,b)=>a+b,0)
 const falta = totalPlanejado - totalMarcado
-const saldoRestante = saldoBasePerfil - totalMarcado
+const saldoRestante = Math.max(0, saldoBasePerfil - totalMarcado)
 
 document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
 document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
 document.getElementById("qtdMarcados").innerText = quantidadeMarcados
 document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
+
+salvarDescontoNoIndex(totalMarcado)
 }
 
 function montarQuadro(){
@@ -364,6 +374,7 @@ marcados = new Array(valores.length).fill(false)
 
 salvarValores()
 salvarMarcados()
+salvarDescontoNoIndex(0)
 atualizarCabecalho(resultado.total)
 montarQuadro()
 }

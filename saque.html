@@ -103,7 +103,8 @@ usuario_email: usuario.email,
 tipo: "saque",
 valor: valor,
 descricao: "PIX: " + pix,
-status: "pendente"
+status: "pendente",
+created_at: new Date().toISOString()
 })
 
 if(error){

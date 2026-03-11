@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RRinvest ADM</title>
+<title>Admin RRinvest</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
+
 body{
 font-family:Arial;
 background:#f3f3f3;
@@ -43,28 +46,49 @@ color:white;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="card">
-<h2>Admin RRinvest</h2>
+
+<h2>Painel Admin</h2>
+
 <button class="sair" onclick="logout()">Sair</button>
+
 </div>
 
 <div class="card">
+
 <h3>Depósitos pendentes</h3>
+
 <div id="depositos"></div>
+
 </div>
 
 <div class="card">
+
+<h3>Saques pendentes</h3>
+
+<div id="saques"></div>
+
+</div>
+
+<div class="card">
+
 <h3>Clientes</h3>
+
 <div id="clientes"></div>
+
 </div>
 
 <div class="card">
-<h3>Movimentações</h3>
+
+<h3>Movimentações aprovadas</h3>
+
 <div id="movimentos"></div>
+
 </div>
 
 <script>
@@ -93,13 +117,18 @@ let html=""
 data.forEach(c=>{
 
 html+=`
+
 <p>
+
 <b>${c.nome}</b><br>
 ${c.email}<br>
 Telefone: ${c.telefone}<br>
 Saldo: R$ ${c.saldo}
+
 </p>
+
 <hr>
+
 `
 
 })
@@ -121,19 +150,23 @@ let html=""
 data.forEach(d=>{
 
 html+=`
+
 <p>
 
-<b>Depósito</b><br>
 Usuário: ${d.usuario_email}<br>
 Valor: R$ ${d.valor}<br>
 Data: ${horarioBrasil(d.created_at)}<br><br>
 
-<button class="aprovar" onclick="aprovar(${d.id},'${d.usuario_id}',${d.valor})">
-Aprovar depósito
+<button class="aprovar" onclick="aprovarDeposito(${d.id},'${d.usuario_id}',${d.valor})">
+
+Aprovar
+
 </button>
 
 </p>
+
 <hr>
+
 `
 
 })
@@ -142,7 +175,7 @@ document.getElementById("depositos").innerHTML=html
 
 }
 
-async function aprovar(id,usuario,valor){
+async function aprovarDeposito(id,usuario,valor){
 
 await supabase
 .from("transacoes")
@@ -168,6 +201,38 @@ carregarMovimentos()
 
 }
 
+async function carregarSaques(){
+
+let {data} = await supabase
+.from("transacoes")
+.select("*")
+.eq("tipo","saque")
+.eq("status","pendente")
+
+let html=""
+
+data.forEach(d=>{
+
+html+=`
+
+<p>
+
+Usuário: ${d.usuario_email}<br>
+Valor: R$ ${d.valor}<br>
+Data: ${horarioBrasil(d.created_at)}
+
+</p>
+
+<hr>
+
+`
+
+})
+
+document.getElementById("saques").innerHTML=html
+
+}
+
 async function carregarMovimentos(){
 
 let {data} = await supabase
@@ -181,6 +246,7 @@ let html=""
 data.forEach(m=>{
 
 html+=`
+
 <p>
 
 <b>${m.tipo}</b><br>
@@ -189,7 +255,9 @@ ${m.descricao}<br>
 ${horarioBrasil(m.created_at)}
 
 </p>
+
 <hr>
+
 `
 
 })
@@ -201,12 +269,14 @@ document.getElementById("movimentos").innerHTML=html
 async function logout(){
 
 await supabase.auth.signOut()
-location.href="index.html"
+
+location.href="login.html"
 
 }
 
 carregarClientes()
 carregarDepositos()
+carregarSaques()
 carregarMovimentos()
 
 </script>

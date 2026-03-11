@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RRinvest Admin</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+margin-bottom:10px;
+}
+
+button{
+padding:10px 20px;
+background:#0b3d91;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.usuario{
+border-bottom:1px solid #eee;
+padding:10px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>RRinvest Admin</h2>
+
+<button onclick="logout()">Sair</button>
+
+</div>
+
+<div class="card">
+
+<h3>Adicionar saldo</h3>
+
+<input id="email" placeholder="Email do cliente">
+<input id="valor" placeholder="Valor">
+
+<button onclick="adicionarSaldo()">Adicionar saldo</button>
+
+<div id="msg"></div>
+
+</div>
+
+<div class="card">
+
+<h3>Clientes</h3>
+
+<div id="listaUsuarios"></div>
+
+</div>
+
+<script>
+
+let usuario
+
+function formatarReal(valor){
+
+return Number(valor).toLocaleString("pt-BR",{
+minimumFractionDigits:2
+})
+
+}
+
+async function iniciar(){
+
+const { data } = await sb.auth.getUser()
+
+if(!data.user){
+window.location.href="login.html"
+return
+}
+
+usuario = data.user
+
+carregarUsuarios()
+
+}
+
+async function carregarUsuarios(){
+
+const { data } = await sb
+.from("profiles")
+.select("*")
+.order("created_at",{ascending:false})
+
+const div = document.getElementById("listaUsuarios")
+
+div.innerHTML=""
+
+data.forEach(u=>{
+
+div.innerHTML+=`
+
+<div class="usuario">
+
+<strong>${u.nome}</strong><br>
+
+${u.email}<br>
+
+Telefone: ${u.telefone}<br>
+
+Saldo: R$ ${formatarReal(u.saldo)}
+
+</div>
+
+`
+
+})
+
+}
+
+async function adicionarSaldo(){
+
+const email = document.getElementById("email").value
+const valor = Number(document.getElementById("valor").value)
+
+const { data } = await sb
+.from("profiles")
+.select("*")
+.eq("email",email)
+.single()
+
+if(!data){
+
+document.getElementById("msg").innerText="Cliente não encontrado"
+return
+
+}
+
+const novoSaldo = Number(data.saldo)+valor
+
+await sb
+.from("profiles")
+.update({saldo:novoSaldo})
+.eq("id",data.id)
+
+await sb
+.from("transacoes")
+.insert({
+
+usuario_id:data.id,
+tipo:"deposito",
+valor:valor,
+descricao:"Depósito admin"
+
+})
+
+document.getElementById("msg").innerText="Saldo adicionado"
+
+carregarUsuarios()
+
+}
+
+async function logout(){
+
+await sb.auth.signOut()
+
+window.location.href="login.html"
+
+}
+
+iniciar()
+
+</script>
+
+</body>
+</html>

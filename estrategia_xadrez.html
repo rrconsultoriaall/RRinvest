@@ -23,7 +23,7 @@ padding:20px;
 .topo{
 display:flex;
 gap:10px;
-margin-bottom:20px;
+margin-bottom:14px;
 }
 
 button{
@@ -46,6 +46,27 @@ color:white;
 flex:1;
 }
 
+.cardTopoSaldo{
+background:white;
+padding:18px;
+border-radius:18px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
+margin-bottom:18px;
+text-align:center;
+}
+
+.labelSaldo{
+font-size:15px;
+color:#666;
+margin-bottom:6px;
+}
+
+.valorSaldo{
+font-size:34px;
+font-weight:bold;
+color:#0b3d91;
+}
+
 .card{
 background:white;
 padding:20px;
@@ -58,14 +79,14 @@ text-align:center;
 .titulo{
 font-size:32px;
 font-weight:bold;
-color:#5f8f42;
+color:#1e4ea1;
 margin-bottom:8px;
 }
 
 .total{
 font-size:34px;
 font-weight:bold;
-color:#d63384;
+color:#1faa59;
 margin-bottom:10px;
 }
 
@@ -152,6 +173,11 @@ color:#111;
 <button class="atualizar" onclick="gerarNovaEstrategia()">Atualizar</button>
 </div>
 
+<div class="cardTopoSaldo">
+<div class="labelSaldo">Saldo atual</div>
+<div id="saldoAtualTopo" class="valorSaldo">R$ 0,00</div>
+</div>
+
 <div class="card">
 <div class="titulo">Estratégia Xadrez</div>
 <div id="totalPlanejado" class="total">R$ 0,00</div>
@@ -171,10 +197,12 @@ O botão <b>Atualizar</b> gera uma nova distribuição de valores.
 </div>
 
 <script>
+let usuario = null
 let meta = 0
 let qtdQuadrados = 500
 let valores = []
 let marcados = []
+let saldoBasePerfil = 0
 
 async function verificarLogin(){
 const {data,error} = await sb.auth.getSession()
@@ -184,6 +212,7 @@ location.href = "login.html"
 return false
 }
 
+usuario = data.session.user
 return true
 }
 
@@ -271,7 +300,7 @@ marcados = new Array(valores.length).fill(false)
 }
 }
 
-function atualizarResumo(){
+function calcularTotalMarcado(){
 let totalMarcado = 0
 let quantidadeMarcados = 0
 
@@ -282,12 +311,19 @@ quantidadeMarcados++
 }
 }
 
+return { totalMarcado, quantidadeMarcados }
+}
+
+function atualizarResumo(){
+const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
 const totalPlanejado = valores.reduce((a,b)=>a+b,0)
 const falta = totalPlanejado - totalMarcado
+const saldoRestante = saldoBasePerfil - totalMarcado
 
 document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
 document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
 document.getElementById("qtdMarcados").innerText = quantidadeMarcados
+document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
 }
 
 function montarQuadro(){
@@ -335,10 +371,25 @@ montarQuadro()
 function atualizarCabecalho(total){
 document.getElementById("totalPlanejado").innerText = "R$ " + formatarReal(total)
 document.getElementById("infoMeta").innerHTML = `
-Meta escolhida: <b>R$ ${formatarReal(meta)}</b><br>
 Total planejado: <b>R$ ${formatarReal(total)}</b><br>
 Quantidade de quadrados: <b>${qtdQuadrados}</b>
 `
+}
+
+async function carregarSaldoPerfil(){
+const {data,error} = await sb
+.from("profiles")
+.select("saldo")
+.eq("id",usuario.id)
+.single()
+
+if(error || !data){
+saldoBasePerfil = 0
+}else{
+saldoBasePerfil = Number(data.saldo || 0)
+}
+
+document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoBasePerfil)
 }
 
 async function iniciar(){
@@ -352,6 +403,8 @@ if(!meta || meta <= 0){
 document.getElementById("infoMeta").innerText = "Nenhuma meta encontrada."
 return
 }
+
+await carregarSaldoPerfil()
 
 const valoresSalvos = JSON.parse(localStorage.getItem(chaveValores()) || "[]")
 

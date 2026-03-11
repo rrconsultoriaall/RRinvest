@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f3f3f3;
+padding:20px;
+margin:0;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:15px;
+margin-top:10px;
+}
+
+.voltar{
+background:#1e4ea1;
+color:white;
+}
+
+.item{
+border-bottom:1px solid #eee;
+padding:12px 0;
+line-height:1.6;
+}
+
+.item:last-child{
+border-bottom:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Clientes</h2>
+
+<button class="voltar" onclick="voltar()">Voltar</button>
+
+<div id="lista">Carregando...</div>
+
+</div>
+
+<script>
+
+let usuario
+
+function formatarReal(valor){
+
+return Number(valor).toLocaleString("pt-BR",{
+minimumFractionDigits:2
+})
+
+}
+
+async function verificarLogin(){
+
+const { data } = await sb.auth.getSession()
+
+if(!data.session){
+
+location.href="login.html"
+return
+
+}
+
+usuario=data.session.user
+
+}
+
+async function carregarClientes(){
+
+let { data } = await sb
+.from("profiles")
+.select("*")
+.order("created_at",{ascending:false})
+
+if(!data || data.length==0){
+
+document.getElementById("lista").innerHTML="Nenhum cliente"
+return
+
+}
+
+let html=""
+
+data.forEach(c=>{
+
+html+=`
+
+<div class="item">
+
+<b>${c.nome}</b><br>
+Email: ${c.email}<br>
+Telefone: ${c.telefone}<br>
+Saldo: R$ ${formatarReal(c.saldo)}
+
+</div>
+
+`
+
+})
+
+document.getElementById("lista").innerHTML=html
+
+}
+
+function voltar(){
+
+location.href="admin.html"
+
+}
+
+async function iniciar(){
+
+await verificarLogin()
+carregarClientes()
+
+}
+
+iniciar()
+
+</script>
+
+</body>
+</html>

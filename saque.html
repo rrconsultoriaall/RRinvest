@@ -103,6 +103,14 @@ color:#c0392b;
 
 <script>
 let usuario = null
+let perfil = null
+
+function formatarReal(valor){
+return Number(valor || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+}
 
 async function verificarLogin(){
 const { data, error } = await sb.auth.getSession()
@@ -116,6 +124,22 @@ usuario = data.session.user
 return true
 }
 
+async function carregarPerfil(){
+const { data, error } = await sb
+.from("profiles")
+.select("*")
+.eq("id", usuario.id)
+.single()
+
+if(error){
+mostrarMsg(error.message,"erro")
+return false
+}
+
+perfil = data
+return true
+}
+
 function mostrarMsg(texto,tipo=""){
 const el = document.getElementById("msg")
 el.className = "msg " + tipo
@@ -123,15 +147,41 @@ el.innerText = texto
 }
 
 async function sacar(){
-const valor = document.getElementById("valor").value.trim()
+const valorTexto = document.getElementById("valor").value.trim().replace(",",".")
 const pix = document.getElementById("pix").value.trim()
 
-if(!valor || !pix){
+if(!valorTexto || !pix){
 mostrarMsg("Preencha todos os campos","erro")
 return
 }
 
-const { error } = await sb
+const valor = Number(valorTexto)
+
+if(isNaN(valor) || valor <= 0){
+mostrarMsg("Digite um valor válido","erro")
+return
+}
+
+const saldoAtual = Number(perfil.saldo || 0)
+
+if(saldoAtual < valor){
+mostrarMsg("Saldo insuficiente","erro")
+return
+}
+
+const novoSaldo = saldoAtual - valor
+
+const { error: erroSaldo } = await sb
+.from("profiles")
+.update({ saldo: novoSaldo })
+.eq("id", usuario.id)
+
+if(erroSaldo){
+mostrarMsg(erroSaldo.message,"erro")
+return
+}
+
+const { error: erroTransacao } = await sb
 .from("transacoes")
 .insert({
 usuario_id: usuario.id,
@@ -143,8 +193,13 @@ status: "pendente",
 created_at: new Date().toISOString()
 })
 
-if(error){
-mostrarMsg(error.message,"erro")
+if(erroTransacao){
+await sb
+.from("profiles")
+.update({ saldo: saldoAtual })
+.eq("id", usuario.id)
+
+mostrarMsg(erroTransacao.message,"erro")
 return
 }
 
@@ -162,6 +217,9 @@ location.href = "index.html"
 async function iniciar(){
 const ok = await verificarLogin()
 if(!ok) return
+
+const okPerfil = await carregarPerfil()
+if(!okPerfil) return
 }
 
 iniciar()

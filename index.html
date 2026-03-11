@@ -1,410 +1,291 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>RRinvest</title>
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<link rel="stylesheet" href="style.css">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
-<style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f6f8;
-margin:0;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:22px;
-border-radius:18px;
-margin-bottom:20px;
-box-shadow:0 4px 16px rgba(0,0,0,0.08);
-text-align:center;
-}
-
-.nome{
-font-size:22px;
-font-weight:bold;
-}
-
-.saldo{
-font-size:54px;
-font-weight:bold;
-color:#0b3d91;
-margin-top:12px;
-}
-
-.subtitulo{
-font-size:14px;
-color:#666;
-margin-top:8px;
-}
-
-.infoDesconto{
-margin-top:10px;
-font-size:15px;
-color:#666;
-line-height:1.6;
-}
-
-input, select{
-width:100%;
-padding:14px;
-border:1px solid #ccc;
-border-radius:12px;
-font-size:16px;
-box-sizing:border-box;
-margin-top:12px;
-background:white;
-}
-
-.botoes{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-margin-top:10px;
-}
-
-button{
-flex:1;
-padding:14px;
-border:none;
-border-radius:12px;
-font-size:16px;
-cursor:pointer;
-}
-
-.xadrez{
-background:#6f42c1;
-color:white;
-width:100%;
-margin-top:12px;
-}
-
-.depositar{
-background:#1e4ea1;
-color:white;
-}
-
-.sacar{
-background:#1faa59;
-color:white;
-}
-
-.notif{
-background:#444;
-color:white;
-position:relative;
-}
-
-.sair{
-background:#1e4ea1;
-color:white;
-width:100%;
-margin-top:10px;
-}
-
-.badge{
-position:absolute;
-top:-8px;
-right:-8px;
-background:red;
-color:white;
-font-size:12px;
-padding:4px 6px;
-border-radius:20px;
-min-width:20px;
-text-align:center;
-display:none;
-}
-
-.extratoItem{
-padding:10px 0;
-border-bottom:1px solid #eee;
-line-height:1.6;
-}
-
-.extratoItem:last-child{
-border-bottom:none;
-}
-
-.pendente{
-color:orange;
-font-weight:bold;
-}
-</style>
 </head>
 
 <body>
 
-<!-- CARD 1 -->
-<div class="card">
-<div id="nome" class="nome">Carregando...</div>
-<div id="saldo" class="saldo">R$ 0,00</div>
-<div id="infoDesconto" class="infoDesconto" style="display:none">
-Reservado na Estratégia Xadrez: <strong id="valorReservado">R$ 0,00</strong>
+<div class="container">
+
+<div class="topoApp">
+
+<div>
+<div class="logoNome">RRinvest</div>
+<div class="logoSub">Painel financeiro</div>
 </div>
+
+<div class="statusChip">
+Premium
 </div>
 
-<!-- CARD 2 -->
+</div>
+
+
+<!-- CARD SALDO -->
+
+<div class="card cardSaldo">
+
+<div id="nome" class="nome">
+Carregando...
+</div>
+
+<div class="saldo" id="saldo">
+R$ 0,00
+</div>
+
+</div>
+
+
+
+<!-- CARD ESTRATÉGIA XADREZ -->
+
 <div class="card">
-<h3>Estratégia Xadrez</h3>
-<div class="subtitulo">Digite o valor que você quer juntar</div>
 
-<input type="number" id="metaXadrez" placeholder="Ex: 10000" step="1" min="1">
+<div class="cardTitulo">
+Estratégia Xadrez
+</div>
 
-<select id="qtdQuadrados">
+<div class="cardSubtitulo">
+Escolha um valor para montar sua estratégia de depósitos.
+</div>
+
+<input id="valorMeta" placeholder="Ex: 10000">
+
+<select id="quantidade">
 <option value="100">100 quadrados</option>
 <option value="200">200 quadrados</option>
 <option value="300">300 quadrados</option>
-<option value="500" selected>500 quadrados</option>
+<option value="500">500 quadrados</option>
 </select>
 
-<button class="xadrez" onclick="abrirEstrategiaXadrez()">Abrir estratégia xadrez</button>
+<button class="btnPrincipal xadrez" onclick="criarXadrez()">
+Criar estratégia
+</button>
+
 </div>
 
-<!-- CARD 3 -->
+
+
+<!-- BOTÕES -->
+
 <div class="card">
 
 <div class="botoes">
-<button class="depositar" onclick="location.href='deposito.html'">Depositar</button>
-<button class="sacar" onclick="location.href='saque.html'">Sacar</button>
+
+<button class="depositar" onclick="location.href='deposito.html'">
+Depositar
+</button>
+
+<button class="sacar" onclick="location.href='saque.html'">
+Sacar
+</button>
 
 <button class="notif" onclick="location.href='notificacoes.html'">
+
 Notificações
-<span id="badge" class="badge">0</span>
+
+<div id="badge" class="badge">
+0
+</div>
+
 </button>
-</div>
-
-<button class="sair" onclick="logout()">Sair</button>
 
 </div>
 
-<!-- CARD 4 -->
+<button class="sair" onclick="sair()">
+Sair
+</button>
+
+</div>
+
+
+
+<!-- EXTRATO -->
+
 <div class="card">
-<h3>Extrato</h3>
-<div id="extrato">Carregando...</div>
+
+<div class="extratoTopo">
+
+<div class="extratoTitulo">
+Extrato
 </div>
+
+<div class="extratoSub">
+Últimas movimentações
+</div>
+
+</div>
+
+<div id="extrato" class="extratoLista">
+
+<div class="vazio">
+Nenhuma solicitação pendente.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
 
 <script>
-let usuario = null
-let saldoAtual = 0
-let rendimentoPorMinuto = 0
-let timerSaldo = null
-let aguardandoPrimeiroDeposito = false
-let saldoVersion = 0
 
-function formatarReal(v){
-return Number(v || 0).toLocaleString("pt-BR",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-})
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let usuario = JSON.parse(localStorage.getItem("usuario"))
+
+if(!usuario){
+
+location.href="login.html"
+
 }
 
-function horarioBrasil(data){
-return new Date(data).toLocaleString("pt-BR",{
-timeZone:"America/Sao_Paulo"
-})
-}
 
-function chaveSaldo(){
-return "rrinvest_saldo_" + usuario.id
-}
 
-function chaveVersion(){
-return "rrinvest_saldo_version_" + usuario.id
-}
+async function carregar(){
 
-function chaveDescontoXadrez(){
-return "rrinvest_xadrez_desconto_" + usuario.id
-}
-
-function calcularRendimentoPorMinuto(saldo){
-return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
-}
-
-function atualizarSaldoNaTela(){
-const desconto = Number(localStorage.getItem(chaveDescontoXadrez()) || 0)
-const saldoExibicao = Math.max(0, Number(saldoAtual) - desconto)
-
-document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoExibicao)
-
-const info = document.getElementById("infoDesconto")
-const valorReservado = document.getElementById("valorReservado")
-
-if(desconto > 0){
-info.style.display = "block"
-valorReservado.innerText = "R$ " + formatarReal(desconto)
-}else{
-info.style.display = "none"
-}
-}
-
-function salvarSaldoLocal(){
-localStorage.setItem(chaveSaldo(), String(saldoAtual))
-localStorage.setItem(chaveVersion(), String(saldoVersion))
-}
-
-function limparTimer(){
-if(timerSaldo){
-clearInterval(timerSaldo)
-timerSaldo = null
-}
-}
-
-function iniciarLoopSaldo(){
-limparTimer()
-
-if(aguardandoPrimeiroDeposito || Number(saldoAtual) <= 0){
-atualizarSaldoNaTela()
-return
-}
-
-timerSaldo = setInterval(()=>{
-saldoAtual = Number(saldoAtual) + Number(rendimentoPorMinuto)
-salvarSaldoLocal()
-atualizarSaldoNaTela()
-},60000)
-
-atualizarSaldoNaTela()
-}
-
-async function verificarLogin(){
-const {data,error} = await sb.auth.getSession()
-
-if(error || !data.session){
-location.href = "login.html"
-return false
-}
-
-usuario = data.session.user
-return true
-}
-
-async function carregarPerfil(){
-const {data,error} = await sb
-.from("profiles")
+const {data} = await supabase
+.from("clientes")
 .select("*")
 .eq("id",usuario.id)
 .single()
 
-if(error || !data) return
+document.getElementById("nome").innerText=data.nome
 
-document.getElementById("nome").innerText = data.nome
+let saldo = data.saldo || 0
 
-const versionLocal = Number(localStorage.getItem(chaveVersion()) || -1)
-const saldoLocal = Number(localStorage.getItem(chaveSaldo()) || 0)
+saldo -= parseFloat(localStorage.getItem("descontoXadrez") || 0)
 
-saldoVersion = Number(data.saldo_version || 0)
-aguardandoPrimeiroDeposito = !!data.aguardando_primeiro_deposito
+document.getElementById("saldo").innerText = 
+"R$ " + saldo.toFixed(2).replace(".",",")
 
-if(versionLocal !== saldoVersion){
-saldoAtual = Number(data.saldo || 0)
-salvarSaldoLocal()
-}else{
-saldoAtual = saldoLocal
 }
 
-rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoAtual)
-iniciarLoopSaldo()
-}
 
 async function carregarExtrato(){
-const {data,error} = await sb
-.from("transacoes")
+
+const {data} = await supabase
+.from("movimentacoes")
 .select("*")
-.eq("usuario_id",usuario.id)
-.eq("status","pendente")
-.order("created_at",{ascending:false})
+.eq("cliente_id",usuario.id)
+.order("id",{ascending:false})
+.limit(10)
 
-if(error){
-document.getElementById("extrato").innerHTML = "Erro ao carregar extrato."
-return
-}
+let html=""
 
-if(!data || data.length === 0){
-document.getElementById("extrato").innerHTML = "Nenhuma solicitação pendente."
-return
-}
+if(data.length==0){
 
-let html = ""
+html='<div class="vazio">Nenhuma solicitação pendente.</div>'
 
-data.forEach(t=>{
-html += `
-<div class="extratoItem">
-<b>${t.tipo}</b><br>
-Valor: R$ ${formatarReal(t.valor)}<br>
-Status: <span class="pendente">${t.status}</span><br>
-${horarioBrasil(t.created_at)}
-</div>
-`
-})
-
-document.getElementById("extrato").innerHTML = html
-}
-
-async function verificarNotificacoes(){
-const {count,error} = await sb
-.from("notificacoes")
-.select("*",{count:"exact",head:true})
-.eq("usuario_id",usuario.id)
-.eq("lida",false)
-
-if(error) return
-
-const badge = document.getElementById("badge")
-
-if(count && count > 0){
-badge.style.display = "block"
-badge.innerText = count > 99 ? "99+" : count
 }else{
-badge.style.display = "none"
-}
-}
 
-function abrirEstrategiaXadrez(){
-const valor = Math.floor(Number(document.getElementById("metaXadrez").value))
-const quadrados = Number(document.getElementById("qtdQuadrados").value)
+data.forEach(m=>{
 
-if(!valor || valor <= 0){
-alert("Digite o valor que você quer juntar.")
-return
-}
+html+=`
 
-localStorage.setItem("rrinvest_meta_xadrez", String(valor))
-localStorage.setItem("rrinvest_qtd_xadrez", String(quadrados))
-location.href = "estrategia_xadrez.html"
-}
+<div class="extratoItem">
 
-async function logout(){
-limparTimer()
-await sb.auth.signOut()
-location.href = "login.html"
-}
+<div class="tipoLinha">
 
-window.addEventListener("focus",()=>{
-if(usuario){
-atualizarSaldoNaTela()
-}
+<div class="tipoTag">
+${m.tipo}
+</div>
+
+<div class="valorLinha">
+R$ ${m.valor}
+</div>
+
+</div>
+
+<div class="statusPendente">
+${m.status}
+</div>
+
+</div>
+
+`
+
 })
 
-async function iniciar(){
-const ok = await verificarLogin()
-if(!ok) return
-
-await carregarPerfil()
-await carregarExtrato()
-await verificarNotificacoes()
 }
 
-iniciar()
+document.getElementById("extrato").innerHTML=html
+
+}
+
+
+
+async function notificacoes(){
+
+const {count} = await supabase
+.from("movimentacoes")
+.select("*",{count:"exact",head:true})
+.eq("cliente_id",usuario.id)
+.eq("status","pendente")
+
+if(count>0){
+
+let badge=document.getElementById("badge")
+
+badge.style.display="block"
+
+badge.innerText=count
+
+}
+
+}
+
+
+
+function criarXadrez(){
+
+let meta = document.getElementById("valorMeta").value
+let qtd = document.getElementById("quantidade").value
+
+if(!meta){
+
+alert("Digite um valor")
+
+return
+
+}
+
+localStorage.setItem("metaXadrez",meta)
+localStorage.setItem("qtdXadrez",qtd)
+
+location.href="xadrez.html"
+
+}
+
+
+
+function sair(){
+
+localStorage.removeItem("usuario")
+
+location.href="login.html"
+
+}
+
+
+
+carregar()
+carregarExtrato()
+notificacoes()
+
 </script>
 
 </body>

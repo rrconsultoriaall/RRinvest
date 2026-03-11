@@ -43,14 +43,8 @@ margin-top:12px;
 letter-spacing:-1px;
 }
 
-.rendimento{
-margin-top:8px;
-font-size:15px;
-color:#666;
-}
-
 .mineracaoCard{
-background:linear-gradient(180deg,#111 0%,#1a1a1a 100%);
+background:linear-gradient(180deg,#101010 0%,#1b1b1b 100%);
 color:white;
 overflow:hidden;
 position:relative;
@@ -64,67 +58,79 @@ margin-bottom:14px;
 
 .caverna{
 width:100%;
-max-width:420px;
+max-width:430px;
 margin:0 auto;
 display:block;
 }
 
-.luz{
-animation:luzPulse 2.4s infinite ease-in-out;
-transform-origin:300px 92px;
+.luzCaverna{
+animation:luzPulse 2.2s infinite ease-in-out;
+transform-origin:215px 110px;
 }
 
 @keyframes luzPulse{
-0%,100%{opacity:.55}
+0%,100%{opacity:.45}
 50%{opacity:.9}
 }
 
-.picaretaGrupo{
-transform-origin:180px 112px;
-animation:picaretaBate 1s infinite ease-in-out;
+.carrinho{
+animation:carrinhoMove 1.4s infinite ease-in-out;
+transform-origin:72px 160px;
 }
 
-@keyframes picaretaBate{
-0%{transform:rotate(-12deg)}
-45%{transform:rotate(6deg)}
-100%{transform:rotate(-12deg)}
+@keyframes carrinhoMove{
+0%,100%{transform:rotate(0deg) translateY(0)}
+50%{transform:rotate(-2deg) translateY(-1px)}
+}
+
+.bracoPicareta{
+transform-origin:235px 128px;
+animation:golpe 0.8s infinite ease-in-out;
+}
+
+@keyframes golpe{
+0%{transform:rotate(-20deg)}
+45%{transform:rotate(10deg)}
+100%{transform:rotate(-20deg)}
 }
 
 .pedra{
-animation:pedraTreme 1s infinite ease-in-out;
-transform-origin:310px 150px;
+transform-origin:338px 155px;
+animation:pedraTreme 0.8s infinite ease-in-out;
 }
 
 @keyframes pedraTreme{
 0%,100%{transform:translateX(0)}
-45%{transform:translateX(2px)}
+45%{transform:translateX(4px)}
 }
 
-.faisca1,.faisca2{
+.moeda1,.moeda2,.moeda3{
 opacity:0;
-animation:faisca 1.4s infinite ease-out;
-}
-
-.faisca2{animation-delay:.4s}
-
-@keyframes faisca{
-0%{opacity:0; transform:translate(0,0) scale(.8)}
-30%{opacity:.8}
-100%{opacity:0; transform:translate(6px,-10px) scale(1.1)}
-}
-
-.moeda1,.moeda2{
-opacity:0;
-animation:moedaSobe 2.2s infinite ease-out;
+animation:moedaSobe 1.8s infinite ease-out;
 transform-origin:center;
 }
 
-.moeda2{animation-delay:.7s}
+.moeda2{animation-delay:.35s}
+.moeda3{animation-delay:.7s}
 
 @keyframes moedaSobe{
-0%{opacity:0; transform:translateY(8px) scale(.8)}
-20%{opacity:1}
-100%{opacity:0; transform:translateY(-26px) scale(1)}
+0%{opacity:0; transform:translateY(8px) scale(.7) rotate(0deg)}
+25%{opacity:1}
+100%{opacity:0; transform:translateY(-42px) scale(1) rotate(18deg)}
+}
+
+.fa1,.fa2,.fa3{
+opacity:0;
+animation:faisca 1s infinite ease-out;
+}
+
+.fa2{animation-delay:.2s}
+.fa3{animation-delay:.4s}
+
+@keyframes faisca{
+0%{opacity:0; transform:translate(0,0) scale(.7)}
+30%{opacity:1}
+100%{opacity:0; transform:translate(10px,-14px) scale(1.15)}
 }
 
 .progressoBox{
@@ -140,13 +146,13 @@ height:100%;
 width:35%;
 background:linear-gradient(90deg,#f7c948,#ffd700);
 border-radius:999px;
-animation:barraLoop 3s infinite ease-in-out;
+animation:barraLoop 2.8s infinite ease-in-out;
 }
 
 @keyframes barraLoop{
-0%{width:18%}
-50%{width:70%}
-100%{width:18%}
+0%{width:15%}
+50%{width:78%}
+100%{width:15%}
 }
 
 .botoes{
@@ -233,42 +239,85 @@ border-bottom:none;
 <div class="card">
 <div id="nome" class="nome">Carregando...</div>
 <div id="saldo" class="saldo">R$ 0,00</div>
-<div id="rendimento" class="rendimento">Rendimento por minuto: R$ 0,00</div>
 </div>
 
 <!-- CARD 2 -->
 <div class="card mineracaoCard">
 <div class="mineracaoTitulo">⛏️ Minerando lucros...</div>
 
-<svg class="caverna" viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="420" height="220" rx="18" fill="#111"/>
-<ellipse class="luz" cx="300" cy="92" rx="95" ry="60" fill="rgba(255,215,0,0.08)"/>
-<rect x="25" y="168" width="370" height="38" rx="8" fill="#202225"/>
+<svg class="caverna" viewBox="0 0 430 230" xmlns="http://www.w3.org/2000/svg">
+
+<!-- fundo -->
+<rect x="0" y="0" width="430" height="230" rx="18" fill="#111"/>
+<rect x="22" y="148" width="386" height="42" rx="8" fill="#202225"/>
+<ellipse class="luzCaverna" cx="230" cy="112" rx="145" ry="82" fill="rgba(255,215,0,0.07)"/>
+
+<!-- carrinho -->
+<g class="carrinho">
+<polygon points="38,133 86,133 96,156 28,156" fill="#d7d7d7" stroke="#4b4b4b" stroke-width="3"/>
+<polygon points="45,139 79,139 85,152 39,152" fill="#b07a2f"/>
+<circle cx="45" cy="164" r="9" fill="#c68a2f" stroke="#4b4b4b" stroke-width="3"/>
+<circle cx="82" cy="164" r="9" fill="#c68a2f" stroke="#4b4b4b" stroke-width="3"/>
+<polygon points="42,133 80,133 69,118 53,118" fill="#49494f"/>
+</g>
 
 <!-- mineiro -->
-<circle cx="140" cy="98" r="14" fill="#ffd7b0"/>
-<rect x="126" y="83" width="28" height="10" rx="2" fill="#f4c542"/>
-<rect x="132" y="112" width="16" height="34" fill="#2f6cd1"/>
-<line x1="140" y1="124" x2="180" y2="108" stroke="#ffd7b0" stroke-width="7" stroke-linecap="round"/>
+<g>
+<circle cx="196" cy="90" r="28" fill="#f5d7b7"/>
+<circle cx="186" cy="86" r="4" fill="#222"/>
+<circle cx="207" cy="86" r="4" fill="#222"/>
+<path d="M186 101 Q196 108 206 101" fill="none" stroke="#d94b3d" stroke-width="4" stroke-linecap="round"/>
+<circle cx="173" cy="99" r="4" fill="#f2a18e"/>
+<circle cx="218" cy="99" r="4" fill="#f2a18e"/>
 
-<g class="picaretaGrupo">
-<line x1="180" y1="108" x2="210" y2="94" stroke="#8b5a2b" stroke-width="6" stroke-linecap="round"/>
-<line x1="206" y1="88" x2="222" y2="103" stroke="#c9ced6" stroke-width="6" stroke-linecap="round"/>
+<!-- barba -->
+<path d="M180 103 L180 122 L188 122 L188 108 L204 108 L204 122 L212 122 L212 103" fill="#1e1e25"/>
+
+<!-- capacete -->
+<path d="M168 72 Q196 45 224 72 L228 80 L164 80 Z" fill="#ef9b52" stroke="#1e1e25" stroke-width="4"/>
+<rect x="164" y="77" width="64" height="8" rx="4" fill="#ef9b52" stroke="#1e1e25" stroke-width="4"/>
+<rect x="191" y="52" width="10" height="28" fill="#1e1e25"/>
+<circle cx="196" cy="80" r="10" fill="#89dceb" stroke="#1e1e25" stroke-width="4"/>
+
+<!-- corpo -->
+<rect x="174" y="121" width="44" height="48" rx="8" fill="#ef9b52" stroke="#1e1e25" stroke-width="4"/>
+<rect x="191" y="121" width="10" height="48" fill="#2d3d7a"/>
+<rect x="178" y="132" width="11" height="15" fill="#f5edd8" stroke="#1e1e25" stroke-width="2"/>
+<rect x="203" y="132" width="11" height="15" fill="#f5edd8" stroke="#1e1e25" stroke-width="2"/>
+
+<!-- mão esquerda curtindo -->
+<line x1="174" y1="132" x2="154" y2="125" stroke="#f5d7b7" stroke-width="8" stroke-linecap="round"/>
+<path d="M148 117 Q141 122 144 130 Q148 138 157 137 L157 117 Z" fill="#f5d7b7"/>
+
+<!-- pernas -->
+<path d="M184 169 L180 193 Q188 202 195 192 L195 169 Z" fill="#2d3d7a"/>
+<path d="M208 169 L212 193 Q204 202 197 192 L197 169 Z" fill="#2d3d7a"/>
+
+<!-- braço com picareta -->
+<g class="bracoPicareta">
+<line x1="218" y1="132" x2="258" y2="120" stroke="#f5d7b7" stroke-width="8" stroke-linecap="round"/>
+<line x1="258" y1="120" x2="292" y2="108" stroke="#8b5a2b" stroke-width="8" stroke-linecap="round"/>
+<line x1="286" y1="99" x2="304" y2="117" stroke="#5e6068" stroke-width="8" stroke-linecap="round"/>
+<line x1="295" y1="96" x2="315" y2="118" stroke="#3d3f46" stroke-width="8" stroke-linecap="round"/>
+</g>
 </g>
 
 <!-- pedra -->
 <g class="pedra">
-<polygon points="285,166 315,118 368,140 345,175" fill="#6d6d72"/>
-<polyline points="320,128 327,142 316,160" stroke="#4a4a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M308 174 L333 124 L390 145 L366 183 Z" fill="#66666d"/>
+<polyline points="343,134 351,148 341,167" stroke="#4a4a50" stroke-width="4" fill="none" stroke-linecap="round"/>
 </g>
 
-<!-- faiscas -->
-<circle class="faisca1" cx="305" cy="120" r="3" fill="#ffd700"/>
-<circle class="faisca2" cx="315" cy="125" r="3" fill="#ffd700"/>
+<!-- faíscas -->
+<circle class="fa1" cx="318" cy="116" r="3.5" fill="#ffd700"/>
+<circle class="fa2" cx="329" cy="121" r="3.5" fill="#ffd700"/>
+<circle class="fa3" cx="309" cy="126" r="3.5" fill="#ffd700"/>
 
 <!-- moedas -->
-<circle class="moeda1" cx="330" cy="118" r="7" fill="#ffd700"/>
-<circle class="moeda2" cx="345" cy="122" r="7" fill="#ffd700"/>
+<circle class="moeda1" cx="336" cy="114" r="7" fill="#ffd700"/>
+<circle class="moeda2" cx="351" cy="118" r="7" fill="#ffd700"/>
+<circle class="moeda3" cx="321" cy="110" r="7" fill="#ffd700"/>
+
 </svg>
 
 <div class="progressoBox">
@@ -334,7 +383,6 @@ localStorage.setItem(chaveTempo(), String(Date.now()))
 
 function atualizarSaldoNaTela(){
 document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
-document.getElementById("rendimento").innerText = "Rendimento por minuto: R$ " + formatarReal(rendimentoPorMinuto)
 }
 
 function iniciarLoopSaldo(){

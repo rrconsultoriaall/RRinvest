@@ -1,52 +1,110 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>RRinvest</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
+
 body{
-font-family:Arial,sans-serif;
-background:#f3f3f3;
-padding:20px;
+font-family:Arial;
+background:#f4f6f8;
 margin:0;
+padding:20px;
 }
 
 .card{
 background:white;
-padding:20px;
-border-radius:12px;
+padding:24px;
+border-radius:16px;
 margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
+box-shadow:0 4px 18px rgba(0,0,0,0.08);
 }
 
-.topo-botoes{
+.nome{
+font-size:24px;
+font-weight:bold;
+}
+
+.saldo{
+font-size:40px;
+font-weight:bold;
+color:#0b3d91;
+margin-top:8px;
+}
+
+.mineracao{
+display:flex;
+justify-content:center;
+align-items:center;
+margin:20px 0;
+}
+
+.picareta{
+font-size:40px;
+animation:minerar 0.8s infinite alternate;
+}
+
+@keyframes minerar{
+from{transform:rotate(-20deg)}
+to{transform:rotate(20deg)}
+}
+
+.pedra{
+font-size:34px;
+margin-left:10px;
+animation:pedra 0.8s infinite alternate;
+}
+
+@keyframes pedra{
+from{transform:translateX(0px)}
+to{transform:translateX(4px)}
+}
+
+.botoes{
 display:flex;
 flex-wrap:wrap;
-gap:8px;
+gap:10px;
 margin-top:10px;
 }
 
 button{
-padding:12px 14px;
+flex:1;
+padding:14px;
 border:none;
-border-radius:8px;
-background:#1e4ea1;
-color:white;
+border-radius:10px;
 font-size:16px;
 cursor:pointer;
 }
 
-#btnNotif{
+.depositar{
+background:#1e4ea1;
+color:white;
+}
+
+.sacar{
+background:#1faa59;
+color:white;
+}
+
+.notif{
 background:#444;
+color:white;
 position:relative;
+}
+
+.sair{
+background:#1e4ea1;
+color:white;
 }
 
 .badge{
@@ -62,7 +120,6 @@ font-size:12px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-weight:bold;
 }
 
 .pendente{
@@ -76,217 +133,265 @@ padding:12px 0;
 line-height:1.6;
 }
 
-.notificacao:last-child{
-border-bottom:none;
-}
-
 .oculto{
 display:none;
 }
+
 </style>
+
 </head>
 <body>
 
 <div class="card">
-<h2 id="nome">Carregando...</h2>
-<p id="saldo">Saldo: R$ 0,00</p>
 
-<div class="topo-botoes">
-<button onclick="irDeposito()">Depositar</button>
-<button onclick="irSaque()">Sacar</button>
+<div class="nome" id="nome">Carregando...</div>
 
-<button id="btnNotif" onclick="toggleNotificacoes()">
-Notificações
-<span id="badgeNotif" class="badge oculto">!</span>
+<div class="saldo" id="saldo">R$ 0,00</div>
+
+<div class="mineracao">
+<div class="picareta">⛏️</div>
+<div class="pedra">🪨</div>
+</div>
+
+<div class="botoes">
+
+<button class="depositar" onclick="irDeposito()">
+Depositar
 </button>
 
-<button onclick="logout()">Sair</button>
-</div>
+<button class="sacar" onclick="irSaque()">
+Sacar
+</button>
+
+<button class="notif" onclick="toggleNotificacoes()" id="btnNotif">
+Notificações
+<span id="badge" class="badge oculto">!</span>
+</button>
+
+<button class="sair" onclick="logout()">
+Sair
+</button>
+
 </div>
 
-<div class="card oculto" id="cardNotificacoes">
+</div>
+
+<div class="card oculto" id="cardNotif">
+
 <h3>Notificações</h3>
-<div id="notificacoes">Carregando...</div>
+
+<div id="notificacoes">
+Carregando...
+</div>
+
 </div>
 
 <div class="card">
+
 <h3>Extrato</h3>
-<div id="extrato">Carregando...</div>
+
+<div id="extrato">
+Carregando...
+</div>
+
 </div>
 
 <script>
-let usuario = null
 
-function formatarReal(valor){
-return Number(valor || 0).toLocaleString("pt-BR",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-})
+let usuario=null
+
+function formatarReal(v){
+return Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2})
 }
 
 function horarioBrasil(data){
-if(!data) return "-"
-return new Date(data).toLocaleString("pt-BR",{
-timeZone:"America/Sao_Paulo",
-year:"numeric",
-month:"2-digit",
-day:"2-digit",
-hour:"2-digit",
-minute:"2-digit",
-second:"2-digit"
-})
+return new Date(data).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})
 }
 
 async function verificarLogin(){
-const { data, error } = await sb.auth.getSession()
+
+const {data,error}=await sb.auth.getSession()
 
 if(error || !data.session){
-location.href = "login.html"
+
+location.href="login.html"
 return false
+
 }
 
-usuario = data.session.user
+usuario=data.session.user
 return true
+
 }
 
 async function carregarPerfil(){
-const { data, error } = await sb
+
+const {data,error}=await sb
 .from("profiles")
 .select("*")
-.eq("id", usuario.id)
+.eq("id",usuario.id)
 .single()
 
 if(error){
-document.getElementById("nome").innerText = "Erro ao carregar"
-document.getElementById("saldo").innerText = error.message
 return
 }
 
-document.getElementById("nome").innerText = data.nome || "-"
-document.getElementById("saldo").innerText = "Saldo: R$ " + formatarReal(data.saldo)
+document.getElementById("nome").innerText=data.nome
+document.getElementById("saldo").innerText="R$ "+formatarReal(data.saldo)
+
 }
 
 async function carregarExtrato(){
-const { data, error } = await sb
+
+const {data}=await sb
 .from("transacoes")
 .select("*")
-.eq("usuario_id", usuario.id)
-.eq("status", "pendente")
+.eq("usuario_id",usuario.id)
+.eq("status","pendente")
 .order("created_at",{ascending:false})
 
-if(error){
-document.getElementById("extrato").innerHTML = error.message
+if(!data || data.length==0){
+
+document.getElementById("extrato").innerHTML="Nenhuma solicitação pendente."
 return
+
 }
 
-if(!data || data.length===0){
-document.getElementById("extrato").innerHTML = "Nenhuma solicitação pendente."
-return
-}
-
-let html = ""
+let html=""
 
 data.forEach(t=>{
-html += `
+
+html+=`
+
 <p>
+
 <b>${t.tipo}</b><br>
+
 Valor: R$ ${formatarReal(t.valor)}<br>
-Status: <span class="pendente">${t.status || "-"}</span><br>
-${t.descricao || ""}<br>
+
+Status: <span class="pendente">${t.status}</span><br>
+
 ${horarioBrasil(t.created_at)}
+
 </p>
+
 <hr>
+
 `
+
 })
 
-document.getElementById("extrato").innerHTML = html
+document.getElementById("extrato").innerHTML=html
+
 }
 
 async function carregarNotificacoes(){
-const { data, error } = await sb
+
+const {data}=await sb
 .from("notificacoes")
 .select("*")
-.eq("usuario_id", usuario.id)
+.eq("usuario_id",usuario.id)
 .order("created_at",{ascending:false})
 
-if(error){
-document.getElementById("notificacoes").innerHTML = error.message
+if(!data || data.length==0){
+
+document.getElementById("notificacoes").innerHTML="Nenhuma notificação."
+document.getElementById("badge").classList.add("oculto")
 return
+
 }
 
-if(!data || data.length===0){
-document.getElementById("notificacoes").innerHTML = "Nenhuma notificação."
-document.getElementById("badgeNotif").classList.add("oculto")
-return
-}
+let html=""
 
-let html = ""
+let nova=false
 
 data.forEach(n=>{
-html += `
+
+if(!n.lida) nova=true
+
+html+=`
+
 <div class="notificacao">
-<b>${n.titulo || "-"}</b><br>
-${n.mensagem || ""}<br>
+
+<b>${n.titulo}</b><br>
+
+${n.mensagem}<br>
+
 ${horarioBrasil(n.created_at)}
+
 </div>
+
 `
+
 })
 
-document.getElementById("notificacoes").innerHTML = html
+document.getElementById("notificacoes").innerHTML=html
 
-const temNova = data.some(n => n.lida === false)
-
-if(temNova){
-document.getElementById("badgeNotif").classList.remove("oculto")
-}else{
-document.getElementById("badgeNotif").classList.add("oculto")
-}
+if(nova){
+document.getElementById("badge").classList.remove("oculto")
 }
 
-async function marcarNotificacoesComoLidas(){
+}
+
+async function marcarLidas(){
+
 await sb
 .from("notificacoes")
-.update({ lida: true })
-.eq("usuario_id", usuario.id)
-.eq("lida", false)
+.update({lida:true})
+.eq("usuario_id",usuario.id)
+.eq("lida",false)
 
-document.getElementById("badgeNotif").classList.add("oculto")
+document.getElementById("badge").classList.add("oculto")
+
 }
 
 async function toggleNotificacoes(){
-document.getElementById("cardNotificacoes").classList.toggle("oculto")
 
-const aberto = !document.getElementById("cardNotificacoes").classList.contains("oculto")
+const card=document.getElementById("cardNotif")
 
-if(aberto){
-await marcarNotificacoesComoLidas()
+card.classList.toggle("oculto")
+
+if(!card.classList.contains("oculto")){
+
+await marcarLidas()
 await carregarNotificacoes()
+
 }
+
 }
 
 function irDeposito(){
-location.href = "deposito.html"
+location.href="deposito.html"
 }
 
 function irSaque(){
-location.href = "saque.html"
+location.href="saque.html"
 }
 
 async function logout(){
+
 await sb.auth.signOut()
-location.href = "login.html"
+location.href="login.html"
+
 }
 
 async function iniciar(){
-const ok = await verificarLogin()
+
+const ok=await verificarLogin()
+
 if(!ok) return
 
 await carregarPerfil()
+
 await carregarExtrato()
+
 await carregarNotificacoes()
+
 }
 
 iniciar()
+
 </script>
+
 </body>
 </html>

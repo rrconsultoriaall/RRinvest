@@ -1,4 +1,4 @@
-const CACHE_NAME = "rrinvest-cache-v5";
+const CACHE_NAME = "rrinvest-cache-v6";
 
 const urlsToCache = [
   "/RRinvest/",
@@ -56,4 +56,10 @@ self.addEventListener("fetch", event => {
       })
       .catch(() => caches.match(event.request))
   );
+});
+
+self.addEventListener("message", event => {
+  if (event.data === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });

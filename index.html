@@ -43,6 +43,12 @@ margin-top:12px;
 letter-spacing:-1px;
 }
 
+.rendimento{
+margin-top:8px;
+font-size:15px;
+color:#666;
+}
+
 .mineracaoCard{
 background:linear-gradient(180deg,#111 0%,#1a1a1a 100%);
 color:white;
@@ -94,15 +100,15 @@ transform-origin:310px 150px;
 45%{transform:translateX(4px)}
 }
 
-.faísca1,.faísca2,.faísca3{
+.faisca1,.faisca2,.faisca3{
 opacity:0;
-animation:faísca 1s infinite ease-out;
+animation:faisca 1s infinite ease-out;
 }
 
-.faísca2{animation-delay:.2s}
-.faísca3{animation-delay:.4s}
+.faisca2{animation-delay:.2s}
+.faisca3{animation-delay:.4s}
 
-@keyframes faísca{
+@keyframes faisca{
 0%{opacity:0; transform:translate(0,0) scale(.8)}
 30%{opacity:1}
 100%{opacity:0; transform:translate(10px,-18px) scale(1.2)}
@@ -229,6 +235,7 @@ border-bottom:none;
 <div class="card">
 <div id="nome" class="nome">Carregando...</div>
 <div id="saldo" class="saldo">R$ 0,00</div>
+<div id="rendimento" class="rendimento">Rendimento por minuto: R$ 0,00</div>
 </div>
 
 <!-- CARD 2 -->
@@ -236,11 +243,8 @@ border-bottom:none;
 <div class="mineracaoTitulo">⛏️ Minerando lucros...</div>
 
 <svg class="caverna" viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
-
 <rect x="0" y="0" width="420" height="220" rx="18" fill="#111"/>
-
 <ellipse class="luz" cx="300" cy="92" rx="95" ry="60" fill="rgba(255,215,0,0.10)"/>
-
 <rect x="25" y="168" width="370" height="38" rx="8" fill="#202225"/>
 
 <!-- mineiro -->
@@ -260,16 +264,15 @@ border-bottom:none;
 <polyline points="320,128 327,142 316,160" stroke="#4a4a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
 </g>
 
-<!-- faíscas -->
-<circle class="faísca1" cx="305" cy="120" r="3" fill="#ffd700"/>
-<circle class="faísca2" cx="315" cy="125" r="3" fill="#ffd700"/>
-<circle class="faísca3" cx="298" cy="132" r="3" fill="#ffd700"/>
+<!-- faiscas -->
+<circle class="faisca1" cx="305" cy="120" r="3" fill="#ffd700"/>
+<circle class="faisca2" cx="315" cy="125" r="3" fill="#ffd700"/>
+<circle class="faisca3" cx="298" cy="132" r="3" fill="#ffd700"/>
 
 <!-- moedas -->
 <circle class="moeda1" cx="330" cy="118" r="7" fill="#ffd700"/>
 <circle class="moeda2" cx="345" cy="122" r="7" fill="#ffd700"/>
 <circle class="moeda3" cx="315" cy="114" r="7" fill="#ffd700"/>
-
 </svg>
 
 <div class="progressoBox">
@@ -299,6 +302,9 @@ Notificações
 
 <script>
 let usuario = null
+let saldoBase = 0
+let rendimentoPorMinuto = 0
+let timerSaldo = null
 
 function formatarReal(v){
 return Number(v || 0).toLocaleString("pt-BR",{
@@ -311,6 +317,60 @@ function horarioBrasil(data){
 return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo"
 })
+}
+
+function chaveSaldo(){
+return "rrinvest_saldo_" + usuario.id
+}
+
+function chaveTempo(){
+return "rrinvest_tempo_" + usuario.id
+}
+
+function calcularRendimentoPorMinuto(saldo){
+return (Number(saldo || 0) * 0.20) / 30
+}
+
+function salvarSaldoLocal(saldo){
+localStorage.setItem(chaveSaldo(), String(saldo))
+localStorage.setItem(chaveTempo(), String(Date.now()))
+}
+
+function lerSaldoCorrigido(){
+const saldoSalvo = Number(localStorage.getItem(chaveSaldo()) || saldoBase)
+const tempoSalvo = Number(localStorage.getItem(chaveTempo()) || Date.now())
+
+const agora = Date.now()
+const minutosPassados = Math.floor((agora - tempoSalvo) / 60000)
+
+if(minutosPassados <= 0){
+return saldoSalvo
+}
+
+const novoSaldo = saldoSalvo + (rendimentoPorMinuto * minutosPassados)
+
+localStorage.setItem(chaveSaldo(), String(novoSaldo))
+localStorage.setItem(chaveTempo(), String(tempoSalvo + (minutosPassados * 60000)))
+
+return novoSaldo
+}
+
+function atualizarSaldoNaTela(){
+const saldoAtual = lerSaldoCorrigido()
+document.getElementById("saldo").innerText = "R$ " + formatarReal(saldoAtual)
+document.getElementById("rendimento").innerText = "Rendimento por minuto: R$ " + formatarReal(rendimentoPorMinuto)
+}
+
+function iniciarLoopSaldo(){
+if(timerSaldo){
+clearInterval(timerSaldo)
+}
+
+atualizarSaldoNaTela()
+
+timerSaldo = setInterval(()=>{
+atualizarSaldoNaTela()
+},60000)
 }
 
 async function verificarLogin(){
@@ -335,7 +395,17 @@ const { data, error } = await sb
 if(error || !data) return
 
 document.getElementById("nome").innerText = data.nome
-document.getElementById("saldo").innerText = "R$ " + formatarReal(data.saldo)
+
+saldoBase = Number(data.saldo || 0)
+rendimentoPorMinuto = calcularRendimentoPorMinuto(saldoBase)
+
+const saldoLocal = Number(localStorage.getItem(chaveSaldo()) || 0)
+
+if(!saldoLocal || saldoLocal < saldoBase){
+salvarSaldoLocal(saldoBase)
+}
+
+iniciarLoopSaldo()
 }
 
 async function carregarExtrato(){

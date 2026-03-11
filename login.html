@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=60">
+<link rel="stylesheet" href="style.css?v=80">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -28,91 +28,104 @@
   </div>
 
   <div class="card">
+
     <div class="card-title">Entrar</div>
-    <div class="card-subtitle">Use seu e-mail e senha para acessar.</div>
+    <div class="card-subtitle">Digite seu e-mail e senha</div>
 
     <div class="form-group">
-      <input type="email" id="email" placeholder="Seu e-mail">
+      <input type="email" id="email" placeholder="E-mail">
     </div>
 
     <div class="form-group">
-      <input type="password" id="senha" placeholder="Sua senha">
+      <input type="password" id="senha" placeholder="Senha">
     </div>
 
-    <button class="btn btn-deposito" style="width:100%" onclick="fazerLogin()">
+    <button class="btn btn-deposito" style="width:100%" onclick="login()">
       <span class="material-symbols-rounded icon">login</span>
       Entrar
     </button>
 
-    <div id="mensagem" class="vazio" style="margin-top:12px;"></div>
+    <div id="msg" class="vazio" style="margin-top:10px;"></div>
+
   </div>
 
 </div>
 
 <script>
-async function fazerLogin(){
-  const email = document.getElementById("email").value.trim()
-  const senha = document.getElementById("senha").value.trim()
-  const msg = document.getElementById("mensagem")
 
-  msg.innerText = ""
+async function login(){
 
-  if(!email || !senha){
-    msg.innerText = "Preencha e-mail e senha."
-    return
-  }
+const email = document.getElementById("email").value.trim()
+const senha = document.getElementById("senha").value.trim()
+const msg = document.getElementById("msg")
 
-  const { data, error } = await sb.auth.signInWithPassword({
-    email,
-    password: senha
-  })
+msg.innerText = ""
 
-  if(error || !data.user){
-    msg.innerText = "E-mail ou senha inválidos."
-    return
-  }
-
-  const userId = data.user.id
-
-  const { data: perfil, error: erroPerfil } = await sb
-    .from("profiles")
-    .select("admin")
-    .eq("id", userId)
-    .single()
-
-  if(erroPerfil || !perfil){
-    msg.innerText = "Perfil não encontrado."
-    return
-  }
-
-  if(perfil.admin === true){
-    location.href = "admin.html"
-  }else{
-    location.href = "index.html"
-  }
+if(!email || !senha){
+msg.innerText = "Preencha e-mail e senha."
+return
 }
 
-async function verificarSessaoAtual(){
-  const { data } = await sb.auth.getSession()
+const { data, error } = await sb.auth.signInWithPassword({
+email,
+password: senha
+})
 
-  if(!data.session) return
-
-  const userId = data.session.user.id
-
-  const { data: perfil } = await sb
-    .from("profiles")
-    .select("admin")
-    .eq("id", userId)
-    .single()
-
-  if(perfil?.admin === true){
-    location.href = "admin.html"
-  }else{
-    location.href = "index.html"
-  }
+if(error || !data.user){
+msg.innerText = "Login inválido."
+return
 }
 
-verificarSessaoAtual()
+const userId = data.user.id
+
+const { data:perfil } = await sb
+.from("profiles")
+.select("admin")
+.eq("id",userId)
+.single()
+
+if(perfil?.admin === true){
+
+location.href = "admin.html"
+
+}else{
+
+location.href = "index.html"
+
+}
+
+}
+
+
+
+async function verificarSessao(){
+
+const { data } = await sb.auth.getSession()
+
+if(!data.session) return
+
+const userId = data.session.user.id
+
+const { data:perfil } = await sb
+.from("profiles")
+.select("admin")
+.eq("id",userId)
+.single()
+
+if(perfil?.admin === true){
+
+location.href = "admin.html"
+
+}else{
+
+location.href = "index.html"
+
+}
+
+}
+
+verificarSessao()
+
 </script>
 
 </body>

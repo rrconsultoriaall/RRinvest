@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estratégia Xadrez</title>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f8;
+margin:0;
+padding:20px;
+}
+
+.topo{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+button{
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:16px;
+cursor:pointer;
+}
+
+.voltar{
+background:#1e4ea1;
+color:white;
+flex:1;
+}
+
+.refazer{
+background:#6f42c1;
+color:white;
+flex:1;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:18px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
+margin-bottom:20px;
+text-align:center;
+}
+
+.titulo{
+font-size:30px;
+font-weight:bold;
+color:#5f8f42;
+margin-bottom:8px;
+}
+
+.total{
+font-size:34px;
+font-weight:bold;
+color:#d63384;
+margin-bottom:10px;
+}
+
+.info{
+font-size:15px;
+color:#555;
+line-height:1.7;
+}
+
+.porquinho{
+font-size:42px;
+}
+
+.quadro{
+display:grid;
+grid-template-columns:repeat(20,1fr);
+gap:1px;
+background:#cfcfcf;
+border:1px solid #cfcfcf;
+margin-top:16px;
+}
+
+.casa{
+min-height:36px;
+padding:2px 1px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:white;
+}
+
+.casa.clara{
+background:#ffffff;
+}
+
+.casa.escura{
+background:#f3f3f3;
+}
+
+.numero{
+font-size:9px;
+font-weight:bold;
+color:#444;
+line-height:1;
+}
+
+.valor{
+font-size:8px;
+color:#111;
+line-height:1.1;
+margin-top:2px;
+text-align:center;
+word-break:break-word;
+}
+
+.rodape{
+margin-top:16px;
+font-size:14px;
+color:#666;
+line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="topo">
+<button class="voltar" onclick="location.href='index.html'">Voltar</button>
+<button class="refazer" onclick="location.href='index.html'">Nova meta</button>
+</div>
+
+<div class="card">
+<div class="porquinho">🐷</div>
+<div class="titulo">Desafio dos 500 depósitos</div>
+<div id="totalPlanejado" class="total">R$ 0,00</div>
+<div id="infoMeta" class="info">Carregando...</div>
+<div id="quadro" class="quadro"></div>
+<div class="rodape">
+Estratégia xadrez criada com 500 depósitos.<br>
+O total pode passar um pouco da meta para fechar a conta certinho.
+</div>
+</div>
+
+<script>
+async function verificarLogin(){
+const {data,error} = await sb.auth.getSession()
+
+if(error || !data.session){
+location.href = "login.html"
+return false
+}
+
+return true
+}
+
+function formatarReal(v){
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+}
+
+function formatarCurto(v){
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:0,
+maximumFractionDigits:2
+})
+}
+
+function gerarValores(meta){
+const totalCasas = 500
+const pesos = []
+
+for(let i=0;i<totalCasas;i++){
+pesos.push((i % 25) + 1)
+}
+
+const somaPesos = pesos.reduce((a,b)=>a+b,0)
+const metaCentavos = Math.ceil(Number(meta) * 100)
+
+let valoresCentavos = pesos.map(p=>{
+const bruto = Math.floor((metaCentavos * p) / somaPesos)
+return bruto < 1 ? 1 : bruto
+})
+
+let totalAtual = valoresCentavos.reduce((a,b)=>a+b,0)
+
+let idx = totalCasas - 1
+while(totalAtual < metaCentavos){
+valoresCentavos[idx] += 1
+totalAtual += 1
+idx--
+if(idx < 0) idx = totalCasas - 1
+}
+
+return {
+valores: valoresCentavos.map(v=>v/100),
+total: totalAtual / 100
+}
+}
+
+function montarQuadro(valores){
+const quadro = document.getElementById("quadro")
+let html = ""
+
+valores.forEach((valor,index)=>{
+const linha = Math.floor(index / 20)
+const coluna = index % 20
+const classe = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
+
+html += `
+<div class="casa ${classe}">
+<div class="numero">${index + 1}</div>
+<div class="valor">${formatarCurto(valor)}</div>
+</div>
+`
+})
+
+quadro.innerHTML = html
+}
+
+async function iniciar(){
+const ok = await verificarLogin()
+if(!ok) return
+
+const meta = Number(localStorage.getItem("rrinvest_meta_xadrez") || 0)
+
+if(!meta || meta <= 0){
+document.getElementById("infoMeta").innerText = "Nenhuma meta encontrada."
+return
+}
+
+const resultado = gerarValores(meta)
+
+document.getElementById("totalPlanejado").innerText = "R$ " + formatarReal(resultado.total)
+document.getElementById("infoMeta").innerHTML = `
+Meta escolhida: <b>R$ ${formatarReal(meta)}</b><br>
+Total planejado: <b>R$ ${formatarReal(resultado.total)}</b>
+`
+
+montarQuadro(resultado.valores)
+}
+
+iniciar()
+</script>
+
+</body>
+</html>

@@ -47,7 +47,7 @@ color:#666;
 margin-top:8px;
 }
 
-input{
+input, select{
 width:100%;
 padding:14px;
 border:1px solid #ccc;
@@ -55,6 +55,7 @@ border-radius:12px;
 font-size:16px;
 box-sizing:border-box;
 margin-top:12px;
+background:white;
 }
 
 .botoes{
@@ -146,7 +147,16 @@ font-weight:bold;
 <div class="card">
 <h3>Estratégia Xadrez</h3>
 <div class="subtitulo">Digite o valor que você quer juntar</div>
-<input type="number" id="metaXadrez" placeholder="Ex: 125000" step="0.01">
+
+<input type="number" id="metaXadrez" placeholder="Ex: 10000" step="1" min="1">
+
+<select id="qtdQuadrados">
+<option value="100">100 quadrados</option>
+<option value="200">200 quadrados</option>
+<option value="300">300 quadrados</option>
+<option value="500" selected>500 quadrados</option>
+</select>
+
 <button class="xadrez" onclick="abrirEstrategiaXadrez()">Abrir estratégia xadrez</button>
 </div>
 
@@ -333,7 +343,8 @@ badge.style.display = "none"
 }
 
 function abrirEstrategiaXadrez(){
-const valor = Number(document.getElementById("metaXadrez").value)
+const valor = Math.floor(Number(document.getElementById("metaXadrez").value))
+const quadrados = Number(document.getElementById("qtdQuadrados").value)
 
 if(!valor || valor <= 0){
 alert("Digite o valor que você quer juntar.")
@@ -341,6 +352,7 @@ return
 }
 
 localStorage.setItem("rrinvest_meta_xadrez", String(valor))
+localStorage.setItem("rrinvest_qtd_xadrez", String(quadrados))
 location.href = "estrategia_xadrez.html"
 }
 

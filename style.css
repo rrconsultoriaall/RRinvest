@@ -334,6 +334,177 @@ select:focus{
   padding:10px 0 4px 0;
 }
 
+.xadrez-salva-box{
+  margin-bottom:16px;
+  padding:16px;
+  border-radius:20px;
+  background:#f7f8ff;
+  border:1px solid #e8ebff;
+}
+
+.xadrez-salva-topo{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.xadrez-salva-titulo{
+  font-size:18px;
+  font-weight:800;
+}
+
+.xadrez-salva-status{
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:#eaf8ee;
+  color:#12833c;
+}
+
+.xadrez-salva-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.xadrez-info-item{
+  background:#fff;
+  border:1px solid #eceff5;
+  border-radius:16px;
+  padding:14px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.xadrez-info-label{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.btn-abrir-salva{
+  width:100%;
+  background:#eef2ff;
+  color:var(--primary);
+  border:1px solid #dfe7ff;
+}
+
+.top-actions-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.card-saldo-topo-xadrez{
+  text-align:center;
+}
+
+.card-subtitle-top{
+  font-size:15px;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.saldo-topo-xadrez{
+  font-size:54px;
+  font-weight:800;
+  color:var(--primary-dark);
+  line-height:1;
+  letter-spacing:-2px;
+}
+
+.xadrez-title{
+  text-align:center;
+  color:var(--primary-dark);
+}
+
+.xadrez-valor-titulo{
+  text-align:center;
+  font-size:50px;
+  font-weight:800;
+  color:var(--success);
+  line-height:1;
+  margin-bottom:18px;
+  letter-spacing:-2px;
+}
+
+.quadro-xadrez{
+  display:grid;
+  gap:1px;
+  background:#cfd4dc;
+  border:1px solid #cfd4dc;
+  margin-top:10px;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.casa-xadrez{
+  min-height:58px;
+  padding:6px 3px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:white;
+  cursor:pointer;
+  user-select:none;
+  transition:all .15s ease;
+}
+
+.casa-xadrez.clara{
+  background:#ffffff;
+}
+
+.casa-xadrez.escura{
+  background:#f5f7fa;
+}
+
+.casa-xadrez.marcada{
+  background:#20b15a !important;
+  color:white;
+  transform:scale(0.98);
+}
+
+.numero-xadrez{
+  font-size:11px;
+  font-weight:800;
+  line-height:1;
+}
+
+.valor-xadrez{
+  font-size:15px;
+  line-height:1.1;
+  margin-top:5px;
+  font-weight:800;
+}
+
+.xadrez-resumo-box{
+  margin-top:18px;
+  padding:18px;
+  border-radius:20px;
+  background:#f8fafc;
+  border:1px solid #edf1f5;
+  line-height:2;
+  font-size:17px;
+  text-align:center;
+}
+
+.mensagem-salvar{
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:#eaf8ee;
+  color:#12833c;
+  font-size:14px;
+  font-weight:700;
+  text-align:center;
+}
+
 @media (max-width:640px){
   .saldo-valor{
     font-size:52px;
@@ -359,5 +530,29 @@ select:focus{
 
   .valor-item{
     font-size:17px;
+  }
+
+  .xadrez-salva-grid{
+    grid-template-columns:1fr;
+  }
+
+  .top-actions-grid{
+    grid-template-columns:1fr;
+  }
+
+  .saldo-topo-xadrez{
+    font-size:44px;
+  }
+
+  .xadrez-valor-titulo{
+    font-size:42px;
+  }
+
+  .casa-xadrez{
+    min-height:54px;
+  }
+
+  .valor-xadrez{
+    font-size:14px;
   }
   }

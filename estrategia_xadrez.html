@@ -9,191 +9,63 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
+<link rel="stylesheet" href="style.css?v=10">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
-<style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f6f8;
-margin:0;
-padding:20px;
-}
-
-.topo{
-display:flex;
-gap:10px;
-margin-bottom:14px;
-}
-
-button{
-padding:14px;
-border:none;
-border-radius:12px;
-font-size:16px;
-cursor:pointer;
-}
-
-.voltar{
-background:#1e4ea1;
-color:white;
-flex:1;
-}
-
-.atualizar{
-background:#6f42c1;
-color:white;
-flex:1;
-}
-
-.cardTopoSaldo{
-background:white;
-padding:18px;
-border-radius:18px;
-box-shadow:0 4px 16px rgba(0,0,0,0.08);
-margin-bottom:18px;
-text-align:center;
-}
-
-.labelSaldo{
-font-size:15px;
-color:#666;
-margin-bottom:6px;
-}
-
-.valorSaldo{
-font-size:34px;
-font-weight:bold;
-color:#0b3d91;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:18px;
-box-shadow:0 4px 16px rgba(0,0,0,0.08);
-margin-bottom:20px;
-text-align:center;
-}
-
-.titulo{
-font-size:32px;
-font-weight:bold;
-color:#1e4ea1;
-margin-bottom:8px;
-}
-
-.total{
-font-size:34px;
-font-weight:bold;
-color:#1faa59;
-margin-bottom:10px;
-}
-
-.info{
-font-size:15px;
-color:#555;
-line-height:1.8;
-margin-bottom:14px;
-}
-
-.quadro{
-display:grid;
-gap:1px;
-background:#cfcfcf;
-border:1px solid #cfcfcf;
-margin-top:16px;
-}
-
-.casa{
-min-height:42px;
-padding:4px 2px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-background:white;
-cursor:pointer;
-user-select:none;
-transition:all .15s ease;
-}
-
-.casa.clara{
-background:#ffffff;
-}
-
-.casa.escura{
-background:#f3f3f3;
-}
-
-.casa.marcada{
-background:#1faa59 !important;
-color:white;
-transform:scale(0.98);
-}
-
-.numero{
-font-size:10px;
-font-weight:bold;
-line-height:1;
-}
-
-.valor{
-font-size:12px;
-line-height:1.1;
-margin-top:3px;
-font-weight:bold;
-}
-
-.rodape{
-margin-top:16px;
-font-size:14px;
-color:#666;
-line-height:1.7;
-}
-
-.resumo{
-margin-top:18px;
-padding:16px;
-background:#f8f9fb;
-border-radius:14px;
-line-height:1.9;
-font-size:16px;
-}
-
-.resumo strong{
-color:#111;
-}
-</style>
 </head>
 <body>
 
-<div class="topo">
-<button class="voltar" onclick="location.href='index.html'">Voltar</button>
-<button class="atualizar" onclick="gerarNovaEstrategia()">Atualizar</button>
-</div>
+<div class="app">
 
-<div class="cardTopoSaldo">
-<div class="labelSaldo">Saldo atual</div>
-<div id="saldoAtualTopo" class="valorSaldo">R$ 0,00</div>
-</div>
+  <div class="topbar">
+    <div>
+      <div class="brand">RRinvest</div>
+      <div class="brand-sub">Estratégia Xadrez</div>
+    </div>
+    <div class="premium-badge">Premium</div>
+  </div>
 
-<div class="card">
-<div class="titulo">Estratégia Xadrez</div>
-<div id="totalPlanejado" class="total">R$ 0,00</div>
-<div id="infoMeta" class="info">Carregando...</div>
-<div id="quadro" class="quadro"></div>
+  <div class="top-actions-grid">
+    <button class="btn btn-deposito" onclick="location.href='index.html'">
+      <span class="material-symbols-rounded icon">arrow_back</span>
+      Voltar
+    </button>
 
-<div class="resumo">
-<div>Saldo marcado: <strong id="saldoMarcado">R$ 0,00</strong></div>
-<div>Falta marcar: <strong id="saldoFaltando">R$ 0,00</strong></div>
-<div>Quadrados marcados: <strong id="qtdMarcados">0</strong></div>
-</div>
+    <button class="btn btn-xadrez" onclick="gerarNovaEstrategia()">
+      <span class="material-symbols-rounded icon">refresh</span>
+      Atualizar
+    </button>
 
-<div class="rodape">
-Clique nos quadrados para marcar os depósitos já feitos.<br>
-O botão <b>Atualizar</b> gera uma nova distribuição de valores.
-</div>
+    <button class="btn btn-saque" onclick="salvarEstrategia()">
+      <span class="material-symbols-rounded icon">save</span>
+      Salvar
+    </button>
+  </div>
+
+  <div class="card card-saldo-topo-xadrez">
+    <div class="card-subtitle-top">Saldo atual</div>
+    <div id="saldoAtualTopo" class="saldo-topo-xadrez">R$ 0,00</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title xadrez-title">Estratégia Xadrez</div>
+    <div id="valorMetaTitulo" class="xadrez-valor-titulo">R$ 0,00</div>
+
+    <div id="quadro" class="quadro-xadrez"></div>
+
+    <div class="xadrez-resumo-box">
+      <div>Saldo marcado: <strong id="saldoMarcado">R$ 0,00</strong></div>
+      <div>Falta marcar: <strong id="saldoFaltando">R$ 0,00</strong></div>
+      <div>Quadrados marcados: <strong id="qtdMarcados">0</strong></div>
+    </div>
+
+    <div id="mensagemSalvar" class="mensagem-salvar oculto">
+      Estratégia salva com sucesso.
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -205,237 +77,249 @@ let marcados = []
 let saldoBasePerfil = 0
 
 async function verificarLogin(){
-const {data,error} = await sb.auth.getSession()
+  const {data,error} = await sb.auth.getSession()
 
-if(error || !data.session){
-location.href = "login.html"
-return false
-}
+  if(error || !data.session){
+    location.href = "login.html"
+    return false
+  }
 
-usuario = data.session.user
-return true
+  usuario = data.session.user
+  return true
 }
 
 function formatarReal(v){
-return Number(v || 0).toLocaleString("pt-BR",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-})
+  return Number(v || 0).toLocaleString("pt-BR",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  })
 }
 
 function chaveValores(){
-return "rrinvest_xadrez_valores_" + meta + "_" + qtdQuadrados
+  return "rrinvest_xadrez_valores_" + meta + "_" + qtdQuadrados
 }
 
 function chaveMarcados(){
-return "rrinvest_xadrez_marcados_" + meta + "_" + qtdQuadrados
+  return "rrinvest_xadrez_marcados_" + meta + "_" + qtdQuadrados
 }
 
 function chaveDescontoXadrez(){
-return "rrinvest_xadrez_desconto_" + usuario.id
+  return "rrinvest_xadrez_desconto_" + usuario.id
+}
+
+function chaveResumoXadrez(){
+  return "rrinvest_xadrez_resumo_" + usuario.id
 }
 
 function obterColunas(qtd){
-if(qtd === 100) return 10
-if(qtd === 200) return 20
-if(qtd === 300) return 20
-return 20
+  if(qtd === 100) return 10
+  if(qtd === 200) return 20
+  if(qtd === 300) return 20
+  return 20
 }
 
 function gerarValoresInteiros(metaEscolhida, quantidade){
-const pesos = []
-const grupos = [1,2,3,4,5,6,7,8,9,10]
+  const pesos = []
+  const grupos = [1,2,3,4,5,6,7,8,9,10]
 
-for(let i=0;i<quantidade;i++){
-const aleatorio = grupos[Math.floor(Math.random() * grupos.length)]
-pesos.push(aleatorio)
-}
+  for(let i=0;i<quantidade;i++){
+    const aleatorio = grupos[Math.floor(Math.random() * grupos.length)]
+    pesos.push(aleatorio)
+  }
 
-const somaPesos = pesos.reduce((a,b)=>a+b,0)
-let inteiros = pesos.map(p => Math.max(1, Math.floor((metaEscolhida * p) / somaPesos)))
+  const somaPesos = pesos.reduce((a,b)=>a+b,0)
+  let inteiros = pesos.map(p => Math.max(1, Math.floor((metaEscolhida * p) / somaPesos)))
 
-let totalAtual = inteiros.reduce((a,b)=>a+b,0)
+  let totalAtual = inteiros.reduce((a,b)=>a+b,0)
 
-while(totalAtual < metaEscolhida){
-const idx = Math.floor(Math.random() * quantidade)
-inteiros[idx] += 1
-totalAtual += 1
-}
+  while(totalAtual < metaEscolhida){
+    const idx = Math.floor(Math.random() * quantidade)
+    inteiros[idx] += 1
+    totalAtual += 1
+  }
 
-while(totalAtual > metaEscolhida + quantidade){
-const idx = Math.floor(Math.random() * quantidade)
-if(inteiros[idx] > 1){
-inteiros[idx] -= 1
-totalAtual -= 1
-}
-}
+  while(totalAtual > metaEscolhida + quantidade){
+    const idx = Math.floor(Math.random() * quantidade)
+    if(inteiros[idx] > 1){
+      inteiros[idx] -= 1
+      totalAtual -= 1
+    }
+  }
 
-return {
-valores: inteiros,
-total: totalAtual
-}
+  return {
+    valores: inteiros
+  }
 }
 
 function embaralhar(lista){
-const copia = [...lista]
-for(let i=copia.length-1;i>0;i--){
-const j = Math.floor(Math.random() * (i+1))
-const temp = copia[i]
-copia[i] = copia[j]
-copia[j] = temp
-}
-return copia
+  const copia = [...lista]
+  for(let i=copia.length-1;i>0;i--){
+    const j = Math.floor(Math.random() * (i+1))
+    const temp = copia[i]
+    copia[i] = copia[j]
+    copia[j] = temp
+  }
+  return copia
 }
 
 function salvarValores(){
-localStorage.setItem(chaveValores(), JSON.stringify(valores))
+  localStorage.setItem(chaveValores(), JSON.stringify(valores))
 }
 
-function salvarMarcados(){
-localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
+function salvarMarcadosLocais(){
+  localStorage.setItem(chaveMarcados(), JSON.stringify(marcados))
 }
 
-function salvarDescontoNoIndex(totalMarcado){
-localStorage.setItem(chaveDescontoXadrez(), String(totalMarcado))
+function salvarResumoNoIndex(totalMarcado, quantidadeMarcados){
+  localStorage.setItem(chaveDescontoXadrez(), String(totalMarcado))
+
+  localStorage.setItem(chaveResumoXadrez(), JSON.stringify({
+    salvo: true,
+    meta: meta,
+    reservado: totalMarcado,
+    marcados: quantidadeMarcados
+  }))
 }
 
 function carregarMarcados(){
-const salvo = JSON.parse(localStorage.getItem(chaveMarcados()) || "[]")
-if(Array.isArray(salvo) && salvo.length === valores.length){
-marcados = salvo
-}else{
-marcados = new Array(valores.length).fill(false)
-}
+  const salvo = JSON.parse(localStorage.getItem(chaveMarcados()) || "[]")
+  if(Array.isArray(salvo) && salvo.length === valores.length){
+    marcados = salvo
+  }else{
+    marcados = new Array(valores.length).fill(false)
+  }
 }
 
 function calcularTotalMarcado(){
-let totalMarcado = 0
-let quantidadeMarcados = 0
+  let totalMarcado = 0
+  let quantidadeMarcados = 0
 
-for(let i=0;i<valores.length;i++){
-if(marcados[i]){
-totalMarcado += Number(valores[i])
-quantidadeMarcados++
-}
-}
+  for(let i=0;i<valores.length;i++){
+    if(marcados[i]){
+      totalMarcado += Number(valores[i])
+      quantidadeMarcados++
+    }
+  }
 
-return { totalMarcado, quantidadeMarcados }
+  return { totalMarcado, quantidadeMarcados }
 }
 
 function atualizarResumo(){
-const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
-const totalPlanejado = valores.reduce((a,b)=>a+b,0)
-const falta = totalPlanejado - totalMarcado
-const saldoRestante = Math.max(0, saldoBasePerfil - totalMarcado)
+  const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
+  const falta = Math.max(0, meta - totalMarcado)
+  const saldoRestante = Math.max(0, saldoBasePerfil - totalMarcado)
 
-document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
-document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
-document.getElementById("qtdMarcados").innerText = quantidadeMarcados
-document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
-
-salvarDescontoNoIndex(totalMarcado)
+  document.getElementById("saldoMarcado").innerText = "R$ " + formatarReal(totalMarcado)
+  document.getElementById("saldoFaltando").innerText = "R$ " + formatarReal(falta)
+  document.getElementById("qtdMarcados").innerText = quantidadeMarcados
+  document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoRestante)
 }
 
 function montarQuadro(){
-const quadro = document.getElementById("quadro")
-const colunas = obterColunas(qtdQuadrados)
-quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
+  const quadro = document.getElementById("quadro")
+  const colunas = obterColunas(qtdQuadrados)
+  quadro.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`
 
-let html = ""
+  let html = ""
 
-valores.forEach((valor,index)=>{
-const linha = Math.floor(index / colunas)
-const coluna = index % colunas
-const classeCor = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
-const classeMarcada = marcados[index] ? "marcada" : ""
+  valores.forEach((valor,index)=>{
+    const linha = Math.floor(index / colunas)
+    const coluna = index % colunas
+    const classeCor = ((linha + coluna) % 2 === 0) ? "clara" : "escura"
+    const classeMarcada = marcados[index] ? "marcada" : ""
 
-html += `
-<div class="casa ${classeCor} ${classeMarcada}" onclick="alternarMarcado(${index})">
-<div class="numero">${index + 1}</div>
-<div class="valor">${valor}</div>
-</div>
-`
-})
+    html += `
+      <div class="casa-xadrez ${classeCor} ${classeMarcada}" onclick="alternarMarcado(${index})">
+        <div class="numero-xadrez">${index + 1}</div>
+        <div class="valor-xadrez">${valor}</div>
+      </div>
+    `
+  })
 
-quadro.innerHTML = html
-atualizarResumo()
+  quadro.innerHTML = html
+  atualizarResumo()
 }
 
 function alternarMarcado(index){
-marcados[index] = !marcados[index]
-salvarMarcados()
-montarQuadro()
+  marcados[index] = !marcados[index]
+  salvarMarcadosLocais()
+  montarQuadro()
+  esconderMensagemSalvar()
 }
 
 function gerarNovaEstrategia(){
-const resultado = gerarValoresInteiros(meta, qtdQuadrados)
-valores = embaralhar(resultado.valores)
-marcados = new Array(valores.length).fill(false)
+  const resultado = gerarValoresInteiros(meta, qtdQuadrados)
+  valores = embaralhar(resultado.valores)
+  marcados = new Array(valores.length).fill(false)
 
-salvarValores()
-salvarMarcados()
-salvarDescontoNoIndex(0)
-atualizarCabecalho(resultado.total)
-montarQuadro()
+  salvarValores()
+  salvarMarcadosLocais()
+  esconderMensagemSalvar()
+  montarQuadro()
 }
 
-function atualizarCabecalho(total){
-document.getElementById("totalPlanejado").innerText = "R$ " + formatarReal(total)
-document.getElementById("infoMeta").innerHTML = `
-Total planejado: <b>R$ ${formatarReal(total)}</b><br>
-Quantidade de quadrados: <b>${qtdQuadrados}</b>
-`
+function mostrarMensagemSalvar(){
+  document.getElementById("mensagemSalvar").classList.remove("oculto")
+}
+
+function esconderMensagemSalvar(){
+  document.getElementById("mensagemSalvar").classList.add("oculto")
+}
+
+function salvarEstrategia(){
+  const { totalMarcado, quantidadeMarcados } = calcularTotalMarcado()
+  salvarResumoNoIndex(totalMarcado, quantidadeMarcados)
+  mostrarMensagemSalvar()
 }
 
 async function carregarSaldoPerfil(){
-const {data,error} = await sb
-.from("profiles")
-.select("saldo")
-.eq("id",usuario.id)
-.single()
+  const {data,error} = await sb
+    .from("profiles")
+    .select("saldo")
+    .eq("id",usuario.id)
+    .single()
 
-if(error || !data){
-saldoBasePerfil = 0
-}else{
-saldoBasePerfil = Number(data.saldo || 0)
-}
+  if(error || !data){
+    saldoBasePerfil = 0
+  }else{
+    saldoBasePerfil = Number(data.saldo || 0)
+  }
 
-document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoBasePerfil)
+  document.getElementById("saldoAtualTopo").innerText = "R$ " + formatarReal(saldoBasePerfil)
 }
 
 async function iniciar(){
-const ok = await verificarLogin()
-if(!ok) return
+  const ok = await verificarLogin()
+  if(!ok) return
 
-meta = Math.floor(Number(localStorage.getItem("rrinvest_meta_xadrez") || 0))
-qtdQuadrados = Number(localStorage.getItem("rrinvest_qtd_xadrez") || 500)
+  meta = Math.floor(Number(localStorage.getItem("rrinvest_meta_xadrez") || 0))
+  qtdQuadrados = Number(localStorage.getItem("rrinvest_qtd_xadrez") || 500)
 
-if(!meta || meta <= 0){
-document.getElementById("infoMeta").innerText = "Nenhuma meta encontrada."
-return
-}
+  if(!meta || meta <= 0){
+    location.href = "index.html"
+    return
+  }
 
-await carregarSaldoPerfil()
+  document.getElementById("valorMetaTitulo").innerText = "R$ " + formatarReal(meta)
 
-const valoresSalvos = JSON.parse(localStorage.getItem(chaveValores()) || "[]")
+  await carregarSaldoPerfil()
 
-if(Array.isArray(valoresSalvos) && valoresSalvos.length === qtdQuadrados){
-valores = valoresSalvos
-}else{
-const resultado = gerarValoresInteiros(meta, qtdQuadrados)
-valores = embaralhar(resultado.valores)
-salvarValores()
-}
+  const valoresSalvos = JSON.parse(localStorage.getItem(chaveValores()) || "[]")
 
-carregarMarcados()
+  if(Array.isArray(valoresSalvos) && valoresSalvos.length === qtdQuadrados){
+    valores = valoresSalvos
+  }else{
+    const resultado = gerarValoresInteiros(meta, qtdQuadrados)
+    valores = embaralhar(resultado.valores)
+    salvarValores()
+  }
 
-const total = valores.reduce((a,b)=>a+b,0)
-atualizarCabecalho(total)
-montarQuadro()
+  carregarMarcados()
+  montarQuadro()
 }
 
 iniciar()
 </script>
 
 </body>
-</html>
+        </html>

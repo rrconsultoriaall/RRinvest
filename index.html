@@ -1,189 +1,241 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>RRinvest</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial;
+font-family:Arial,sans-serif;
 background:#f3f3f3;
 padding:20px;
+margin:0;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
+border-radius:12px;
 margin-bottom:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
 button{
 padding:12px;
 border:none;
-border-radius:6px;
+border-radius:8px;
 background:#1e4ea1;
 color:white;
-margin-right:5px;
+margin-right:6px;
+font-size:16px;
+cursor:pointer;
+margin-top:8px;
 }
 
-.aprovado{
-color:green;
+#btnNotif{
+background:#444;
 }
 
 .pendente{
 color:orange;
+font-weight:bold;
 }
 
+.notificacao{
+border-bottom:1px solid #eee;
+padding:12px 0;
+line-height:1.6;
+}
+
+.notificacao:last-child{
+border-bottom:none;
+}
+
+.oculto{
+display:none;
+}
 </style>
-
 </head>
-
 <body>
 
 <div class="card">
-
-<h2 id="nome">...</h2>
-
-<p id="saldo"></p>
+<h2 id="nome">Carregando...</h2>
+<p id="saldo">Saldo: R$ 0,00</p>
 
 <button onclick="irDeposito()">Depositar</button>
 <button onclick="irSaque()">Sacar</button>
+<button id="btnNotif" onclick="toggleNotificacoes()">Notificações</button>
 <button onclick="logout()">Sair</button>
+</div>
 
+<div class="card oculto" id="cardNotificacoes">
+<h3>Notificações</h3>
+<div id="notificacoes">Carregando...</div>
 </div>
 
 <div class="card">
-
 <h3>Extrato</h3>
-
-<div id="extrato"></div>
-
+<div id="extrato">Carregando...</div>
 </div>
 
 <script>
+let usuario = null
 
-let usuario
+function formatarReal(valor){
+return Number(valor || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+}
 
 function horarioBrasil(data){
-
-return new Date(data).toLocaleString(
-"pt-BR",
-{timeZone:"America/Sao_Paulo"}
-)
-
+if(!data) return "-"
+let texto = String(data)
+if(!texto.endsWith("Z") && !texto.includes("+") && !texto.match(/-\d{2}:\d{2}$/)){
+texto = texto + "Z"
+}
+return new Date(texto).toLocaleString("pt-BR",{
+timeZone:"America/Sao_Paulo",
+year:"numeric",
+month:"2-digit",
+day:"2-digit",
+hour:"2-digit",
+minute:"2-digit",
+second:"2-digit"
+})
 }
 
-async function iniciar(){
+async function verificarLogin(){
+const { data, error } = await sb.auth.getSession()
 
-const { data:{ session } } = await sb.auth.getSession()
-
-if(!session){
-
-location.href="login.html"
-return
-
+if(error || !data.session){
+location.href = "login.html"
+return false
 }
 
-usuario=session.user
-
-carregarPerfil()
-carregarExtrato()
-
+usuario = data.session.user
+return true
 }
 
 async function carregarPerfil(){
-
-let { data } = await sb
+const { data, error } = await sb
 .from("profiles")
 .select("*")
-.eq("id",usuario.id)
+.eq("id", usuario.id)
 .single()
 
-document.getElementById("nome").innerText=data.nome
-document.getElementById("saldo").innerText="Saldo: R$ "+data.saldo
+if(error){
+document.getElementById("nome").innerText = "Erro ao carregar"
+document.getElementById("saldo").innerText = error.message
+return
+}
 
+document.getElementById("nome").innerText = data.nome || "-"
+document.getElementById("saldo").innerText = "Saldo: R$ " + formatarReal(data.saldo)
 }
 
 async function carregarExtrato(){
-
-let { data } = await sb
+const { data, error } = await sb
 .from("transacoes")
 .select("*")
-.eq("usuario_id",usuario.id)
+.eq("usuario_id", usuario.id)
+.eq("status", "pendente")
 .order("created_at",{ascending:false})
 
-let html=""
-
-if(!data || data.length==0){
-
-html="Nenhuma movimentação"
-
-}else{
-
-data.forEach(t=>{
-
-let cor = t.status=="aprovado" ? "aprovado" : "pendente"
-
-html+=`
-
-<p>
-
-<b>${t.tipo}</b><br>
-Valor: R$ ${t.valor}<br>
-Status: <span class="${cor}">${t.status}</span><br>
-${horarioBrasil(t.created_at)}
-
-</p>
-
-<hr>
-
-`
-
-})
-
+if(error){
+document.getElementById("extrato").innerHTML = error.message
+return
 }
 
-document.getElementById("extrato").innerHTML=html
+if(!data || data.length===0){
+document.getElementById("extrato").innerHTML = "Nenhuma solicitação pendente."
+return
+}
 
+let html = ""
+
+data.forEach(t=>{
+html += `
+<p>
+<b>${t.tipo}</b><br>
+Valor: R$ ${formatarReal(t.valor)}<br>
+Status: <span class="pendente">${t.status || "-"}</span><br>
+${t.descricao || ""}<br>
+${horarioBrasil(t.created_at)}
+</p>
+<hr>
+`
+})
+
+document.getElementById("extrato").innerHTML = html
+}
+
+async function carregarNotificacoes(){
+const { data, error } = await sb
+.from("notificacoes")
+.select("*")
+.eq("usuario_id", usuario.id)
+.order("created_at",{ascending:false})
+
+if(error){
+document.getElementById("notificacoes").innerHTML = error.message
+return
+}
+
+if(!data || data.length===0){
+document.getElementById("notificacoes").innerHTML = "Nenhuma notificação."
+return
+}
+
+let html = ""
+
+data.forEach(n=>{
+html += `
+<div class="notificacao">
+<b>${n.titulo || "-"}</b><br>
+${n.mensagem || ""}<br>
+${horarioBrasil(n.created_at)}
+</div>
+`
+})
+
+document.getElementById("notificacoes").innerHTML = html
+}
+
+function toggleNotificacoes(){
+document.getElementById("cardNotificacoes").classList.toggle("oculto")
 }
 
 function irDeposito(){
-
-location.href="deposito.html"
-
+location.href = "deposito.html"
 }
 
 function irSaque(){
-
-location.href="saque.html"
-
+location.href = "saque.html"
 }
 
 async function logout(){
-
 await sb.auth.signOut()
+location.href = "login.html"
+}
 
-location.href="login.html"
+async function iniciar(){
+const ok = await verificarLogin()
+if(!ok) return
 
+await carregarPerfil()
+await carregarExtrato()
+await carregarNotificacoes()
 }
 
 iniciar()
-
 </script>
-
 </body>
 </html>

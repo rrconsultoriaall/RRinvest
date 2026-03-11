@@ -14,46 +14,76 @@
 <style>
 body{
 font-family:Arial,sans-serif;
-background:#f3f3f3;
+background:#f4f6f8;
 padding:20px;
 margin:0;
 }
 
 .card{
 background:white;
-padding:20px;
-border-radius:12px;
-max-width:500px;
-margin:auto;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
+padding:24px;
+border-radius:16px;
+max-width:480px;
+margin:40px auto;
+box-shadow:0 4px 18px rgba(0,0,0,0.08);
+}
+
+h2{
+margin-top:0;
+margin-bottom:20px;
+font-size:40px;
 }
 
 input{
 width:100%;
-padding:12px;
+padding:14px;
 margin-top:10px;
 margin-bottom:10px;
 box-sizing:border-box;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
+border:1px solid #d9d9d9;
+border-radius:12px;
+font-size:18px;
+outline:none;
+}
+
+input:focus{
+border-color:#1e4ea1;
 }
 
 button{
-padding:12px;
-border:none;
-border-radius:8px;
-background:#1e4ea1;
-color:white;
 width:100%;
-margin-top:10px;
-font-size:16px;
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:20px;
 cursor:pointer;
+margin-top:10px;
+}
+
+.btn-principal{
+background:#0b3d91;
+color:white;
+}
+
+.btn-secundario{
+background:#e9eef7;
+color:#0b3d91;
 }
 
 .msg{
-margin-top:10px;
+margin-top:16px;
+font-size:18px;
 font-weight:bold;
+text-align:center;
+min-height:24px;
+}
+
+.ok{
+color:#1f8f4e;
+}
+
+.erro{
+color:#c0392b;
 }
 </style>
 </head>
@@ -65,8 +95,8 @@ font-weight:bold;
 <input id="valor" placeholder="Valor do saque">
 <input id="pix" placeholder="Chave PIX">
 
-<button onclick="sacar()">Solicitar saque</button>
-<button onclick="voltar()">Voltar</button>
+<button class="btn-principal" onclick="sacar()">Solicitar saque</button>
+<button class="btn-secundario" onclick="voltar()">Voltar</button>
 
 <div class="msg" id="msg"></div>
 </div>
@@ -86,12 +116,18 @@ usuario = data.session.user
 return true
 }
 
+function mostrarMsg(texto,tipo=""){
+const el = document.getElementById("msg")
+el.className = "msg " + tipo
+el.innerText = texto
+}
+
 async function sacar(){
 const valor = document.getElementById("valor").value.trim()
 const pix = document.getElementById("pix").value.trim()
 
 if(!valor || !pix){
-document.getElementById("msg").innerText = "Preencha todos os campos"
+mostrarMsg("Preencha todos os campos","erro")
 return
 }
 
@@ -108,12 +144,15 @@ created_at: new Date().toISOString()
 })
 
 if(error){
-document.getElementById("msg").innerText = error.message
+mostrarMsg(error.message,"erro")
 return
 }
 
-alert("Saque solicitado")
+mostrarMsg("Saque solicitado com sucesso","ok")
+
+setTimeout(()=>{
 location.href = "index.html"
+},800)
 }
 
 function voltar(){

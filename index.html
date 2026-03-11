@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -24,25 +26,27 @@ padding:20px;
 .card{
 background:white;
 padding:20px;
-margin-bottom:20px;
 border-radius:10px;
+margin-bottom:20px;
 }
 
 button{
-padding:10px 15px;
+padding:12px;
 border:none;
 border-radius:6px;
-cursor:pointer;
 background:#1e4ea1;
 color:white;
-margin:5px;
+margin-right:5px;
 }
 
-input{
-width:100%;
-padding:10px;
-margin-top:10px;
-margin-bottom:10px;
+.aprovado{
+color:green;
+font-weight:bold;
+}
+
+.pendente{
+color:orange;
+font-weight:bold;
 }
 
 </style>
@@ -54,10 +58,11 @@ margin-bottom:10px;
 <div class="card">
 
 <h2 id="nome"></h2>
+
 <p id="saldo"></p>
 
-<button onclick="depositar()">Depositar</button>
-<button onclick="sacar()">Sacar</button>
+<button onclick="irDeposito()">Depositar</button>
+<button onclick="irSaque()">Sacar</button>
 <button onclick="logout()">Sair</button>
 
 </div>
@@ -81,9 +86,10 @@ let user
 
 function horarioBrasil(data){
 
-return new Date(data).toLocaleString("pt-BR",{
-timeZone:"America/Sao_Paulo"
-})
+return new Date(data).toLocaleString(
+"pt-BR",
+{timeZone:"America/Sao_Paulo"}
+)
 
 }
 
@@ -124,12 +130,13 @@ let {data} = await supabase
 .from("transacoes")
 .select("*")
 .eq("usuario_id",user.id)
-.eq("status","aprovado")
 .order("created_at",{ascending:false})
 
 let html=""
 
 data.forEach(m=>{
+
+let statusClasse = m.status=="aprovado" ? "aprovado" : "pendente"
 
 html+=`
 
@@ -137,7 +144,7 @@ html+=`
 
 <b>${m.tipo}</b><br>
 Valor: R$ ${m.valor}<br>
-${m.descricao}<br>
+Status: <span class="${statusClasse}">${m.status}</span><br>
 ${horarioBrasil(m.created_at)}
 
 </p>
@@ -152,51 +159,15 @@ document.getElementById("extrato").innerHTML=html
 
 }
 
-async function depositar(){
+function irDeposito(){
 
-let valor = prompt("Valor do depósito")
-
-if(!valor) return
-
-await supabase
-.from("transacoes")
-.insert({
-
-usuario_id:user.id,
-usuario_email:user.email,
-tipo:"deposito",
-valor:valor,
-descricao:"Depósito solicitado",
-status:"pendente",
-created_at:new Date().toISOString()
-
-})
-
-alert("Depósito solicitado. Aguarde aprovação.")
+location.href="deposito.html"
 
 }
 
-async function sacar(){
+function irSaque(){
 
-let valor = prompt("Valor do saque")
-
-if(!valor) return
-
-await supabase
-.from("transacoes")
-.insert({
-
-usuario_id:user.id,
-usuario_email:user.email,
-tipo:"saque",
-valor:valor,
-descricao:"Saque solicitado",
-status:"pendente",
-created_at:new Date().toISOString()
-
-})
-
-alert("Saque solicitado.")
+location.href="saque.html"
 
 }
 

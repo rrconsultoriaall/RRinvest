@@ -1,135 +1,118 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - RRinvest</title>
 
-<title>RRinvest</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<link rel="stylesheet" href="style.css?v=60">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
-<style>
-
-body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:25px;
-border-radius:10px;
-max-width:400px;
-margin:auto;
-}
-
-input{
-width:100%;
-padding:12px;
-margin-top:10px;
-margin-bottom:10px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#0b3d91;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
-
-h1{
-text-align:center;
-}
-
-</style>
-
 </head>
-
 <body>
 
-<div class="card">
+<div class="app">
 
-<h1>RRinvest</h1>
+  <div class="topbar">
+    <div>
+      <div class="brand">RRinvest</div>
+      <div class="brand-sub">Acesso ao sistema</div>
+    </div>
+    <div class="premium-badge">Login</div>
+  </div>
 
-<h2>Entrar</h2>
+  <div class="card">
+    <div class="card-title">Entrar</div>
+    <div class="card-subtitle">Use seu e-mail e senha para acessar.</div>
 
-<input id="email" placeholder="Email">
-<input id="senha" type="password" placeholder="Senha">
+    <div class="form-group">
+      <input type="email" id="email" placeholder="Seu e-mail">
+    </div>
 
-<button onclick="login()">Entrar</button>
+    <div class="form-group">
+      <input type="password" id="senha" placeholder="Sua senha">
+    </div>
 
-<hr>
+    <button class="btn btn-deposito" style="width:100%" onclick="fazerLogin()">
+      <span class="material-symbols-rounded icon">login</span>
+      Entrar
+    </button>
 
-<h2>Criar conta</h2>
-
-<input id="nome" placeholder="Nome completo">
-<input id="email2" placeholder="Email">
-<input id="telefone" placeholder="Telefone">
-<input id="senha2" type="password" placeholder="Senha">
-
-<button onclick="criarConta()">Criar conta</button>
-
-<div id="msg"></div>
+    <div id="mensagem" class="vazio" style="margin-top:12px;"></div>
+  </div>
 
 </div>
 
 <script>
+async function fazerLogin(){
+  const email = document.getElementById("email").value.trim()
+  const senha = document.getElementById("senha").value.trim()
+  const msg = document.getElementById("mensagem")
 
-async function login(){
+  msg.innerText = ""
 
-const email = document.getElementById("email").value
-const senha = document.getElementById("senha").value
+  if(!email || !senha){
+    msg.innerText = "Preencha e-mail e senha."
+    return
+  }
 
-const { error } = await sb.auth.signInWithPassword({
-email:email,
-password:senha
-})
+  const { data, error } = await sb.auth.signInWithPassword({
+    email,
+    password: senha
+  })
 
-if(error){
-document.getElementById("msg").innerText = error.message
-return
+  if(error || !data.user){
+    msg.innerText = "E-mail ou senha inválidos."
+    return
+  }
+
+  const userId = data.user.id
+
+  const { data: perfil, error: erroPerfil } = await sb
+    .from("profiles")
+    .select("admin")
+    .eq("id", userId)
+    .single()
+
+  if(erroPerfil || !perfil){
+    msg.innerText = "Perfil não encontrado."
+    return
+  }
+
+  if(perfil.admin === true){
+    location.href = "admin.html"
+  }else{
+    location.href = "index.html"
+  }
 }
 
-window.location.href = "index.html"
+async function verificarSessaoAtual(){
+  const { data } = await sb.auth.getSession()
 
+  if(!data.session) return
+
+  const userId = data.session.user.id
+
+  const { data: perfil } = await sb
+    .from("profiles")
+    .select("admin")
+    .eq("id", userId)
+    .single()
+
+  if(perfil?.admin === true){
+    location.href = "admin.html"
+  }else{
+    location.href = "index.html"
+  }
 }
 
-async function criarConta(){
-
-const nome = document.getElementById("nome").value
-const email = document.getElementById("email2").value
-const telefone = document.getElementById("telefone").value
-const senha = document.getElementById("senha2").value
-
-const { data , error } = await sb.auth.signUp({
-email:email,
-password:senha
-})
-
-if(error){
-document.getElementById("msg").innerText = error.message
-return
-}
-
-await sb.from("profiles").insert({
-id:data.user.id,
-nome:nome,
-email:email,
-telefone:telefone
-})
-
-document.getElementById("msg").innerText = "Conta criada com sucesso"
-
-}
-
+verificarSessaoAtual()
 </script>
 
 </body>

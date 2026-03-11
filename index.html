@@ -328,7 +328,7 @@ return "rrinvest_tempo_" + usuario.id
 }
 
 function calcularRendimentoPorMinuto(saldo){
-return (Number(saldo || 0) * 0.20) / 30
+return ((Number(saldo || 0) * 0.20) / 30 / 24 / 60)
 }
 
 function salvarSaldoLocal(saldo){
@@ -347,7 +347,8 @@ if(minutosPassados <= 0){
 return saldoSalvo
 }
 
-const novoSaldo = saldoSalvo + (rendimentoPorMinuto * minutosPassados)
+const acrescimo = rendimentoPorMinuto * minutosPassados
+const novoSaldo = saldoSalvo + acrescimo
 
 localStorage.setItem(chaveSaldo(), String(novoSaldo))
 localStorage.setItem(chaveTempo(), String(tempoSalvo + (minutosPassados * 60000)))

@@ -2,150 +2,169 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Clientes</title>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
-font-family:Arial;
-background:#f3f3f3;
-padding:20px;
+font-family:Arial,sans-serif;
+background:#f4f6f8;
 margin:0;
+padding:20px;
 }
 
-.card{
-background:white;
-padding:20px;
-border-radius:12px;
+.topo{
+display:flex;
+gap:10px;
 margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
 button{
-padding:12px;
+padding:14px;
 border:none;
-border-radius:8px;
+border-radius:12px;
+font-size:16px;
 cursor:pointer;
-font-size:15px;
-margin-top:10px;
 }
 
 .voltar{
 background:#1e4ea1;
 color:white;
+flex:1;
 }
 
-.item{
-border-bottom:1px solid #eee;
-padding:12px 0;
-line-height:1.6;
+.sair{
+background:#c0392b;
+color:white;
+flex:1;
 }
 
-.item:last-child{
-border-bottom:none;
+.card{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 4px 16px rgba(0,0,0,0.08);
+margin-bottom:15px;
+line-height:1.8;
 }
 
+.zerar{
+background:#d35400;
+color:white;
+width:100%;
+margin-top:12px;
+}
+
+.msg{
+background:#e8f7ea;
+color:#1e7e34;
+padding:12px;
+border-radius:12px;
+margin-bottom:15px;
+font-weight:bold;
+}
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<h2>Clientes</h2>
-
-<button class="voltar" onclick="voltar()">Voltar</button>
-
-<div id="lista">Carregando...</div>
-
+<div class="topo">
+<button class="voltar" onclick="location.href='admin.html'">Voltar</button>
+<button class="sair" onclick="logout()">Sair</button>
 </div>
 
+<div id="mensagem"></div>
+<div id="clientes">Carregando...</div>
+
 <script>
-
-let usuario
-
-function formatarReal(valor){
-
-return Number(valor).toLocaleString("pt-BR",{
-minimumFractionDigits:2
+function formatarReal(v){
+return Number(v || 0).toLocaleString("pt-BR",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
 })
-
-}
-
-async function verificarLogin(){
-
-const { data } = await sb.auth.getSession()
-
-if(!data.session){
-
-location.href="login.html"
-return
-
-}
-
-usuario=data.session.user
-
 }
 
 async function carregarClientes(){
-
-let { data } = await sb
+const {data,error} = await sb
 .from("profiles")
 .select("*")
-.order("created_at",{ascending:false})
+.order("nome",{ascending:true})
 
-if(!data || data.length==0){
-
-document.getElementById("lista").innerHTML="Nenhum cliente"
+if(error){
+document.getElementById("clientes").innerHTML = "Erro ao carregar clientes."
 return
-
 }
 
-let html=""
+if(!data || data.length === 0){
+document.getElementById("clientes").innerHTML = "Nenhum cliente encontrado."
+return
+}
+
+let html = ""
 
 data.forEach(c=>{
-
-html+=`
-
-<div class="item">
-
-<b>${c.nome}</b><br>
-Email: ${c.email}<br>
-Telefone: ${c.telefone}<br>
-Saldo: R$ ${formatarReal(c.saldo)}
-
+html += `
+<div class="card">
+<b>${c.nome || "-"}</b><br>
+Email: ${c.email || "-"}<br>
+Telefone: ${c.telefone || "-"}<br>
+Saldo: R$ ${formatarReal(c.saldo)}<br>
+Aguardando reinício: ${c.aguardando_primeiro_deposito ? "Sim" : "Não"}<br>
+<button class="zerar" onclick="zerarSaldo('${c.id}','${(c.nome || "").replace(/'/g,"")}')">Zerar saldo</button>
 </div>
-
 `
-
 })
 
-document.getElementById("lista").innerHTML=html
-
+document.getElementById("clientes").innerHTML = html
 }
 
-function voltar(){
+async function zerarSaldo(id,nome){
+const confirmar = confirm("Zerar saldo de " + nome + "?")
+if(!confirmar) return
 
-location.href="admin.html"
+const {data:cliente,error:erroBusca} = await sb
+.from("profiles")
+.select("saldo_version")
+.eq("id",id)
+.single()
 
+if(erroBusca || !cliente){
+alert("Erro ao buscar cliente.")
+return
 }
 
-async function iniciar(){
+const novaVersion = Number(cliente.saldo_version || 0) + 1
 
-await verificarLogin()
+const {error} = await sb
+.from("profiles")
+.update({
+saldo: 0,
+saldo_version: novaVersion,
+aguardando_primeiro_deposito: true
+})
+.eq("id",id)
+
+if(error){
+alert("Erro ao zerar saldo.")
+return
+}
+
+document.getElementById("mensagem").innerHTML = `<div class="msg">Saldo zerado com sucesso.</div>`
 carregarClientes()
-
 }
 
-iniciar()
+async function logout(){
+await sb.auth.signOut()
+location.href = "login.html"
+}
 
+carregarClientes()
 </script>
 
 </body>

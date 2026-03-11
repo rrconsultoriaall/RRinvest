@@ -27,20 +27,42 @@ margin-bottom:20px;
 box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
+.topo-botoes{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:10px;
+}
+
 button{
-padding:12px;
+padding:12px 14px;
 border:none;
 border-radius:8px;
 background:#1e4ea1;
 color:white;
-margin-right:6px;
 font-size:16px;
 cursor:pointer;
-margin-top:8px;
 }
 
 #btnNotif{
 background:#444;
+position:relative;
+}
+
+.badge{
+position:absolute;
+top:-6px;
+right:-6px;
+background:red;
+color:white;
+width:18px;
+height:18px;
+border-radius:50%;
+font-size:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
 }
 
 .pendente{
@@ -69,10 +91,17 @@ display:none;
 <h2 id="nome">Carregando...</h2>
 <p id="saldo">Saldo: R$ 0,00</p>
 
+<div class="topo-botoes">
 <button onclick="irDeposito()">Depositar</button>
 <button onclick="irSaque()">Sacar</button>
-<button id="btnNotif" onclick="toggleNotificacoes()">Notificações</button>
+
+<button id="btnNotif" onclick="toggleNotificacoes()">
+Notificações
+<span id="badgeNotif" class="badge oculto">!</span>
+</button>
+
 <button onclick="logout()">Sair</button>
+</div>
 </div>
 
 <div class="card oculto" id="cardNotificacoes">
@@ -97,11 +126,7 @@ maximumFractionDigits:2
 
 function horarioBrasil(data){
 if(!data) return "-"
-let texto = String(data)
-if(!texto.endsWith("Z") && !texto.includes("+") && !texto.match(/-\d{2}:\d{2}$/)){
-texto = texto + "Z"
-}
-return new Date(texto).toLocaleString("pt-BR",{
+return new Date(data).toLocaleString("pt-BR",{
 timeZone:"America/Sao_Paulo",
 year:"numeric",
 month:"2-digit",
@@ -191,6 +216,7 @@ return
 
 if(!data || data.length===0){
 document.getElementById("notificacoes").innerHTML = "Nenhuma notificação."
+document.getElementById("badgeNotif").classList.add("oculto")
 return
 }
 
@@ -207,10 +233,35 @@ ${horarioBrasil(n.created_at)}
 })
 
 document.getElementById("notificacoes").innerHTML = html
+
+const temNova = data.some(n => n.lida === false)
+
+if(temNova){
+document.getElementById("badgeNotif").classList.remove("oculto")
+}else{
+document.getElementById("badgeNotif").classList.add("oculto")
+}
 }
 
-function toggleNotificacoes(){
+async function marcarNotificacoesComoLidas(){
+await sb
+.from("notificacoes")
+.update({ lida: true })
+.eq("usuario_id", usuario.id)
+.eq("lida", false)
+
+document.getElementById("badgeNotif").classList.add("oculto")
+}
+
+async function toggleNotificacoes(){
 document.getElementById("cardNotificacoes").classList.toggle("oculto")
+
+const aberto = !document.getElementById("cardNotificacoes").classList.contains("oculto")
+
+if(aberto){
+await marcarNotificacoesComoLidas()
+await carregarNotificacoes()
+}
 }
 
 function irDeposito(){

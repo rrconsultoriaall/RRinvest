@@ -1,20 +1,25 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Saque - RRinvest</title>
+<title>Saque</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+background:#f3f3f3;
 padding:20px;
 }
 
@@ -22,25 +27,22 @@ padding:20px;
 background:white;
 padding:20px;
 border-radius:10px;
-max-width:400px;
-margin:auto;
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:6px;
+background:#1e4ea1;
+color:white;
+width:100%;
+margin-top:10px;
 }
 
 input{
 width:100%;
-padding:12px;
+padding:10px;
 margin-top:10px;
-margin-bottom:10px;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#0b3d91;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
 }
 
 </style>
@@ -53,55 +55,98 @@ cursor:pointer;
 
 <h2>Saque</h2>
 
-<input id="valor" placeholder="Valor do saque">
+<input
+id="valor"
+placeholder="Valor do saque"
+/>
 
-<button onclick="sacar()">Solicitar saque</button>
+<input
+id="pix"
+placeholder="Chave PIX"
+/>
 
-<div id="msg"></div>
+<button onclick="sacar()">
 
-<br>
+Solicitar saque
 
-<button onclick="voltar()">Voltar</button>
+</button>
+
+<button onclick="voltar()">
+
+Voltar
+
+</button>
 
 </div>
 
 <script>
 
-let usuario
+const supabase = supabase.createClient(
+"https://SEU_PROJETO.supabase.co",
+"SUA_PUBLIC_ANON_KEY"
+)
+
+let user
+
+function horarioBrasil(){
+
+return new Date().toLocaleString(
+"sv-SE",
+{timeZone:"America/Sao_Paulo"}
+)
+
+}
 
 async function iniciar(){
 
-const { data } = await sb.auth.getUser()
+const {data:{session}} = await supabase.auth.getSession()
 
-if(!data.user){
-window.location.href="login.html"
+if(!session){
+
+location.href="login.html"
 return
+
 }
 
-usuario = data.user
+user=session.user
 
 }
 
 async function sacar(){
 
-const valor = Number(document.getElementById("valor").value)
+let valor = document.getElementById("valor").value
+let pix = document.getElementById("pix").value
 
-await sb.from("transacoes").insert({
+if(!valor || !pix){
 
-usuario_id:usuario.id,
+alert("Preencha todos os campos")
+return
+
+}
+
+await supabase
+.from("transacoes")
+.insert({
+
+usuario_id:user.id,
+usuario_email:user.email,
 tipo:"saque",
 valor:valor,
-descricao:"Saque solicitado"
+descricao:"PIX: "+pix,
+status:"pendente",
+created_at:horarioBrasil()
 
 })
 
-document.getElementById("msg").innerText="Saque solicitado"
+alert("Saque solicitado")
+
+location.href="index.html"
 
 }
 
 function voltar(){
 
-window.location.href="index.html"
+location.href="index.html"
 
 }
 

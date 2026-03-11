@@ -10,6 +10,7 @@
 <meta http-equiv="Expires" content="0">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 <script src="config.js"></script>
 
 <style>
@@ -44,7 +45,7 @@ letter-spacing:-1px;
 }
 
 .mineracaoCard{
-background:linear-gradient(180deg,#101010 0%,#1d1d1d 100%);
+background:linear-gradient(180deg,#101010 0%,#1b1b1b 100%);
 color:white;
 overflow:hidden;
 position:relative;
@@ -53,113 +54,37 @@ position:relative;
 .mineracaoTitulo{
 font-size:18px;
 font-weight:bold;
-margin-bottom:12px;
+margin-bottom:14px;
 }
 
-.caverna{
-width:100%;
-max-width:430px;
+.animacaoBox{
+max-width:420px;
 margin:0 auto;
-display:block;
-}
-
-.luzMina{
-animation:luzMina 2.2s infinite ease-in-out;
-}
-
-@keyframes luzMina{
-0%,100%{opacity:.35}
-50%{opacity:.75}
-}
-
-.carrinho{
-animation:carrinhoBalanco 1.6s infinite ease-in-out;
-transform-origin:65px 162px;
-}
-
-@keyframes carrinhoBalanco{
-0%,100%{transform:rotate(0deg)}
-50%{transform:rotate(-3deg)}
-}
-
-.mineiroCorpo{
-animation:mineiroRespira 1.4s infinite ease-in-out;
-transform-origin:210px 150px;
-}
-
-@keyframes mineiroRespira{
-0%,100%{transform:translateY(0)}
-50%{transform:translateY(-2px)}
-}
-
-.bracoPicareta{
-animation:golpePicareta .7s infinite ease-in-out;
-transform-origin:248px 132px;
-}
-
-@keyframes golpePicareta{
-0%{transform:rotate(-18deg)}
-45%{transform:rotate(12deg)}
-100%{transform:rotate(-18deg)}
-}
-
-.pedra{
-animation:pedraTreme .7s infinite ease-in-out;
-transform-origin:346px 155px;
-}
-
-@keyframes pedraTreme{
-0%,100%{transform:translateX(0)}
-45%{transform:translateX(5px)}
-}
-
-.fa1,.fa2,.fa3{
-opacity:0;
-animation:faisca 1s infinite ease-out;
-}
-
-.fa2{animation-delay:.18s}
-.fa3{animation-delay:.36s}
-
-@keyframes faisca{
-0%{opacity:0;transform:translate(0,0) scale(.7)}
-30%{opacity:1}
-100%{opacity:0;transform:translate(10px,-16px) scale(1.15)}
-}
-
-.moeda1,.moeda2,.moeda3{
-opacity:0;
-animation:moedaVoando 1.8s infinite ease-out;
-transform-origin:center;
-}
-
-.moeda2{animation-delay:.35s}
-.moeda3{animation-delay:.7s}
-
-@keyframes moedaVoando{
-0%{opacity:0;transform:translate(0,0) scale(.7)}
-25%{opacity:1}
-100%{opacity:0;transform:translate(-120px,-12px) scale(1)}
+background:rgba(255,255,255,0.03);
+border-radius:16px;
+padding:8px;
 }
 
 .barraBox{
 margin-top:14px;
-height:11px;
-background:rgba(255,255,255,0.14);
+height:10px;
+background:rgba(255,255,255,0.12);
 border-radius:999px;
 overflow:hidden;
 }
 
 .barra{
 height:100%;
-background:linear-gradient(90deg,#ffd700,#f7c948);
-animation:barraMinerando 2.6s infinite linear;
+width:35%;
+background:linear-gradient(90deg,#f7c948,#ffd700);
 border-radius:999px;
+animation:barraLoop 2.8s infinite ease-in-out;
 }
 
-@keyframes barraMinerando{
-0%{width:0%}
-100%{width:100%}
+@keyframes barraLoop{
+0%{width:15%}
+50%{width:82%}
+100%{width:15%}
 }
 
 .botoes{
@@ -252,82 +177,16 @@ border-bottom:none;
 <div class="card mineracaoCard">
 <div class="mineracaoTitulo">⛏️ Minerando lucros...</div>
 
-<svg class="caverna" viewBox="0 0 430 230" xmlns="http://www.w3.org/2000/svg">
-
-<rect x="0" y="0" width="430" height="230" rx="18" fill="#101010"/>
-<rect x="25" y="168" width="380" height="38" rx="8" fill="#23252c"/>
-<ellipse class="luzMina" cx="235" cy="118" rx="150" ry="78" fill="rgba(255,215,0,0.08)"/>
-
-<!-- carrinho -->
-<g class="carrinho">
-  <polygon points="32,132 86,132 97,156 23,156" fill="#d5d7dc" stroke="#3a3c42" stroke-width="3"/>
-  <polygon points="41,139 77,139 84,151 34,151" fill="#c28a37"/>
-  <polygon points="40,132 79,132 70,118 49,118" fill="#4f5055"/>
-  <circle cx="40" cy="165" r="10" fill="#cf9632" stroke="#4a4a4a" stroke-width="3"/>
-  <circle cx="79" cy="165" r="10" fill="#cf9632" stroke="#4a4a4a" stroke-width="3"/>
-</g>
-
-<!-- mineiro cartoon -->
-<g class="mineiroCorpo">
-
-  <!-- cabeça -->
-  <circle cx="208" cy="88" r="28" fill="#f6d7b5"/>
-  <circle cx="197" cy="84" r="4" fill="#222"/>
-  <circle cx="220" cy="84" r="4" fill="#222"/>
-  <path d="M198 99 Q208 106 218 99" fill="none" stroke="#d45545" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="185" cy="97" r="4" fill="#ee9f92"/>
-  <circle cx="231" cy="97" r="4" fill="#ee9f92"/>
-
-  <!-- barba -->
-  <path d="M191 101 L191 123 L199 123 L199 108 L217 108 L217 123 L225 123 L225 101" fill="#1e1e24"/>
-
-  <!-- capacete -->
-  <path d="M176 70 Q208 42 240 70 L244 80 L172 80 Z" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
-  <rect x="172" y="77" width="72" height="8" rx="4" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
-  <rect x="203" y="50" width="10" height="29" fill="#22252c"/>
-  <circle cx="208" cy="80" r="10" fill="#89dceb" stroke="#22252c" stroke-width="4"/>
-
-  <!-- corpo -->
-  <rect x="185" y="122" width="46" height="52" rx="8" fill="#ef9b52" stroke="#22252c" stroke-width="4"/>
-  <rect x="203" y="122" width="10" height="52" fill="#2b3b7b"/>
-  <rect x="190" y="135" width="12" height="16" fill="#f5efdc" stroke="#22252c" stroke-width="2"/>
-  <rect x="215" y="135" width="12" height="16" fill="#f5efdc" stroke="#22252c" stroke-width="2"/>
-
-  <!-- braço esquerdo -->
-  <line x1="186" y1="134" x2="165" y2="128" stroke="#f6d7b5" stroke-width="8" stroke-linecap="round"/>
-  <path d="M159 121 Q150 126 154 136 Q160 141 169 138 L169 120 Z" fill="#f6d7b5"/>
-
-  <!-- pernas -->
-  <path d="M196 174 L190 198 Q199 208 207 196 L207 174 Z" fill="#2b3b7b"/>
-  <path d="M220 174 L226 198 Q217 208 209 196 L209 174 Z" fill="#2b3b7b"/>
-
-  <!-- braço direito + picareta -->
-  <g class="bracoPicareta">
-    <line x1="230" y1="134" x2="268" y2="120" stroke="#f6d7b5" stroke-width="8" stroke-linecap="round"/>
-    <line x1="268" y1="120" x2="302" y2="106" stroke="#8b5a2b" stroke-width="8" stroke-linecap="round"/>
-    <line x1="295" y1="96" x2="314" y2="116" stroke="#5e6068" stroke-width="8" stroke-linecap="round"/>
-    <line x1="304" y1="94" x2="325" y2="115" stroke="#3d3f46" stroke-width="8" stroke-linecap="round"/>
-  </g>
-
-</g>
-
-<!-- pedra -->
-<g class="pedra">
-  <path d="M315 176 L342 126 L401 146 L375 186 Z" fill="#6d6d72"/>
-  <polyline points="349,136 358,150 347,170" stroke="#4b4b51" stroke-width="4" fill="none" stroke-linecap="round"/>
-</g>
-
-<!-- faíscas -->
-<circle class="fa1" cx="326" cy="116" r="3.5" fill="#ffd700"/>
-<circle class="fa2" cx="337" cy="121" r="3.5" fill="#ffd700"/>
-<circle class="fa3" cx="318" cy="126" r="3.5" fill="#ffd700"/>
-
-<!-- moedas voando para o carrinho -->
-<circle class="moeda1" cx="348" cy="115" r="7" fill="#ffd700"/>
-<circle class="moeda2" cx="363" cy="119" r="7" fill="#ffd700"/>
-<circle class="moeda3" cx="334" cy="111" r="7" fill="#ffd700"/>
-
-</svg>
+<div class="animacaoBox">
+<lottie-player
+src="https://assets9.lottiefiles.com/packages/lf20_9cyyl8i6.json"
+background="transparent"
+speed="1"
+style="width:100%;height:220px"
+loop
+autoplay>
+</lottie-player>
+</div>
 
 <div class="barraBox">
 <div class="barra"></div>

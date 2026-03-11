@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Admin</title>
+<title>Painel Admin - RRinvest</title>
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<link rel="stylesheet" href="style.css?v=50">
+<link rel="stylesheet" href="style.css?v=60">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -97,12 +97,6 @@ function formatarReal(v){
   })
 }
 
-function horarioBrasil(data){
-  return new Date(data).toLocaleString("pt-BR", {
-    timeZone: "America/Sao_Paulo"
-  })
-}
-
 async function verificarLogin(){
   const { data, error } = await sb.auth.getSession()
 
@@ -124,7 +118,7 @@ async function buscarPerfilAdmin(){
 
   if(error || !data){
     alert("Perfil não encontrado.")
-    location.href = "index.html"
+    location.href = "login.html"
     return false
   }
 
@@ -169,7 +163,6 @@ async function carregarResumoAdmin(){
           <span class="tipo-tag">${cliente.admin ? "admin" : "cliente"}</span>
           <span class="valor-item">R$ ${formatarReal(cliente.saldo || 0)}</span>
         </div>
-
         <div class="status-pendente">${cliente.nome || "Sem nome"}</div>
         <div class="data-item">${cliente.email || "Sem e-mail"}</div>
       </div>

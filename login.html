@@ -1,303 +1,389 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>RRinvest</title>
 
 <link rel="manifest" href="/RRinvest/manifest.json">
 <meta name="theme-color" content="#1d4ed8">
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=91">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
-/* SPLASH */
-
 .splash-screen{
-position:fixed;
-inset:0;
-z-index:9999;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-background:linear-gradient(135deg,#1d4ed8,#2563eb,#4f7cff);
-transition:opacity .3s;
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 50%,#4f7cff 100%);
+  transition:opacity .35s ease, visibility .35s ease;
 }
 
 .splash-screen.hide{
-opacity:0;
-pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
 }
 
 .splash-logo{
-width:110px;
-height:110px;
-border-radius:26px;
-background:rgba(255,255,255,0.15);
-display:flex;
-align-items:center;
-justify-content:center;
-margin-bottom:18px;
+  width:110px;
+  height:110px;
+  border-radius:28px;
+  background:rgba(255,255,255,0.14);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 18px 40px rgba(0,0,0,0.18);
+  margin-bottom:18px;
 }
 
 .splash-logo img{
-width:70px;
+  width:74px;
+  height:74px;
+  object-fit:contain;
+  border-radius:18px;
 }
 
 .splash-title{
-color:#fff;
-font-size:32px;
-font-weight:800;
+  color:#fff;
+  font-size:34px;
+  font-weight:800;
+  letter-spacing:-1px;
+  margin-bottom:6px;
+}
+
+.splash-subtitle{
+  color:rgba(255,255,255,0.88);
+  font-size:15px;
+  font-weight:500;
 }
 
 .install-btn{
-display:none;
-margin-bottom:20px;
+  display:none;
+  width:100%;
+  margin-bottom:18px;
 }
 
 .install-btn.show{
-display:flex;
+  display:flex;
 }
 
+.update-banner{
+  position:fixed;
+  left:16px;
+  right:16px;
+  bottom:16px;
+  z-index:99998;
+  background:#ffffff;
+  border:1px solid #dbe4f0;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 20px 40px rgba(15,23,42,0.18);
+  display:none;
+  flex-direction:column;
+  gap:12px;
+}
+
+.update-banner.show{
+  display:flex;
+}
+
+.update-title{
+  font-size:16px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+.update-subtitle{
+  font-size:14px;
+  color:#64748b;
+  line-height:1.5;
+}
+
+.update-actions{
+  display:flex;
+  gap:10px;
+}
+
+.update-actions .btn{
+  flex:1;
+}
 </style>
-
 </head>
-
 <body>
 
-<!-- SPLASH -->
-
 <div id="splashScreen" class="splash-screen">
-
-<div class="splash-logo">
-<img src="/RRinvest/icons/icon-192.png">
-</div>
-
-<div class="splash-title">RRinvest</div>
-
+  <div class="splash-logo">
+    <img src="/RRinvest/icons/icon-192.png" alt="RRinvest">
+  </div>
+  <div class="splash-title">RRinvest</div>
+  <div class="splash-subtitle">Acesso ao sistema</div>
 </div>
 
 <div class="app">
 
-<div class="topbar">
+  <div class="topbar">
+    <div>
+      <div class="brand">RRinvest</div>
+      <div class="brand-sub">Acesso ao sistema</div>
+    </div>
+    <div class="premium-badge">Login</div>
+  </div>
 
-<div>
-<div class="brand">RRinvest</div>
-<div class="brand-sub">Acesso ao sistema</div>
-</div>
+  <button id="installBtn" class="btn btn-xadrez install-btn">
+    <span class="material-symbols-rounded icon">download</span>
+    Instalar app
+  </button>
 
-<div class="premium-badge">Login</div>
+  <div class="card">
 
-</div>
+    <div class="card-title">Entrar</div>
+    <div class="card-subtitle">Digite seu e-mail e senha</div>
 
-<button id="installBtn" class="btn btn-xadrez install-btn">
+    <div class="form-group">
+      <input type="email" id="email" placeholder="E-mail">
+    </div>
 
-<span class="material-symbols-rounded icon">download</span>
+    <div class="form-group">
+      <input type="password" id="senha" placeholder="Senha">
+    </div>
 
-Instalar app
+    <button class="btn btn-deposito" style="width:100%" onclick="login()">
+      <span class="material-symbols-rounded icon">login</span>
+      Entrar
+    </button>
 
-</button>
+    <div style="height:20px"></div>
 
-<div class="card">
+    <div class="card-title">Criar conta</div>
+    <div class="card-subtitle">Cadastre-se para começar</div>
 
-<div class="card-title">Entrar</div>
+    <div class="form-group">
+      <input type="text" id="nome" placeholder="Seu nome">
+    </div>
 
-<div class="card-subtitle">Use seu e-mail e senha para acessar.</div>
+    <div class="form-group">
+      <input type="text" id="telefone" placeholder="Telefone">
+    </div>
 
-<div class="form-group">
+    <div class="form-group">
+      <input type="email" id="emailCadastro" placeholder="Seu e-mail">
+    </div>
 
-<input id="loginEmail" type="email" placeholder="Seu e-mail">
+    <div class="form-group">
+      <input type="password" id="senhaCadastro" placeholder="Crie uma senha">
+    </div>
 
-</div>
+    <button class="btn btn-xadrez" style="width:100%" onclick="criarConta()">
+      <span class="material-symbols-rounded icon">person_add</span>
+      Criar conta
+    </button>
 
-<div class="form-group">
+    <div id="msg" class="vazio" style="margin-top:10px;"></div>
 
-<input id="loginSenha" type="password" placeholder="Sua senha">
-
-</div>
-
-<button class="btn btn-deposito" onclick="login()">
-
-<span class="material-symbols-rounded icon">login</span>
-
-Entrar
-
-</button>
-
-<hr style="margin:20px 0">
-
-<div class="card-title">Criar conta</div>
-
-<div class="card-subtitle">Cadastre-se para começar</div>
-
-<div class="form-group">
-
-<input id="cadNome" placeholder="Seu nome">
-
-</div>
-
-<div class="form-group">
-
-<input id="cadTelefone" placeholder="Telefone">
-
-</div>
-
-<div class="form-group">
-
-<input id="cadEmail" placeholder="Seu e-mail">
+  </div>
 
 </div>
 
-<div class="form-group">
-
-<input id="cadSenha" type="password" placeholder="Crie uma senha">
-
-</div>
-
-<button class="btn btn-xadrez" onclick="criarConta()">
-
-<span class="material-symbols-rounded icon">person_add</span>
-
-Criar conta
-
-</button>
-
-</div>
-
+<div id="updateBanner" class="update-banner">
+  <div class="update-title">Nova versão disponível</div>
+  <div class="update-subtitle">Atualize o app para usar a versão mais recente.</div>
+  <div class="update-actions">
+    <button class="btn btn-sair" onclick="fecharBannerUpdate()">Depois</button>
+    <button class="btn btn-xadrez" onclick="atualizarApp()">Atualizar app</button>
+  </div>
 </div>
 
 <script>
-
 let deferredPrompt = null
+let novoWorker = null
 
 function esconderSplash(){
-
-document.getElementById("splashScreen").classList.add("hide")
-
+  document.getElementById("splashScreen").classList.add("hide")
 }
 
-setTimeout(esconderSplash,1200)
+setTimeout(esconderSplash, 1200)
 
-/* INSTALAR APP */
+function prepararInstalacaoPWA(){
+  const installBtn = document.getElementById("installBtn")
 
-window.addEventListener("beforeinstallprompt",(e)=>{
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault()
+    deferredPrompt = e
+    installBtn.classList.add("show")
+  })
 
-e.preventDefault()
+  installBtn.addEventListener("click", async () => {
+    if(!deferredPrompt) return
 
-deferredPrompt=e
+    deferredPrompt.prompt()
+    await deferredPrompt.userChoice
+    deferredPrompt = null
+    installBtn.classList.remove("show")
+  })
 
-document.getElementById("installBtn").classList.add("show")
+  window.addEventListener("appinstalled", () => {
+    installBtn.classList.remove("show")
+  })
+}
 
-})
+function mostrarBannerUpdate(){
+  document.getElementById("updateBanner").classList.add("show")
+}
 
-document.getElementById("installBtn").addEventListener("click",async()=>{
+function fecharBannerUpdate(){
+  document.getElementById("updateBanner").classList.remove("show")
+}
 
-if(!deferredPrompt)return
-
-deferredPrompt.prompt()
-
-await deferredPrompt.userChoice
-
-deferredPrompt=null
-
-})
-
-/* LOGIN */
+function atualizarApp(){
+  if(novoWorker){
+    novoWorker.postMessage("SKIP_WAITING")
+  }
+  fecharBannerUpdate()
+}
 
 async function login(){
+  const email = document.getElementById("email").value.trim()
+  const senha = document.getElementById("senha").value.trim()
+  const msg = document.getElementById("msg")
 
-const email=document.getElementById("loginEmail").value
+  msg.innerText = ""
 
-const senha=document.getElementById("loginSenha").value
+  if(!email || !senha){
+    msg.innerText = "Preencha e-mail e senha"
+    return
+  }
 
-const { error } = await sb.auth.signInWithPassword({
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: email,
+    password: senha
+  })
 
-email:email,
+  if(error){
+    msg.innerText = "Login inválido"
+    return
+  }
 
-password:senha
+  const userId = data.user.id
 
-})
+  const { data: perfil } = await sb
+    .from("profiles")
+    .select("admin")
+    .eq("id", userId)
+    .single()
 
-if(error){
-
-alert("Erro no login")
-
-return
-
+  if(perfil?.admin === true){
+    location.href = "admin.html"
+  }else{
+    location.href = "index.html"
+  }
 }
-
-location.href="index.html"
-
-}
-
-/* CRIAR CONTA */
 
 async function criarConta(){
+  const nome = document.getElementById("nome").value.trim()
+  const telefone = document.getElementById("telefone").value.trim()
+  const email = document.getElementById("emailCadastro").value.trim()
+  const senha = document.getElementById("senhaCadastro").value.trim()
+  const msg = document.getElementById("msg")
 
-const nome=document.getElementById("cadNome").value
-const telefone=document.getElementById("cadTelefone").value
-const email=document.getElementById("cadEmail").value
-const senha=document.getElementById("cadSenha").value
+  msg.innerText = ""
 
-if(!nome||!telefone||!email||!senha){
+  if(!nome || !telefone || !email || !senha){
+    msg.innerText = "Preencha todos os campos"
+    return
+  }
 
-alert("Preencha todos os campos")
+  const { data, error } = await sb.auth.signUp({
+    email: email,
+    password: senha
+  })
 
-return
+  if(error){
+    msg.innerText = error.message
+    return
+  }
 
+  const userId = data.user.id
+
+  await sb.from("profiles").insert([
+    {
+      id: userId,
+      nome: nome,
+      telefone: telefone,
+      saldo: 0,
+      admin: false
+    }
+  ])
+
+  msg.innerText = "Conta criada! Agora faça login."
 }
 
-const { data, error } = await sb.auth.signUp({
+async function verificarSessao(){
+  const { data } = await sb.auth.getSession()
 
-email:email,
-password:senha
+  if(!data.session) return
 
+  const userId = data.session.user.id
+
+  const { data: perfil } = await sb
+    .from("profiles")
+    .select("admin")
+    .eq("id", userId)
+    .single()
+
+  if(perfil?.admin){
+    location.href = "admin.html"
+  }else{
+    location.href = "index.html"
+  }
+}
+
+navigator.serviceWorker?.addEventListener("controllerchange", () => {
+  window.location.reload()
 })
 
-if(error){
-
-alert("Erro ao criar conta")
-
-return
-
-}
-
-await sb.from("profiles").insert({
-
-id:data.user.id,
-nome:nome,
-telefone:telefone,
-saldo:0,
-admin:false
-
-})
-
-alert("Conta criada!")
-
-}
-
+prepararInstalacaoPWA()
+verificarSessao()
 </script>
 
 <script>
-
 if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/RRinvest/service-worker.js")
+      .then(reg => {
+        console.log("Service Worker registrado com sucesso:", reg.scope)
 
-window.addEventListener("load", () => {
+        if (reg.waiting) {
+          novoWorker = reg.waiting
+          mostrarBannerUpdate()
+        }
 
-navigator.serviceWorker.register("/RRinvest/service-worker.js")
+        reg.addEventListener("updatefound", () => {
+          const workerInstalando = reg.installing
+          if (!workerInstalando) return
 
-})
-
+          workerInstalando.addEventListener("statechange", () => {
+            if (workerInstalando.state === "installed" && navigator.serviceWorker.controller) {
+              novoWorker = workerInstalando
+              mostrarBannerUpdate()
+            }
+          })
+        })
+      })
+      .catch(error => {
+        console.log("Erro ao registrar Service Worker:", error)
+      })
+  })
 }
-
 </script>
 
 </body>

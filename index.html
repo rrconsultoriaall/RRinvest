@@ -14,14 +14,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-<link rel="stylesheet" href="style.css?v=90">
+<link rel="stylesheet" href="style.css?v=91">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-/* SPLASH */
 .splash-screen{
   position:fixed;
   inset:0;
@@ -96,7 +95,6 @@
   100%{transform:translateX(320%)}
 }
 
-/* BOTÃO INSTALAR */
 .install-box{
   margin-bottom:18px;
 }
@@ -110,7 +108,47 @@
   display:flex;
 }
 
-/* AJUSTE SUAVE */
+.update-banner{
+  position:fixed;
+  left:16px;
+  right:16px;
+  bottom:16px;
+  z-index:99998;
+  background:#ffffff;
+  border:1px solid #dbe4f0;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 20px 40px rgba(15,23,42,0.18);
+  display:none;
+  flex-direction:column;
+  gap:12px;
+}
+
+.update-banner.show{
+  display:flex;
+}
+
+.update-title{
+  font-size:16px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+.update-subtitle{
+  font-size:14px;
+  color:#64748b;
+  line-height:1.5;
+}
+
+.update-actions{
+  display:flex;
+  gap:10px;
+}
+
+.update-actions .btn{
+  flex:1;
+}
+
 .card{
   animation:fadeUp .35s ease;
 }
@@ -129,7 +167,6 @@
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splashScreen" class="splash-screen">
   <div class="splash-logo">
     <img src="/RRinvest/icons/icon-192.png" alt="RRinvest">
@@ -151,7 +188,6 @@
     <div class="premium-badge">Premium</div>
   </div>
 
-  <!-- BOTÃO INSTALAR -->
   <div class="install-box">
     <button id="installBtn" class="btn btn-xadrez install-btn">
       <span class="material-symbols-rounded icon">download</span>
@@ -159,7 +195,6 @@
     </button>
   </div>
 
-  <!-- CARD 1 -->
   <div class="card saldo-card">
     <div class="saldo-topo">
       <div>
@@ -176,7 +211,6 @@
     </div>
   </div>
 
-  <!-- CARD 2 -->
   <div class="card">
     <div class="acoes-grid">
       <button class="btn btn-deposito" onclick="location.href='deposito.html'">
@@ -202,7 +236,6 @@
     </button>
   </div>
 
-  <!-- CARD 3 -->
   <div class="card">
     <div class="card-title">Estratégia Xadrez</div>
     <div class="card-subtitle">Monte sua estratégia de depósitos do jeito que preferir.</div>
@@ -255,7 +288,6 @@
     </button>
   </div>
 
-  <!-- CARD 4 -->
   <div class="card">
     <div class="extrato-header">
       <div class="card-title">Extrato</div>
@@ -269,11 +301,21 @@
 
 </div>
 
+<div id="updateBanner" class="update-banner">
+  <div class="update-title">Nova versão disponível</div>
+  <div class="update-subtitle">Atualize o app para usar a versão mais recente.</div>
+  <div class="update-actions">
+    <button class="btn btn-sair" onclick="fecharBannerUpdate()">Depois</button>
+    <button class="btn btn-xadrez" onclick="atualizarApp()">Atualizar app</button>
+  </div>
+</div>
+
 <script>
 let usuario = null
 let saldoServidor = 0
 let timerRendimento = null
 let deferredPrompt = null
+let novoWorker = null
 
 function formatarReal(v){
   return Number(v || 0).toLocaleString("pt-BR", {
@@ -456,6 +498,21 @@ function prepararInstalacaoPWA(){
   })
 }
 
+function mostrarBannerUpdate(){
+  document.getElementById("updateBanner").classList.add("show")
+}
+
+function fecharBannerUpdate(){
+  document.getElementById("updateBanner").classList.remove("show")
+}
+
+function atualizarApp(){
+  if(novoWorker){
+    novoWorker.postMessage("SKIP_WAITING")
+  }
+  fecharBannerUpdate()
+}
+
 async function verificarLogin(){
   const { data, error } = await sb.auth.getSession()
 
@@ -589,6 +646,14 @@ window.addEventListener("focus", async () => {
   }
 })
 
+window.addEventListener("serviceWorkerMessage", () => {
+  window.location.reload()
+})
+
+navigator.serviceWorker?.addEventListener("controllerchange", () => {
+  window.location.reload()
+})
+
 async function iniciar(){
   controlarSplash()
   prepararInstalacaoPWA()
@@ -613,6 +678,23 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/RRinvest/service-worker.js")
       .then(reg => {
         console.log("Service Worker registrado com sucesso:", reg.scope)
+
+        if (reg.waiting) {
+          novoWorker = reg.waiting
+          mostrarBannerUpdate()
+        }
+
+        reg.addEventListener("updatefound", () => {
+          const workerInstalando = reg.installing
+          if (!workerInstalando) return
+
+          workerInstalando.addEventListener("statechange", () => {
+            if (workerInstalando.state === "installed" && navigator.serviceWorker.controller) {
+              novoWorker = workerInstalando
+              mostrarBannerUpdate()
+            }
+          })
+        })
       })
       .catch(error => {
         console.log("Erro ao registrar Service Worker:", error)
@@ -622,4 +704,4 @@ if ("serviceWorker" in navigator) {
 </script>
 
 </body>
-</html>
+  </html>
